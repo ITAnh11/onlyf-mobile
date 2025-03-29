@@ -1,0 +1,21 @@
+import { StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 10
+    },
+
+    image: {
+        width: 200,
+        height: 200,
+        marginBottom: 10
+    },
+    
+    text: {
+        fontSize: 28,   
+    }
+});
