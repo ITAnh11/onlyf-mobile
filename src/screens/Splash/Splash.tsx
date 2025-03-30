@@ -14,7 +14,13 @@ const Splash: React.FC<Props> = ({ navigation }) => {
         const checkLoginStatus = async () => {
             const refreshToken = await TokenService.getRefreshToken();
             if (!refreshToken) {
-                navigation.navigate("Welcome");
+                navigation.reset(
+                    {
+                        index: 0,
+                        routes: [{ name: "Welcome" }],
+                    }
+                )
+                return;
             }
             else {
                 try {
@@ -24,7 +30,6 @@ const Splash: React.FC<Props> = ({ navigation }) => {
                         }
                     });
                     const data = await response.data;
-                    console.log("Dữ liệu từ server:", data);
                     if (data.isLoggedIn) {
                         navigation.reset(
                             {
