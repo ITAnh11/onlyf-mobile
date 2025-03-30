@@ -12,18 +12,21 @@ type Props = {
 const Home: React.FC<Props> = ({ navigation }) => {  
     const handleLogout = async () => {
       const refreshToken = await TokenService.getRefreshToken();
-      console.log("Refresh token:", refreshToken);
       if (!refreshToken) {
-        navigation.navigate("Welcome");
+        navigation.reset(
+          {
+            index: 0,
+            routes: [{ name: 'Welcome' }],
+          }
+        );
+        return;
       } else {
         try {
-          const response = await apiClient.delete("/auth/logout", {
+          await apiClient.delete("/auth/logout", {
             headers: {
               Authorization: `Bearer ${refreshToken}`
             }
           })
-          const data = await response.data;
-          console.log("Dữ liệu từ server:", data);
         } catch (error) {
           console.error("Lỗi khi kiểm tra trạng thái đăng nhập:", error);
         }
@@ -35,6 +38,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
           routes: [{ name: 'Welcome' }],
         }
       );
+      alert("Đăng xuất thành công!");
     }
 
     return (

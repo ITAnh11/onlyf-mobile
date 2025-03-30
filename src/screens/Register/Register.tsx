@@ -23,8 +23,6 @@ const Register: React.FC<Props> = ({ navigation }) => {
   const handleRegister = async () => {
       try {
         const response = await apiClient.post("auth/register", {email, password, confirmPassword, name, username, dob});
-        const data = await response.data;
-        console.log("Dữ liệu từ server:", data);
         navigation.reset(
             {
                 index: 0,
