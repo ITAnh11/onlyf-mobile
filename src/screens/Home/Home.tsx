@@ -1,15 +1,22 @@
-import React, { useContext } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StatusBar, Image } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationProp } from '@react-navigation/native';
 import { styles } from './styles';
 import TokenService from '../../services/token.service';
 import apiClient from '../../networking/apiclient';
+import CustomCamera from '../../components/camera';
+
 
 type Props = {
   navigation: NavigationProp<any>;
 };
 
 const Home: React.FC<Props> = ({ navigation }) => {  
+  const [compressedUri, setCompressedUri] = useState<string | null>(null);
+  
+  
+  // Hàm xử lý đăng xuất
     const handleLogout = async () => {
       const refreshToken = await TokenService.getRefreshToken();
       if (!refreshToken) {
@@ -40,14 +47,36 @@ const Home: React.FC<Props> = ({ navigation }) => {
       );
       alert("Đăng xuất thành công!");
     }
+  
+  // Hàm xử lý ảnh đã chụp
+  useEffect(() => {
+    console.log("Giá trị mới của count:", compressedUri);
+  }, [compressedUri]);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Đây là màn hình "Home" nha</Text>
-            <TouchableOpacity onPress={handleLogout} style={styles.button}>
-                <Text style={styles.buttonText}>Logout</Text>
-            </TouchableOpacity>
-        </View>
+      <SafeAreaProvider style={styles.safeArea_style}>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+        <SafeAreaView>
+          {/* Các nút chức năng */}
+          <View style={styles.list_button}>
+              <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Profile")}>
+                  <Image source={require("../../assets/user.png")} resizeMode="contain" style={{ width: 40, height: 40 }} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Friend")}>
+                  <Image source={require("../../assets/add-friend.png")} resizeMode="contain" style={{ width: 40, height: 40 }} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Message")}>
+                  <Image source={require("../../assets/message.png")} resizeMode="contain" style={{ width: 40, height: 40 }} />
+              </TouchableOpacity>
+          </View>
+
+          {/* Camera */}
+          <View style={styles.camera_container}>
+            <CustomCamera onPhotoTaken={setCompressedUri} />
+          </View>
+
+        </SafeAreaView>
+      </SafeAreaProvider>
     );
 };
 
