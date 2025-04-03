@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StatusBar, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StatusBar, Image, Button } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationProp } from '@react-navigation/native';
 import { styles } from './styles';
 import TokenService from '../../services/token.service';
 import apiClient from '../../networking/apiclient';
 import CustomCamera from '../../components/camera';
+import ProfileApi from '../../networking/profile.api';
 
 
 type Props = {
@@ -48,6 +49,11 @@ const Home: React.FC<Props> = ({ navigation }) => {
       alert("Đăng xuất thành công!");
     }
   
+  useEffect(() => {
+    ProfileApi.getProfile();
+  }, []);
+      
+  
   // Hàm xử lý ảnh đã chụp
   useEffect(() => {
     console.log("Giá trị mới của count:", compressedUri);
@@ -68,6 +74,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
               <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Message")}>
                   <Image source={require("../../assets/message.png")} resizeMode="contain" style={{ width: 40, height: 40 }} />
               </TouchableOpacity>
+              <Button title="Đăng xuất" onPress={handleLogout} color="#FF0000" />
           </View>
 
           {/* Camera */}
