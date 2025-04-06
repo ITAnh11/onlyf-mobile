@@ -22,14 +22,6 @@ const CustomCamera = ({ onPhotoTaken }: CustomCameraProps) => {
     return <View />;
   }
 
-  if (!permission.granted) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.message}>Chúng tôi cần quyền truy cập camera</Text>
-        <Button onPress={requestPermission} title="Cấp quyền" />
-      </View>
-    );
-  }
 
   // Hàm để chuyển đổi giữa camera trước và sau
   function toggleCameraFacing() {
@@ -65,13 +57,13 @@ const CustomCamera = ({ onPhotoTaken }: CustomCameraProps) => {
   // Hàm lấy ảnh từ thư viện
   async function pickImage() {
 
-    if (!permission_library?.granted) {
-      const permissionResponse = await requestPermission_library();
-      if (!permissionResponse.granted) {
-        alert("Bạn cần cấp quyền truy cập thư viện ảnh để chọn ảnh.");
-        return;
-      }
-    }
+    // if (!permission_library?.granted) {
+    //   const permissionResponse = await requestPermission_library();
+    //   if (!permissionResponse.granted) {
+    //     alert("Bạn cần cấp quyền truy cập thư viện ảnh để chọn ảnh.");
+    //     return;
+    //   }
+    // }
   // Mở thư viện ảnh để chọn ảnh
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images, // Chỉ chọn ảnh
