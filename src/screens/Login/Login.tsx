@@ -33,6 +33,9 @@ const Login: React.FC<Props> = ({ navigation }) => {
           deviceInfo,
         });
         const data = await response.data;
+        
+        console.log("Dữ liệu phản hồi:", data);
+
         TokenService.saveTokens(data.accessToken, data.refreshToken);
         navigation.reset(
             {
