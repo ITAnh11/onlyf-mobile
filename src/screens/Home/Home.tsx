@@ -7,6 +7,7 @@ import TokenService from '../../services/token.service';
 import apiClient from '../../networking/apiclient';
 import CustomCamera from '../../components/camera';
 import ProfileApi from '../../networking/profile.api';
+import Posting from './components/Posting';
 
 
 type Props = {
@@ -54,15 +55,15 @@ const Home: React.FC<Props> = ({ navigation }) => {
   }, []);
       
   
-  // Hàm xử lý ảnh đã chụp
-  useEffect(() => {
-    console.log("Giá trị mới của count:", compressedUri);
-  }, [compressedUri]);
+  // // Hàm xử lý ảnh đã chụp
+  // useEffect(() => {
+  //   console.log("Giá trị mới của count:", compressedUri);
+  // }, [compressedUri]);
 
     return (
       <SafeAreaProvider style={styles.safeArea_style}>
         <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-        <SafeAreaView>
+        <SafeAreaView style={{flexDirection: "column", flex: 1}}>
           {/* Các nút chức năng */}
           <View style={styles.list_button}>
               <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Profile")}>
@@ -77,11 +78,16 @@ const Home: React.FC<Props> = ({ navigation }) => {
               <Button title="Đăng xuất" onPress={handleLogout} color="#FF0000" />
           </View>
 
-          {/* Camera */}
-          <View style={styles.camera_container}>
-            <CustomCamera onPhotoTaken={setCompressedUri} />
-          </View>
-
+      {/* Camera hoặc ảnh đã chụp */}
+      {compressedUri ? (
+        <View style={styles.camera_container}>
+          <Posting compressedUri={compressedUri} setCompressedUri={setCompressedUri} />
+        </View>
+      ) : (
+        <View style={styles.camera_container}>
+          <CustomCamera onPhotoTaken={setCompressedUri} />
+        </View>
+      )}
         </SafeAreaView>
       </SafeAreaProvider>
     );
