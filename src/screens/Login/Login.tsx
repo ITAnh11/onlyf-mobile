@@ -14,7 +14,6 @@ type Props = {
 const Login: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [deviceName, setDeviceName] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleLogin = async () => {
@@ -33,17 +32,18 @@ const Login: React.FC<Props> = ({ navigation }) => {
           deviceInfo,
         });
         const data = await response.data;
-        
-        console.log("Dữ liệu phản hồi:", data);
 
         TokenService.saveTokens(data.accessToken, data.refreshToken);
-        navigation.reset(
+        
+        await alert("Đăng nhập thành công!" );
+
+        await navigation.reset(
             {
                 index: 0,
                 routes: [{ name: "Home" }],
             }
         )
-        alert("Đăng nhập thành công!" );
+        
     } catch (error : any) {
         if (error.response) {
             // Server đã phản hồi nhưng với mã lỗi (4xx, 5xx)
@@ -62,8 +62,6 @@ const Login: React.FC<Props> = ({ navigation }) => {
         }
     }
   };
-
-
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
