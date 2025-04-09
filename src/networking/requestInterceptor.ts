@@ -1,16 +1,19 @@
-// // networking/requestInterceptor.ts
-// import apiClient from "./apiclient";
+import apiClient from './apiclient';
+import * as SecureStore from 'expo-secure-store';
 
-// apiClient.interceptors.request.use(
-// //   async (config) => {
-// //     // Giả sử token lưu trong AsyncStorage hoặc Redux
-// //     const token = "Bearer your_token_here";
-// //     if (token) {
-// //       config.headers.Authorization = token;
-// //     }
-// //     return config;
-// //   },
-// //   (error) => {
-// //     return Promise.reject(error);
-// //   }
-// );
+const setupRequestInterceptor = () => {
+  apiClient.interceptors.request.use(async (config) => {
+    if (!config.url?.includes('/refresh-token') && !config.url?.includes('/is-logged-in')) {
+      const token = await SecureStore.getItemAsync('accessToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
+    return config;
+  }, (error) => {
+    return Promise.reject(error);
+  });
+};
+
+export default setupRequestInterceptor;

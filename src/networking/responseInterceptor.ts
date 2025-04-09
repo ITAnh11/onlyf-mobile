@@ -1,17 +1,44 @@
-// // networking/responseInterceptor.ts
-// import apiClient from "./apiclient";
+import apiClient from './apiclient';
+import * as SecureStore from 'expo-secure-store';
 
-// apiClient.interceptors.response.use(
-//   (response) => response, // Trả về response nếu thành công
-//   async (error) => {
-//     if (error.response) {
-//       if (error.response.status === 401) {
-//         console.log("Token hết hạn, cần đăng nhập lại!");
-//       }
-//       if (error.response.status === 500) {
-//         console.log("Lỗi server, vui lòng thử lại sau!");
-//       }
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+const setupResponseInterceptor = () => {
+  apiClient.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        !originalRequest.url.includes('/refresh-token/refresh-token') &&
+        !originalRequest.url.includes('/auth/is-logged-in')
+      ) {
+        originalRequest._retry = true;
+
+        try {
+          const refreshToken = await SecureStore.getItemAsync('refreshToken');
+
+          const res = await apiClient.get('/refresh-token/refresh-token', {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+            },
+          });
+
+          const newAccessToken = res.data.accessToken;
+          console.log('New access token:', newAccessToken);
+          await SecureStore.setItemAsync('accessToken', newAccessToken);
+
+          // Gửi lại request cũ với token mới
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return apiClient(originalRequest);
+        } catch (refreshError) {
+          return Promise.reject(refreshError);
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
+};
+
+export default setupResponseInterceptor;

@@ -4,6 +4,8 @@ import { styles } from "./styles";
 import { NavigationProp } from "@react-navigation/native";
 import TokenService from "../../services/token.service";
 import apiClient from "../../networking/apiclient";
+import setupResponseInterceptor from "../../networking/responseInterceptor";
+import setupRequestInterceptor from "../../networking/requestInterceptor";
 
 type Props = {
     navigation: NavigationProp<any>; 
@@ -11,8 +13,11 @@ type Props = {
 
 const Splash: React.FC<Props> = ({ navigation }) => {
     useEffect(() => {
+        setupRequestInterceptor();
+        setupResponseInterceptor();
         const checkLoginStatus = async () => {
             const refreshToken = await TokenService.getRefreshToken();
+            console.log("Refresh token:", refreshToken);
             if (!refreshToken) {
                 navigation.reset(
                     {
@@ -59,11 +64,10 @@ const Splash: React.FC<Props> = ({ navigation }) => {
         setTimeout(() => {
             checkLoginStatus();
         }
-        , 2000); // Thay đổi thời gian chờ nếu cần
+        , 2000);
     },[navigation]);
     return (
         <View style={styles.container}> 
-            {/* <Image style={styles.image} source={require('../../assets/images/logo.png')} /> */}
             <Text style={styles.text}>OnlyF</Text>
         </View>
     );
