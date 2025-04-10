@@ -20,17 +20,22 @@ export const styles = StyleSheet.create({
     },
     safeArea_style: {
         flexDirection: 'column',
-        justifyContent: 'flex-start',
+        justifyContent: 'space-between',
         backgroundColor: '#111111',
-        
     },
     list_button: {
+        position: 'absolute', // Đặt vị trí tuyệt đối
+        top: 60, // Khoảng cách từ trên cùng (có thể điều chỉnh)
+        left: 0, // Căn trái
+        right: 0, // Căn phải
         flexDirection: 'row',
         justifyContent: 'space-around',
-        marginBottom: 40,
-        marginTop: 20,
+        marginBottom: 0, // Không cần marginBottom khi dùng position: 'absolute'
+        marginTop: 0, // Không cần marginTop khi dùng position: 'absolute'
+        zIndex: 10, // Đảm bảo nằm trên các thành phần khác
     },
     camera_container: {
+        marginTop: 80,
         justifyContent: 'center',
         alignItems: 'center',
     },

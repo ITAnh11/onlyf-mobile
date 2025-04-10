@@ -1,9 +1,12 @@
 import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Provider } from 'react-redux';
+import PostStore from './src/screens/Home/Global/PostStore'; // Import PostStore
 import AppNavigator from './src/navigation/NavigationContainer';
 
-const Stack = createNativeStackNavigator();
-
 export default function App() {
-  return <AppNavigator />;
+  return (
+    <Provider store={PostStore}>
+      <AppNavigator />
+    </Provider>
+  );
 }
