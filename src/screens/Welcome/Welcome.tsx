@@ -9,7 +9,7 @@ type Props = {
 
 const Welcome: React.FC<Props> = ({ navigation }) => {
     return (
-        <TouchableOpacity style={styles.container}>
+        <View style={styles.container}>
             <View>
                 <Text style={styles.title}>Chào mừng bạn đến với OnlyF!</Text>
             </View>
@@ -19,7 +19,7 @@ const Welcome: React.FC<Props> = ({ navigation }) => {
             <TouchableOpacity style={styles.button} onPress = {() => navigation.navigate("Register")}>  
                 <Text style={styles.buttonText}>Đăng ký</Text>
             </TouchableOpacity>
-        </TouchableOpacity>
+        </View>
     );
 }
 
