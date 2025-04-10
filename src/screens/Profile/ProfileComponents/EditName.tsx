@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import ProfileService from '../../../services/profile.service'; // Import ProfileService
+import ProfileApi from '../../../networking/profile.api'; // Import ProfileApi
+import TokenService from '../../../services/token.service';
 
-const EditName: React.FC = () => {
+const EditName: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [firstName, setFirstName] = useState<string>(''); // Tên
   const [lastName, setLastName] = useState<string>(''); // Họ
 
@@ -16,11 +18,16 @@ const EditName: React.FC = () => {
     try {
       await ProfileService.updateProfile({ name: `${firstName} ${lastName}` }); // Cập nhật tên đầy đủ
       Alert.alert('Thành công', 'Tên người dùng đã được cập nhật.');
+      navigation.navigate('Home');
     } catch (error) {
       Alert.alert('Lỗi', 'Không thể cập nhật tên người dùng.');
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    ProfileApi.getProfile();
+  }, []);
 
   return (
     <View style={styles.container}>
