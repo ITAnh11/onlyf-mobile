@@ -8,7 +8,7 @@ import Register from '../screens/Register';
 import { createStackNavigator } from '@react-navigation/stack';
 import Message from '../screens/Message';
 import Friend from '../screens/Friend';
-import Profile from '../screens/Profile';
+import ProfileNavigator from '../screens/Profile/ProfileNavigation/ProfileNavigationContainer';
 
 const Stack = createStackNavigator();
 
@@ -22,7 +22,7 @@ const Route = () => {
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="Message" component={Message} />
             <Stack.Screen name="Friend" component={Friend} />
-            <Stack.Screen name="Profile" component={Profile} />
+            <Stack.Screen name="Profile" component={ProfileNavigator} />
         </Stack.Navigator>
     );
 }
