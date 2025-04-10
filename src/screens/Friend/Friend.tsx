@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { View, StyleSheet, SectionList, Text, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import FriendSearch from '../../components/search';
 import { NavigationProp } from '@react-navigation/native';
-import FriendList from '../../components/friend_list';
-import FriendRequestList from '../../components/friend_requests';
+import FriendList from './components/friend_list';
+import FriendRequestList from './components/friend_requests';
+import FriendSearch from './components/search';
+import SentFriendRequestList from './components/friend_sent_request';
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -15,15 +16,15 @@ const Friend: React.FC<Props> = ({ navigation }) => {
   const sections = [
     {
       title: 'Bạn bè của bạn',
-      data: [<FriendList />], 
+      data: [<FriendList refreshFlag={false} onRefresh={() => {}} />],
     },
     {
       title: 'Yêu cầu kết bạn',
-      data: [<FriendRequestList />],
+      data: [<FriendRequestList refreshFlag={false} onRefresh={() => {}} />],
     },
     {
       title:'Đã gửi yêu cầu',
-      data: [],
+      data: [<SentFriendRequestList refreshFlag={false} onRefresh={() => {}} />],
     }
   ];
 

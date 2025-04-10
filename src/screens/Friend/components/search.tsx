@@ -1,59 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { View, TextInput, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import _ from 'lodash';
-import apiClient from '../networking/apiclient';
-import UserItem from './user_item'; 
-
-type User = {
-  name: string;
-  username: string;
-  urlPublicAvatar?: string | null;
-  user: {
-    id: string;
-  };
-  status: string;
-};
+import UserItem from './user_search_item'; 
+import { useSearch, User } from '../hooks/useSearch';
 
 type FriendSearchProps = {
   onUserSelect?: (user: User) => void;
 };
 
 const FriendSearch: React.FC<FriendSearchProps> = ({ onUserSelect }) => {
-  const [searchText, setSearchText] = useState('');
-  const [results, setResults] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const searchUsers = useCallback(
-    _.debounce(async (text: string) => {
-      if (!text.trim()) {
-        setResults([]);
-        return;
-      }
-  
-      try {
-        setLoading(true);
-        const res = await apiClient.get(`/friend/search-user?username=${text}`);
-        console.log(res.data);
-  
-        const users = Array.isArray(res.data)
-          ? res.data
-          : res.data?.users || res.data?.data || [];
-  
-        const filteredUsers = users.filter((user: any) => user?.user?.id);
-        setResults(filteredUsers);
-      } catch (err) {
-        console.error('Lỗi tìm kiếm:', err);
-      } finally {
-        setLoading(false);
-      }
-    }, 500),
-    []
-  );  
-
-  useEffect(() => {
-    searchUsers(searchText);
-  }, [searchText]);
+  const { searchText, setSearchText, results, loading } = useSearch();
 
   const renderItem = ({ item }: { item: User }) => {
     if (!item?.user?.id) return null;

@@ -8,7 +8,6 @@ import apiClient from '../../networking/apiclient';
 import CustomCamera from '../../components/camera';
 import ProfileApi from '../../networking/profile.api';
 
-
 type Props = {
   navigation: NavigationProp<any>;
 };

@@ -1,45 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
-import apiClient from '../networking/apiclient';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import useFriends from '../hooks/useFriend';
+import { unfriend } from '../../../networking/friend.api';
 
-type Friend = {
-  id: number;
-  friend: {
-    id: number;
-    profile: {
-      name: string;
-      urlPublicAvatar: string | null;
-    };
-  };
+type Props = {
+  refreshFlag: boolean;
+  onRefresh: () => void;
 };
 
-const FriendList: React.FC = () => {
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+const FriendList: React.FC<Props> = ({ refreshFlag, onRefresh }) => {
+  const { friends, fetchFriends } = useFriends(); 
 
   useEffect(() => {
-    const fetchFriends = async () => {
-      try {
-        const response = await apiClient.get('/friend/get-friends');
-        console.log('Danh sách bạn bè:', response.data);
-        setFriends(response.data);
-      } catch (err) {
-        setError('Lỗi khi tải dữ liệu');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchFriends();
-  }, []);
+  }, [refreshFlag]);
 
-  if (loading) {
-    return <Text>Đang tải...</Text>;
-  }
-
-  if (error) {
-    return <Text>{error}</Text>;
+  const handleUnfriend = (friendId: number) => {
+    unfriend(friendId)
+      .then(() => {
+        console.log('Unfriend successful!');
+        onRefresh(); // gọi lại hàm refresh từ component cha
+      })
+      .catch((error) => {
+        console.error('Error unfriending:', error);
+      }
+    );
   }
 
   return (
@@ -55,12 +40,19 @@ const FriendList: React.FC = () => {
               <Image
                 source={item.friend.profile.urlPublicAvatar
                   ? { uri: item.friend.profile.urlPublicAvatar }
-                  : require('../assets/avatar_placeholder.png')} 
+                  : require('../../../assets/avatar_placeholder.png')}
                 style={styles.avatar}
               />
               <View style={styles.infoContainer}>
                 <Text style={styles.name}>{item.friend.profile.name}</Text>
+                <Text style={styles.username}>@{item.friend.profile.username}</Text>
               </View>
+              <TouchableOpacity
+                  onPress={() => {handleUnfriend(item.friend.id)}}
+                  style={styles.unfriendButton}
+                >
+                  <Text style={styles.unfriendButtonText}>Hủy kết bạn</Text>
+                </TouchableOpacity>
             </View>
           )}
         />
@@ -96,11 +88,29 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   infoContainer: {
+    flex: 1,
     flexDirection: 'column',
   },
   name: {
     fontSize: 19,
     fontWeight: 'bold',
+  },
+  username: {
+    fontSize: 12,
+    color: '#888',
+  },
+  unfriendButton: {
+    marginTop: 5,
+    backgroundColor: '#a3a',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignSelf: 'flex-start',
+  },
+  unfriendButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

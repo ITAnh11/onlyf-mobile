@@ -17,7 +17,6 @@ const Splash: React.FC<Props> = ({ navigation }) => {
         setupResponseInterceptor();
         const checkLoginStatus = async () => {
             const refreshToken = await TokenService.getRefreshToken();
-            console.log("Refresh token:", refreshToken);
             if (!refreshToken) {
                 navigation.reset(
                     {

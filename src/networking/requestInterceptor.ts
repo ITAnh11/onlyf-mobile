@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const setupRequestInterceptor = () => {
   apiClient.interceptors.request.use(async (config) => {
-    if (!config.url?.includes('/refresh-token') && !config.url?.includes('/is-logged-in')) {
+    if (!config.url?.includes('/refresh-token/refresh-token') && !config.url?.includes('/auth')) {
       const token = await SecureStore.getItemAsync('accessToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
