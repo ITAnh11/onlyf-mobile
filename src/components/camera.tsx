@@ -56,15 +56,6 @@ const CustomCamera = ({ onPhotoTaken }: CustomCameraProps) => {
 
   // Hàm lấy ảnh từ thư viện
   async function pickImage() {
-
-    // if (!permission_library?.granted) {
-    //   const permissionResponse = await requestPermission_library();
-    //   if (!permissionResponse.granted) {
-    //     alert("Bạn cần cấp quyền truy cập thư viện ảnh để chọn ảnh.");
-    //     return;
-    //   }
-    // }
-  // Mở thư viện ảnh để chọn ảnh
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images, // Chỉ chọn ảnh
     allowsEditing: true, // Cho phép chỉnh sửa ảnh
@@ -95,8 +86,10 @@ const CustomCamera = ({ onPhotoTaken }: CustomCameraProps) => {
             <TouchableOpacity style={styles.get_Picture_button} onPress={pickImage}>
                 <Image source={require("../assets/image_icon.png")} resizeMode="contain" style={{ width:30, height: 30 }}/>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.take_Picture_button} onPress={takePicture}>
-                <Image source={require("../assets/camera.png")} resizeMode="contain" style={{ width:50, height: 50 }}/>
+            <TouchableOpacity onPress={takePicture}>
+              <View style={{ width: 100, height: 100, backgroundColor: '#EAA905', borderRadius: 50, alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{ width: 92, height: 92, backgroundColor: 'white', borderRadius: 50, alignItems: 'center', justifyContent: 'center',borderWidth: 4, borderColor: "black" }}/>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.toggleCameraFacing_button} onPress={toggleCameraFacing}>
                 <Image source={require("../assets/circular.png")} resizeMode="contain" style={{ width:30, height: 30 }}/>
@@ -134,16 +127,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#333333',
     borderRadius: '50%',
-  },
-  take_Picture_button: {
-    width: '25%',
-    aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    borderRadius: '50%',
-    borderWidth: 5,
-    borderColor: '#EAA905',
   },
   get_Picture_button: {
     width: '15%',

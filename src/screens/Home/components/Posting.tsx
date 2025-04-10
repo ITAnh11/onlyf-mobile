@@ -2,7 +2,6 @@ import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ImageBackgroun
 import React, { useState } from 'react';
 import {FirebaseService} from '../../../services/firebase.service';
 import apiClient from '../../../networking/apiclient';
-import ProfileService from '../../../services/profile.service';
 import TokenService from '../../../services/token.service';
 
 
