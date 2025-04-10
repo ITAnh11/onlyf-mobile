@@ -3,10 +3,9 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        marginBottom: 80
+        paddingBottom: 50,
     },
     image: {
         width: 200,
