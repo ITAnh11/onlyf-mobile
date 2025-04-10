@@ -9,16 +9,27 @@ class ProfileService {
   private static DOB_KEY = 'dob';
   private static USERNAME_KEY = 'username';
 
-  static async saveProfile(data:any): Promise<void> {
-    await SecureStore.setItemAsync(this.ID_KEY, data.user.id.toString());
-    await SecureStore.setItemAsync(this.NAME_KEY, data.name);   
-    await SecureStore.setItemAsync(this.EMAIL_KEY, data.user.email);
-    await SecureStore.setItemAsync(this.URL_PUBLIC_AVATAR_KEY, data.avatar);
-    await SecureStore.setItemAsync(this.PHONE_KEY, data.phone);
-    await SecureStore.setItemAsync(this.DOB_KEY, data.dob);
-    await SecureStore.setItemAsync(this.USERNAME_KEY, data.username);
-    }
+  static async saveProfile(data: any): Promise<void> {
+    console.log(
+        "Lưu thông tin người dùng thành công:",
+        data.user.id,
+        data.name,
+        data.user.email,
+        data.avatar,
+        data.phone,
+        data.dob,
+        data.username
+    );
 
+    await SecureStore.setItemAsync(this.ID_KEY, String(data.user.id)); // Chuyển số thành chuỗi
+    await SecureStore.setItemAsync(this.NAME_KEY, data.name || ""); // Đảm bảo giá trị không phải null
+    await SecureStore.setItemAsync(this.EMAIL_KEY, data.user.email || "");
+    await SecureStore.setItemAsync(this.URL_PUBLIC_AVATAR_KEY, data.avatar || "");
+    await SecureStore.setItemAsync(this.PHONE_KEY, data.phone ? String(data.phone) : ""); // Chuyển số hoặc null thành chuỗi
+    await SecureStore.setItemAsync(this.DOB_KEY, data.dob || "");
+    await SecureStore.setItemAsync(this.USERNAME_KEY, data.username || "");
+    }
+    
     static async getProfile(): Promise<any> {
     const id = await SecureStore.getItemAsync(this.ID_KEY);
     const name = await SecureStore.getItemAsync(this.NAME_KEY);
