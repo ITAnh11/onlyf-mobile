@@ -193,13 +193,13 @@ const Home: React.FC<Props> = ({ navigation }) => {
   };
 
 
-  const height = Dimensions.get('window').height;
+  const height = Dimensions.get('screen').height;
   const renderItem = ({ item }: { item: PostItem }) => {
     if (item.id === 'home') {
       return (
         <View >
           {/* Nội dung trang Home giống như bạn viết ở trên */}
-          <SafeAreaView style={{ flexDirection: "column",flex: 1, height: height}}>
+          <SafeAreaView style={{ flexDirection: "column",flex: 1, height: height, backgroundColor: '#111111' }}>
             {permissionsGranted ? (
               compressedUri ? (
                 <View style={styles.camera_container}>

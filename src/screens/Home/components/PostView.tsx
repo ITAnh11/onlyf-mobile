@@ -1,7 +1,6 @@
 import { View, Text, ImageBackground, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Message from '../../Message';
 
 
 type UserProfile = {
@@ -27,7 +26,7 @@ type PostViewProps = {
 
 const PostView = ({ post }: PostViewProps) => {
   return (
-    <SafeAreaView style={{ flexDirection: "column", height: Dimensions.get('window').height, flex: 1 }}>
+    <SafeAreaView style={{ flexDirection: "column", height: Dimensions.get('screen').height, flex: 1 }}>
       <View style={styles.Post_container}>
         <ImageBackground source={{ uri: post.urlPublicImage }} style={styles.Image}>
            <Text style={styles.Caption}>{post.caption}</Text>
