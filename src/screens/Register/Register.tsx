@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
@@ -47,81 +47,85 @@ const Register: React.FC<Props> = ({ navigation }) => {
     }
   };
   
-
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
-        <View style={styles.header}> 
-          <TouchableOpacity onPress={() => navigation.navigate("Welcome")}>
-            <Ionicons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
-          <Text style={styles.title}>Đăng ký</Text>
-        </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <View style={styles.container}>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => navigation.navigate("Welcome")}>
+                <Ionicons name="arrow-back" style={styles.backButton} />
+              </TouchableOpacity>
+              <Text style={styles.title}>Đăng ký</Text>
+            </View>
+  
+            <View style={styles.body}>
+              <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              />
+              {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-        <View style={styles.body}>
-            <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            />
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+              <TextInput
+              style={styles.input}
+              placeholder="Tên"
+              value={name}
+              onChangeText={setName}
+              />
+              {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-            <TextInput
-            style={styles.input}
-            placeholder="Tên"
-            value={name}
-            onChangeText={setName}
-            />
-            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+              <TextInput
+              style={styles.input}
+              placeholder="Tên người dùng"
+              value={username}
+              onChangeText={setUsername}
+              />
+              {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
 
-            <TextInput
-            style={styles.input}
-            placeholder="Tên người dùng"
-            value={username}
-            onChangeText={setUsername}
-            />
-            {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
+              <TextInput
+              style={styles.input}
+              placeholder="Ngày sinh (YYYY-MM-DD)"
+              value={dob}
+              onChangeText={setDob}
+              />
+              {errors.dob && <Text style={styles.errorText}>{errors.dob}</Text>}
 
-            <TextInput
-            style={styles.input}
-            placeholder="Ngày sinh (YYYY-MM-DD)"
-            value={dob}
-            onChangeText={setDob}
-            />
-            {errors.dob && <Text style={styles.errorText}>{errors.dob}</Text>}
+              <TextInput
+              style={styles.input}
+              placeholder="Mật khẩu"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              />
+              {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
-            <TextInput
-            style={styles.input}
-            placeholder="Mật khẩu"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            />
-            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-
-            <TextInput
-            style={styles.input}
-            placeholder="Nhập lại mật khẩu"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            />
-            {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
-        </View>
-
-        <View style={styles.footer}>
-            <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>Đăng ký</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-            <Text style={styles.link}>Đã có tài khoản? Đăng nhập</Text>
-            </TouchableOpacity>
-        </View>
-      </View>
+              <TextInput
+              style={styles.input}
+              placeholder="Nhập lại mật khẩu"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              />
+              {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+            
+              <TouchableOpacity style={styles.button} onPress={handleRegister}>
+                <Text style={styles.buttonText}>Đăng ký</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                <Text style={styles.link}>Đã có tài khoản? Đăng nhập</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
-};
+}
 
 export default Register;
 

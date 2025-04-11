@@ -5,16 +5,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { revokeFriendRequest } from '../../../networking/friend.api';
 
 type Props = {
-  refreshFlag: boolean;
-  onRefresh: () => void;
+  refreshCounter: number;
+  onRequestSent?: () => void;
 };
 
-const SentFriendRequestList: React.FC<Props> = ({ refreshFlag }) => {
+const SentFriendRequestList: React.FC<Props> = ({ refreshCounter, onRequestSent }) => {
   const { sentRequests, loading, error, fetchSentRequests } = useSentRequests();
 
   useEffect(() => {
-    fetchSentRequests();
-  }, [refreshFlag]); // gọi lại khi refreshFlag thay đổi
+    fetchSentRequests(); 
+  }, [refreshCounter]); 
 
   if (loading) {
     return (
@@ -37,7 +37,8 @@ const SentFriendRequestList: React.FC<Props> = ({ refreshFlag }) => {
     revokeFriendRequest(requestId)
       .then(() => {
         console.log('Friend request revoked!');
-        fetchSentRequests(); // cập nhật danh sách yêu cầu đã gửi sau khi thu hồi
+        fetchSentRequests(); 
+        onRequestSent?.();
       })
       .catch((error: any) => {
         console.error('Error revoking friend request:', error);
@@ -67,7 +68,7 @@ const SentFriendRequestList: React.FC<Props> = ({ refreshFlag }) => {
                 <Text style={styles.username}>@{item.receiver.profile.username}</Text>
               </View>
 
-              <TouchableOpacity onPress={() => {handleRevokeRequest(item.id)}} style={styles.button}>
+              <TouchableOpacity onPress={() => { handleRevokeRequest(item.id) }} style={styles.button}>
                 <Ionicons name='close' size={21} color='#000' />
               </TouchableOpacity>
             </View>
@@ -135,4 +136,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SentFriendRequestList;
+export default React.memo(SentFriendRequestList);

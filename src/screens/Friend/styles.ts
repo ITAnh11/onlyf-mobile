@@ -2,24 +2,39 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
+    paddingBottom: 30,
   },
   header: {
-    padding: 20,
-    backgroundColor: "#f8f8f8",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 60,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    backgroundColor: '#fff',
+    marginTop: '10%',
+  },
+  backButton: {
+    fontSize: 26,
+    color: '#000',
+    zIndex: 2,
   },
   title: {
+    flex: 1,
+    textAlign: 'center',
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
+    marginLeft: -26,
   },
-  body: {
-    padding: 16,
-  },
-  sectionTitle: {
+  sectionHeader: {
+    backgroundColor: '#f0f0f0',
+    padding: 5,
     fontSize: 18,
-    marginBottom: 8,
+    fontWeight: 'bold',
+  },
+  searchContainer: {
+    padding: 10,
   },
 });
+
 export default styles;
