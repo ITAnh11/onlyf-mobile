@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
         zIndex: 10, // Đảm bảo nằm trên các thành phần khác
     },
     camera_container: {
-        marginTop: 80,
+        marginTop: 120,
         justifyContent: 'center',
         alignItems: 'center',
     },

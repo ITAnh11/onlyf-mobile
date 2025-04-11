@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   Post_container: { 
     justifyContent: 'space-between',
     flexDirection: 'column',
-    marginTop: 80,
+    marginTop: 120,
   },
   Image: {
     width: '100%',
