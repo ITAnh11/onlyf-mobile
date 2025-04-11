@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StatusBar, Image, Button, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, StatusBar, Image, Button, FlatList, Platform } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationProp } from '@react-navigation/native';
 import { styles } from './styles';
 import TokenService from '../../services/token.service';
 import apiClient from '../../networking/apiclient';
-import CustomCamera from '../../components/camera';
+import CustomCamera from '../../components/camera'; // Ensure this file exists in the specified path
 import ProfileApi from '../../networking/profile.api';
 import Posting from './components/Posting';
 import { useCameraPermissions } from 'expo-camera';
@@ -13,7 +13,7 @@ import { useMediaLibraryPermissions } from 'expo-image-picker';
 import { Dimensions } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from './Global/PostStore';
-import { addPost, addPosts, setHasMore, setNextCursor } from './Global/PostSlice';
+import { addPost, addPosts, clearPosts, setHasMore, setNextCursor } from './Global/PostSlice';
 import PostView from './components/PostView';
 import ProfileService from '../../services/profile.service';
 
@@ -24,7 +24,7 @@ type Props = {
 
 const Home: React.FC<Props> = ({ navigation }) => {  
   const [compressedUri, setCompressedUri] = useState<string | null>(null); 
-  const { height } = Dimensions.get('window');
+
   const avatar = ProfileService.getAvatar(); // Lấy avatar từ ProfileService
   // State để theo dõi trạng thái quyền
   const [permission, requestPermission] = useCameraPermissions();
@@ -160,6 +160,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
         routes: [{ name: 'Welcome' }],
       }
     );
+    dispatch(clearPosts());
     alert("Đăng xuất thành công!");
   }
 
@@ -191,12 +192,14 @@ const Home: React.FC<Props> = ({ navigation }) => {
     user: User;
   };
 
+
+  const height = Dimensions.get('window').height;
   const renderItem = ({ item }: { item: PostItem }) => {
     if (item.id === 'home') {
       return (
-        <View>
+        <View >
           {/* Nội dung trang Home giống như bạn viết ở trên */}
-          <SafeAreaView style={{ flexDirection: "column",height: height,flex: 1 }}>
+          <SafeAreaView style={{ flexDirection: "column",flex: 1, height: height}}>
             {permissionsGranted ? (
               compressedUri ? (
                 <View style={styles.camera_container}>
@@ -224,9 +227,9 @@ const Home: React.FC<Props> = ({ navigation }) => {
   };
   
   return (
-    <SafeAreaProvider>
+    <>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#111111', height: height }}>
+      <View style={{backgroundColor: '#111111',height: height}}>
         <View style={styles.list_button}>
             <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Profile")}>
               <Image source={require("../../assets/user.png")} resizeMode="contain" style={{ width: 40, height: 40 }} />
@@ -249,12 +252,12 @@ const Home: React.FC<Props> = ({ navigation }) => {
           onEndReached={fetchCards}
           onEndReachedThreshold={0.3}
           pagingEnabled={true} // Bật chế độ cuộn trang
-          getItemLayout={(data, index) => (
+          getItemLayout={(_data, index) => (
             { length: height, offset: height * index, index } // Cung cấp chiều cao của mỗi mục
           )}
           />
-      </SafeAreaView>
-    </SafeAreaProvider>
+      </View>
+    </>
   );
 };
 
