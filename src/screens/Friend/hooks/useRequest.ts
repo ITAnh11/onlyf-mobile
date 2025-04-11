@@ -1,7 +1,5 @@
-// Gọi API để lấy danh sách lời mời kết bạn
 import { useEffect, useState, useCallback } from 'react';
 import apiClient from '../../../networking/apiclient';
-import TokenService from '../../../services/token.service';
 
 export type FriendRequest = {
   id: number;
@@ -17,9 +15,9 @@ export type FriendRequest = {
   createdAt: string;
 };
 
-export default function useRequests() {
+export default function useRequests(initialFetch = false) {
   const [requests, setRequests] = useState<FriendRequest[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchFriendRequests = useCallback(async () => {
@@ -29,7 +27,7 @@ export default function useRequests() {
       setRequests(response.data);
       setError(null);
     } catch (err) {
-      console.error(err);
+      console.error('Lỗi khi tải lời mời:', err);
       setError('Lỗi khi tải dữ liệu');
     } finally {
       setLoading(false);
@@ -37,8 +35,10 @@ export default function useRequests() {
   }, []);
 
   useEffect(() => {
-    fetchFriendRequests();
-  }, [fetchFriendRequests]);
+    if (initialFetch) {
+      fetchFriendRequests();
+    }
+  }, [initialFetch, fetchFriendRequests]);
 
   return { requests, loading, error, fetchFriendRequests };
 }

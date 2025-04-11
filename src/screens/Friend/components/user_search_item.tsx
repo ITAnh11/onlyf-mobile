@@ -1,7 +1,7 @@
-// 
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import useFriendStatus, { FriendStatus } from '../hooks/useFriendStatus';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import useFriendStatus from '../hooks/useFriendStatus';
+import type { FriendStatus } from '../hooks/useFriendStatus';
 import { sendFriendRequest } from '../../../networking/friend.api';
 
 type User = {
@@ -15,7 +15,8 @@ type User = {
 
 type Props = {
   user: User;
-  onPress?: () => void;
+  onRequestSent?: () => void;
+  refreshCounter?: number;
 };
 
 const getButtonLabel = (status: FriendStatus) => {
@@ -34,26 +35,37 @@ const getButtonLabel = (status: FriendStatus) => {
   }
 };
 
-const UserItem: React.FC<Props> = ({ user }) => {
+const UserItem: React.FC<Props> = ({ user, refreshCounter, onRequestSent }) => {
   const { name, username, urlPublicAvatar, user: userInfo } = user;
-  const [localStatus, setLocalStatus] = useState<FriendStatus | null>(null);
+  const { status, refetchStatus } = useFriendStatus(Number(userInfo?.id));
+  const [isSending, setIsSending] = useState(false);
 
-  const status = useFriendStatus(Number(userInfo?.id), localStatus ?? undefined);
-  const label = getButtonLabel(status);
-  
+  const prevCounter = useRef(refreshCounter);
+  useEffect(() => {
+    if (refreshCounter !== prevCounter.current) {
+      prevCounter.current = refreshCounter;
+      refetchStatus();
+    }
+  }, [refreshCounter]);
+
   const handlePress = () => {
-    if (status === 'none') {
+    if (status === 'none' && !isSending) {
+      setIsSending(true);
       sendFriendRequest(Number(userInfo?.id))
         .then(() => {
           console.log('Friend request sent!');
-          setLocalStatus('pending_sent');
-          fetchSentRequests();
+          refetchStatus(); 
+          onRequestSent?.();
         })
         .catch((error: any) => {
           console.error('Error sending friend request:', error);
+          Alert.alert('Không thể gửi lời mời', 'Bạn đã gửi lời mời hoặc có lỗi xảy ra.');
+        })
+        .finally(() => {
+          setIsSending(false);
         });
     }
-  };  
+  };
 
   return (
     <View style={styles.container}>
@@ -71,11 +83,25 @@ const UserItem: React.FC<Props> = ({ user }) => {
         <Text style={styles.username}>@{username}</Text>
       </View>
 
-      <TouchableOpacity onPress={handlePress} disabled={status === 'friend' || status === 'pending_sent' || status == 'pending_received'}>
-        <Text style={[styles.button, getButtonStyle(status),
-          (status === 'friend' || status === 'pending_sent' || status === 'pending_received') && { opacity: 0.5 }
-          ]}>  
-          {label}
+      <TouchableOpacity
+        onPress={handlePress}
+        disabled={
+          status === 'friend' ||
+          status === 'pending_sent' ||
+          status === 'pending_received' ||
+          isSending
+        }
+      >
+        <Text
+          style={[
+            styles.button,
+            getButtonStyle(status),
+            (status === 'me' || status === 'friend' || status === 'pending_sent' || status === 'pending_received' || isSending) && {
+              opacity: 0.5,
+            },
+          ]}
+        >
+          {getButtonLabel(status)}
         </Text>
       </TouchableOpacity>
     </View>
@@ -84,12 +110,14 @@ const UserItem: React.FC<Props> = ({ user }) => {
 
 const getButtonStyle = (status: FriendStatus) => {
   switch (status) {
+    case 'me':
+      return { backgroundColor: '#aaa', color: '#000' };
     case 'friend':
-      return { backgroundColor: '#aaa', color: '#fff' };
+      return { backgroundColor: '#aaa', color: '#000' };
     case 'pending_sent':
-      return { backgroundColor: '#aaa', color: '#fff' };
+      return { backgroundColor: '#aaa', color: '#000' };
     case 'pending_received':
-      return { backgroundColor: '#2196F3', color: '#000' };
+      return { backgroundColor: '#aaa', color: '#000' };
     case 'none':
     default:
       return { backgroundColor: '#e4c2a5', color: '#000' };
@@ -135,7 +163,3 @@ const styles = StyleSheet.create({
 });
 
 export default UserItem;
-function fetchSentRequests() {
-  throw new Error('Function not implemented.');
-}
-

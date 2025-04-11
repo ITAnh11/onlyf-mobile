@@ -1,5 +1,4 @@
-// Gọi API để lấy danh sách bạn bè
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import apiClient from '../../../networking/apiclient';
 
 export type Friend = {
@@ -14,20 +13,19 @@ export type Friend = {
   };
 };
 
-export default function useFriends() {
+export default function useFriends(initialFetch = false) {
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchFriends = useCallback(async () => {
     try {
       setLoading(true);
       const response = await apiClient.get('/friend/get-friends');
-      
       setFriends(response.data);
       setError(null);
     } catch (err) {
-      console.error(err);
+      console.error('Lỗi khi tải danh sách bạn bè:', err);
       setError('Lỗi khi tải danh sách bạn bè');
     } finally {
       setLoading(false);
@@ -35,8 +33,10 @@ export default function useFriends() {
   }, []);
 
   useEffect(() => {
-    fetchFriends();
-  }, [fetchFriends]);
+    if (initialFetch) {
+      fetchFriends();
+    }
+  }, [initialFetch, fetchFriends]);
 
   return { friends, loading, error, fetchFriends };
 }

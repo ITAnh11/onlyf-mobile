@@ -1,52 +1,48 @@
-import { useEffect, useState } from 'react';
-import useFriends from './useFriend';
-import useRequests from './useRequest';
-import useSentRequests from './useSentRequest';
-import ProfileService from '../../../services/profile.service';
+import { useEffect, useState } from "react";
+import useFriends from "./useFriend";
+import useRequests from "./useRequest";
+import useSentRequests from "./useSentRequest";
+import ProfileService from "../../../services/profile.service";
 
 export type FriendStatus = 'me' | 'friend' | 'pending_sent' | 'pending_received' | 'none';
 
-export default function useFriendStatus(userId: number, overrideStatus?: FriendStatus): FriendStatus {
-  const { friends, fetchFriends } = useFriends();
-  const { requests, fetchFriendRequests } = useRequests();
-  const { sentRequests, fetchSentRequests } = useSentRequests();
+export default function useFriendStatus(userId: number, overrideStatus?: FriendStatus) {
+  const { friends, fetchFriends } = useFriends(true); 
+  const { requests, fetchFriendRequests } = useRequests(true);
+  const { sentRequests, fetchSentRequests } = useSentRequests(true);
+
   const [status, setStatus] = useState<FriendStatus>('none');
+  const [myId, setMyId] = useState<number | null>(null);
 
   useEffect(() => {
-    let isMounted = true; 
+    ProfileService.getId().then(setMyId);
+  }, []);
 
-    const fetchStatus = async () => {
-      const currentUserId = await ProfileService.getId();
+  useEffect(() => {
+    if (!myId) return;
 
-      await Promise.all([
-        fetchFriends(),
-        fetchFriendRequests(),
-        fetchSentRequests(),
-      ]);
+    if (overrideStatus) {
+      setStatus(overrideStatus);
+    } else if (myId === userId) {
+      setStatus('me');
+    } else if (friends.some(friend => friend.friend.id === userId)) {
+      setStatus('friend');
+    } else if (sentRequests.some(request => request.receiver.id === userId)) {
+      setStatus('pending_sent');
+    } else if (requests.some(request => request.sender.id === userId)) {
+      setStatus('pending_received');
+    } else {
+      setStatus('none');
+    }
+  }, [myId, userId, friends, requests, sentRequests, overrideStatus]);
 
-      if (!isMounted) return;
+  const refetchStatus = async () => {
+    await Promise.all([
+      fetchFriends(),
+      fetchFriendRequests(),
+      fetchSentRequests(),
+    ]);
+  };
 
-      if (overrideStatus) {
-        setStatus(overrideStatus);
-      } else if (currentUserId === userId) {
-        setStatus('me');
-      } else if (friends.some(friend => friend.id === userId)) {
-        setStatus('friend');
-      } else if (sentRequests.some(request => request.receiver.id === userId)) {
-        setStatus('pending_sent');
-      } else if (requests.some(request => request.sender.id === userId)) {
-        setStatus('pending_received');
-      } else {
-        setStatus('none');
-      }
-    };
-
-    fetchStatus();
-
-    return () => {
-      isMounted = false; 
-    };
-  }, [userId, overrideStatus]); 
-
-  return overrideStatus ?? status;
+  return { status: overrideStatus ?? status, refetchStatus };
 }
