@@ -5,8 +5,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { API_URL } from "../../constants/config.constants";
 import apiClient from "../../networking/apiclient";
-import { StatusBar } from "expo-status-bar";
-import { navigate } from "../../navigation/NavigationService";
 
 type Props = {
   navigation: NavigationProp<any>;

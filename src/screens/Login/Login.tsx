@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Keyboard, TouchableWithoutFeedback, ScrollView } from "react-native";
+import React, { useContext, useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { CommonActions, NavigationProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { NavigationProp } from "@react-navigation/native";
 import { styles } from "./styles";

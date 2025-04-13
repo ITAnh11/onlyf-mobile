@@ -34,11 +34,10 @@ const Activate: React.FC<Props> = ({navigation}) => {
 
                     <View style={styles.body}>
                         <View style={styles.content}>
-                            <Text style={{fontSize: 17,}}>Nhập mã OTP được gửi tới email của bạn</Text>
-                            <Text>...@gmail.com</Text>
-                            <Text>Mã xác thực có giá trị trong 5 phút</Text>
+                            <Text style={{fontSize: 17, marginBottom: 1}}>Nhập mã OTP được gửi tới email của bạn</Text>
+                            <Text style={{fontSize: 15, marginBottom: 1}}>...@gmail.com</Text>
+                            <Text style={{fontSize: 16, marginBottom: 30}}>Mã xác thực có giá trị trong 5 phút</Text>
                         
-                            <Text>Mã OTP</Text>
                             <TextInput
                                 style={styles.input}
                                 placeholder="Mã OTP"
@@ -46,6 +45,12 @@ const Activate: React.FC<Props> = ({navigation}) => {
                                 onChangeText={setOtp}
                                 secureTextEntry
                             />
+                            <TouchableOpacity style={styles.link} onPress={() => {}}>
+                                <Text style={styles.link}>Gửi lại mã xác thực</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.button} onPress={() => {}}>
+                                <Text style={styles.buttonText}>Xác nhận</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
