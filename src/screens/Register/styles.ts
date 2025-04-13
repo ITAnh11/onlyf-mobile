@@ -5,21 +5,24 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 20,
-    paddingTop: 60,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
+    paddingTop: '11%',
   },
   backButton: {
+    padding: 8,
     fontSize: 26,
     color: "#000",
     zIndex: 2,
   },
   title: {
+    flex: 1,
+    textAlign: 'center',
     fontSize: 24,
-    fontFamily: "Roboto",
+    fontWeight: 'bold',
     marginLeft: -26,
   },
   body: {

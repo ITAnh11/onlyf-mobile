@@ -16,6 +16,7 @@ import { styles } from "./styles";
 import * as Device from "expo-device";
 import apiClient from "../../networking/apiclient";
 import TokenService from "../../services/token.service";
+import { StatusBar } from "expo-status-bar";
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -64,48 +65,59 @@ const Login: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={{ flex: 1 }}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView contentContainerStyle={styles.container}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.navigate("Welcome")}>
-              <Ionicons name="arrow-back" style={styles.backButton} />
-            </TouchableOpacity>
-            <Text style={styles.title}>Đăng nhập</Text>
-          </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <View style={styles.container}>
+            <StatusBar style="auto" />
+            <View style={styles.header}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Welcome")}
+                style={styles.backButton}
+                activeOpacity={0.6}
+              >
+                <Ionicons name="arrow-back" size={26} color="#000" />
+              </TouchableOpacity>
+              <Text style={styles.title}>Đăng nhập</Text>
+            </View>
 
-          <View style={styles.body}>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-            />
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+            <View style={styles.body}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+              />
+              {errors.email && (
+                <Text style={styles.errorText}>{errors.email}</Text>
+              )}
 
-            <TextInput
-              style={styles.input}
-              placeholder="Mật khẩu"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-            
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-              <Text style={styles.buttonText}>Đăng nhập</Text>
-            </TouchableOpacity>
+              <TextInput
+                style={styles.input}
+                placeholder="Mật khẩu"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+              {errors.password && (
+                <Text style={styles.errorText}>{errors.password}</Text>
+              )}
 
-            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-              <Text style={styles.link}>Chưa có tài khoản? Đăng ký</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Đăng nhập</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                <Text style={styles.link}>Chưa có tài khoản? Đăng ký</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 

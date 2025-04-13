@@ -3,7 +3,6 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    paddingTop: 60,
     paddingBottom: 40,
     paddingHorizontal: 20,
     backgroundColor: "#fff",
@@ -12,8 +11,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 30,
+    paddingTop: '11%',
   },
   backButton: {
+    padding: 8,
     fontSize: 26,
     color: "#000",
     zIndex: 2,
