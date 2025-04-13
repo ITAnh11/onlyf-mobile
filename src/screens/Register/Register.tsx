@@ -6,6 +6,7 @@ import { styles } from "./styles";
 import { API_URL } from "../../constants/config.constants";
 import apiClient from "../../networking/apiclient";
 import { StatusBar } from "expo-status-bar";
+import { navigate } from "../../navigation/NavigationService";
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -18,19 +19,13 @@ const Register: React.FC<Props> = ({ navigation }) => {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [dob, setDob] = useState("");
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors] = useState<{ [key: string]: string }>({});
 
 
   const handleRegister = async () => {
       try {
         const response = await apiClient.post("auth/register", {email, password, confirmPassword, name, username, dob});
-        navigation.reset(
-            {
-                index: 0,
-                routes: [{ name: "Login" }],
-            }
-        )
-        alert("Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.");
+        navigate("Activate", { email: email });
       } catch (error : any) {
         if (error.response) {
             // Server đã phản hồi nhưng với mã lỗi (4xx, 5xx)

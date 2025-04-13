@@ -21,7 +21,7 @@ const Splash: React.FC<Props> = ({ navigation }) => {
                 navigation.reset(
                     {
                         index: 0,
-                        routes: [{ name: "Welcome" }],
+                        routes: [{ name: "Activate" }],
                     }
                 )
                 return;
