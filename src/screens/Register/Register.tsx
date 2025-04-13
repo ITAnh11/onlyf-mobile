@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { API_URL } from "../../constants/config.constants";
 import apiClient from "../../networking/apiclient";
+import { StatusBar } from "expo-status-bar";
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -49,80 +50,88 @@ const Register: React.FC<Props> = ({ navigation }) => {
   
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <StatusBar style="auto" />
           <View style={styles.container}>
             <View style={styles.header}>
-              <TouchableOpacity onPress={() => navigation.navigate("Welcome")}>
-                <Ionicons name="arrow-back" style={styles.backButton} />
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Welcome")}
+                style={styles.backButton}
+                activeOpacity={0.6}
+              >
+                <Ionicons name="arrow-back" size={26} color="#000" />
               </TouchableOpacity>
               <Text style={styles.title}>Đăng ký</Text>
             </View>
-  
+
             <View style={styles.body}>
               <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
               />
               {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
               <TextInput
-              style={styles.input}
-              placeholder="Tên"
-              value={name}
-              onChangeText={setName}
+                style={styles.input}
+                placeholder="Tên"
+                value={name}
+                onChangeText={setName}
               />
               {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
               <TextInput
-              style={styles.input}
-              placeholder="Tên người dùng"
-              value={username}
-              onChangeText={setUsername}
+                style={styles.input}
+                placeholder="Tên người dùng"
+                value={username}
+                onChangeText={setUsername}
               />
               {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
 
               <TextInput
-              style={styles.input}
-              placeholder="Ngày sinh (YYYY-MM-DD)"
-              value={dob}
-              onChangeText={setDob}
+                style={styles.input}
+                placeholder="Ngày sinh (YYYY-MM-DD)"
+                value={dob}
+                onChangeText={setDob}
               />
               {errors.dob && <Text style={styles.errorText}>{errors.dob}</Text>}
 
               <TextInput
-              style={styles.input}
-              placeholder="Mật khẩu"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
+                style={styles.input}
+                placeholder="Mật khẩu"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
               />
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
               <TextInput
-              style={styles.input}
-              placeholder="Nhập lại mật khẩu"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
+                style={styles.input}
+                placeholder="Nhập lại mật khẩu"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
               />
-              {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
-            
+              {errors.confirmPassword && (
+                <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+              )}
+
               <TouchableOpacity style={styles.button} onPress={handleRegister}>
                 <Text style={styles.buttonText}>Đăng ký</Text>
               </TouchableOpacity>
+
               <TouchableOpacity onPress={() => navigation.navigate("Login")}>
                 <Text style={styles.link}>Đã có tài khoản? Đăng nhập</Text>
               </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
