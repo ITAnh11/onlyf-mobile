@@ -5,7 +5,8 @@ import apiClient from '../../../networking/apiclient';
 import ProfileService from '../../../services/profile.service';
 import TokenService from '../../../services/token.service';
 import { useRoute } from '@react-navigation/native';
-import CustomCamera from '../../../components/camera';
+import ProfileCamera from '../../../components/profile_camera';
+
 
 
 type CameraScreenRouteParams = {
@@ -23,7 +24,7 @@ async function post() {
     try {
       if (compressedUri) {
         // Upload the image to Firebase and get the URL
-        const URL = await FirebaseService.uploadImage_post(compressedUri);
+        const URL = await FirebaseService.uploadImage_avatar(compressedUri);
         const accessToken = await TokenService.getAccessToken();
 
         await apiClient.post("/post/create", 
@@ -36,15 +37,15 @@ async function post() {
             headers: {Authorization: `Bearer ${accessToken}`}
           })
           .then((response) => {
-            console.log("Đăng bài thành công:", response.data);
+            console.log("Đăng avatar thành công:", response.data);
             setCompressedUri(null); // Reset the compressedUri after posting
           })
       }
       else {
-        alert("Vui lòng chọn ảnh trước khi đăng bài");
+        alert("Vui lòng chọn ảnh trước khi đăng ảnh");
       }
     } catch (error) {
-      console.error("Lỗi khi đăng bài:", error);
+      console.error("Lỗi khi đăng ảnh:", error);
     }
   }
 
@@ -52,10 +53,9 @@ async function post() {
   if (!compressedUri) {
     return (
       <View style={styles.Post_container}>
-        <CustomCamera
+        <ProfileCamera
           onPhotoTaken={(uri: string) => {
             setCompressedUri(uri); // Lưu URI của ảnh đã chụp
-            navigation.goBack();
           }}
         />
       </View>
@@ -65,7 +65,7 @@ async function post() {
   // Nếu đã có compressedUri, hiển thị ảnh và các nút
   return (
     <View style={styles.Post_container}>
-        <CustomCamera
+        <ProfileCamera
           onPhotoTaken={(uri: string) => {
             setCompressedUri(uri); // Lưu URI của ảnh đã chụp
             navigation.goBack();

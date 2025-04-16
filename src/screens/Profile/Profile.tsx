@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, TextInput } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import CustomCamera from '../../components/camera'; // Import CustomCamera
-import * as ImagePicker from 'expo-image-picker';
 import ProfileService from '../../services/profile.service'; // Import ProfileService
-import { useCameraPermissions } from 'expo-camera';
-import { useMediaLibraryPermissions } from 'expo-image-picker';
-import CameraScreen from './ProfileComponents/CameraScreen';
+
 
 type Props = {
   navigation: NavigationProp<any>;
