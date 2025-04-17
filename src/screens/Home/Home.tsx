@@ -173,6 +173,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
     checkPermissions();
   }, []);
 
+
   type UserProfile = {
     name: string;
     urlPublicAvatar: string;

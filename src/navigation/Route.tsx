@@ -22,7 +22,13 @@ const Route = () => {
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="Message" component={Message} />
             <Stack.Screen name="Friend" component={Friend} />
-            <Stack.Screen name="Profile" component={ProfileNavigator} />
+            <Stack.Screen 
+                name="Profile" 
+                component={ProfileNavigator}
+                options={{ 
+                presentation: 'transparentModal'
+                }} 
+            />
         </Stack.Navigator>
     );
 }

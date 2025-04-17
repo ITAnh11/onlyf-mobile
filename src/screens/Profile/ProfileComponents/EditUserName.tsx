@@ -1,31 +1,24 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState} from 'react';
 import {View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform} from 'react-native';
 import ProfileApi from '../../../networking/profile.api';
 
-const EditName = ({ navigation }: any) => {
-  const [firstName, setFirstName] = useState('');  // Giá trị ban đầu có thể lấy từ props hoặc API
-  const [lastName, setLastName] = useState('');
-  const [name, setFullName] = useState(''); // Giá trị ban đầu có thể lấy từ props hoặc API
-
-  // Cập nhật fullName khi firstName hoặc lastName thay đổi
-  useEffect(() => {
-    setFullName(`${firstName} ${lastName}`.trim());
-  }, [firstName, lastName]);
+const EditUserName = ({ navigation }: any) => {
+  const [username, setUserName] = useState(''); // Giá trị ban đầu có thể lấy từ props hoặc API
 
   const handleSave = async () => {
     try {
       await ProfileApi.updateProfile({
-        name
+        username
       });
 
-      Alert.alert('Thành công', 'Đã cập nhật tên!');
+      Alert.alert('Thành công', 'Đã cập nhật username!');
       navigation.reset({
         index: 0,
         routes: [{ name: "Profile" }], // Đặt lại stack và chuyển đến màn hình Profile
       });
     } catch (error) {
-      console.error('Error updating name:', error);
-      Alert.alert('Lỗi', 'Không thể cập nhật tên. Vui lòng thử lại.');
+      console.error('Error updating username:', error);
+      Alert.alert('Lỗi', 'Không thể cập nhật username. Vui lòng thử lại.');
     }
   };
 
@@ -34,22 +27,14 @@ const EditName = ({ navigation }: any) => {
       style={styles.container}
       behavior={Platform.OS === 'android' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Sửa tên của bạn</Text>
+      <Text style={styles.title}>Sửa tên người dùng của bạn</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Họ"
+        placeholder="Tên người dùng"
         placeholderTextColor="#aaa"
-        value={firstName}
-        onChangeText={setFirstName}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Tên"
-        placeholderTextColor="#aaa"
-        value={lastName}
-        onChangeText={setLastName}
+        value={username}
+        onChangeText={setUserName}
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSave}>
@@ -59,7 +44,7 @@ const EditName = ({ navigation }: any) => {
   );
 };
 
-export default EditName;
+export default EditUserName;
 
 const styles = StyleSheet.create({
   container: {

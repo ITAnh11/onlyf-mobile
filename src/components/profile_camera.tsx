@@ -74,7 +74,6 @@ const ProfileCamera = ({ onPhotoTaken }: CustomCameraProps) => {
 
   return (
     <View style={styles.container}>
-        <View style={styles.camera}>
         {photo ? (
         // Hiển thị ảnh đã chụp
             <Image source={{ uri: photo }} style={styles.cameraWrapper} />
@@ -97,15 +96,16 @@ const ProfileCamera = ({ onPhotoTaken }: CustomCameraProps) => {
             </TouchableOpacity>
         </View>
     </View>
-    </View>
+    /*</View>*/
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between',
-    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'black',
   },
   message: {
     textAlign: 'center',
@@ -117,12 +117,14 @@ const styles = StyleSheet.create({
     borderRadius: 60,
   },
   cameraWrapper: {
-    width: 300,
-    height: 300,
-    borderRadius: 150,
+    width: 390,
+    height: 390,
+    borderRadius: 195,
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonContainer: {
     marginTop: 30,
@@ -137,6 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#333333',
     borderRadius: '50%',
+    marginLeft: 30,
   },
   get_Picture_button: {
     width: '15%',
@@ -145,6 +148,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#333333',
     borderRadius: '50%',
+    marginRight: 30,
   },
   text: {
     fontSize: 24,

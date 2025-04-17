@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, TextInput } from 'react-native';
-import { NavigationProp } from '@react-navigation/native';
+import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import ProfileService from '../../services/profile.service'; // Import ProfileService
+import TokenService from '../../services/token.service'; // Import TokenService
+import apiClient from '../../networking/apiclient'; // Import apiClient
+import { Modalize } from 'react-native-modalize'; // Import Modalize
+import type { Modalize as ModalizeType } from 'react-native-modalize';
+import ProfileApi from '../../networking/profile.api';
 
 
 type Props = {
@@ -12,13 +17,90 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
   const [name, setName] = useState<string | null>('Người dùng');
   const [avatar, setAvatar] = useState<string | null>(null); // Lưu đường dẫn ảnh avatar
   const [username, setUsername] = useState<string | null>(null); // Hiển thị username
-  const [compressedUri, setCompressedUri] = useState<string | null>(null);
+  const modalRef = useRef<ModalizeType>(null);
+  const [modalHeight, setModalHeight] = useState(0);
 
-  // Hàm lấy tên từ ProfileService
+  useEffect(() => {
+    modalRef.current?.open();
+    setTimeout(() => {
+      setModalHeight(800); // Chiều cao mong muốn
+    }, 120); // Delay nhẹ để tránh animation trượt lên
+  }, []);
+
+  // Đóng và quay lại Home khi vuốt xuống
+  const handleClosed = () => {
+    navigation.navigate('Home');
+  };
+
+  // Hàm xử lý đăng xuất
+  const handleLogout = async () => {
+    const refreshToken = await TokenService.getRefreshToken();
+    if (!refreshToken) {
+      navigation.reset(
+        {
+          index: 0,
+          routes: [{ name: 'Welcome' }],
+        }
+      );
+      return;
+    } else {
+      try {
+        await apiClient.delete("/auth/logout", {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`
+          }
+        })
+      } catch (error) {
+        console.error("Lỗi khi kiểm tra trạng thái đăng nhập:", error);
+      }
+    } 
+    TokenService.removeTokens();
+    navigation.reset(
+      {
+        index: 0,
+        routes: [{ name: 'Welcome' }],
+      }
+    );
+    alert("Đăng xuất thành công!");
+  }
+
+  // Hàm xóa tài khoản
+  const handleDeleteAccount = async () => {
+    const accessToken = await TokenService.getAccessToken();
+    if (!accessToken) {
+      navigation.reset(
+        {
+          index: 0,
+          routes: [{ name: 'Welcome' }],
+        }
+      );
+      return;
+    } else {
+      try {
+        await apiClient.delete("/auth/delete-account", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        })
+      } catch (error) {
+        console.error("Lỗi khi kiểm tra trạng thái đăng nhập:", error);
+      }
+    } 
+    TokenService.removeTokens();
+    navigation.reset(
+      {
+        index: 0,
+        routes: [{ name: 'Welcome' }],
+      }
+    );
+    alert("Xóa tài khoản thành công!");
+  }
+
+  // Hàm lấy tên từ ProfileApi
   function getName() {
-    ProfileService.getName()
-      .then((name) => {
-        setName(name);
+    ProfileApi.getProfile()
+      .then((response) => {
+        setName(response.name || null); // Lưu tên từ server
       })
       .catch((error) => {
         console.error('Error fetching name:', error);
@@ -26,15 +108,11 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     console.log('Name:', name);
   }
 
-  useEffect(() => {
-    getName();
-  }, []);
-
-  // Hàm lấy username từ ProfileService
+  // Hàm lấy username từ ProfileApi
   function getusername() {
-    ProfileService.getUsername()
-      .then((username) => {
-        setUsername(username);
+    ProfileApi.getProfile()
+      .then((response) => {
+        setUsername(response.username || null); // Lưu username từ server
       })
       .catch((error) => {
         console.error('Error fetching username:', error);
@@ -42,21 +120,40 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     console.log('username:', username);
   }
 
-  useEffect(() => {
-    getusername();
-  }, []);
+  // Hàm lấy avatar từ ProfileApi
+  function getAvatar() {   
+    ProfileApi.getProfile()
+      .then((response) => {
+        console.log('Avatar từ server:', response.urlPublicAvatar); // Log giá trị avatar từ server
+        setAvatar(response.urlPublicAvatar || null); // Đảm bảo avatar là chuỗi hoặc null
+      })
+      .catch((error) => {
+        console.error('Error fetching avatar:', error);
+      });
+    console.log('Avatar:', avatar);
+  }
 
-  useEffect(() => {
-    // Nhận photoUri từ route.params
-    if (route.params?.photoUri) {
-      setAvatar(route.params.photoUri); // Cập nhật avatar
-    }
-  }, [route.params?.photoUri]);
+  useFocusEffect(
+    React.useCallback(() => {
+      getAvatar(); // Lấy avatar mới từ server khi màn hình được focus
+      getName(); // Lấy tên mới từ server khi
+      getusername(); // Lấy username mới từ server khi
+    }, [])
+  );
 
-
- 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#111111' }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#111111', }}>
+      <Modalize
+        ref={modalRef}
+        modalHeight={modalHeight}
+        onClosed={handleClosed}
+        modalStyle={styles.modal}
+        handleStyle={styles.handle}
+        scrollViewProps={{
+          showsVerticalScrollIndicator: false,
+          bounces: false,
+        }}
+      >
         <FlatList
           data={[
             { key: 'avatar' },
@@ -77,13 +174,10 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                   <View style={{flex : 1, alignContent: 'center', justifyContent: 'center'}}>
                   <TouchableOpacity style={styles.avatarButton}
                     onPress={() => {
-                      navigation.navigate('CameraScreen', {
-                        compressedUri,
-                        setCompressedUri,
-                      });
+                      navigation.navigate('CameraScreen');
                     }}>
-                    {compressedUri ? (
-                      <Image source={{ uri: compressedUri }} style={styles.avatarImage} />
+                    {avatar ? (
+                      <Image source={{ uri: avatar }} style={styles.avatarImage} />
                     ) : (
                       <Image source={require("../../assets/user.png")} style={styles.avatarImage} />
                     )}
@@ -112,10 +206,13 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                     {/* Hiển thị hai ô trên cùng một hàng */}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                       {/* Ô hiển thị username */}
-                      <View style={[styles.box, { flex: 1, marginRight: 10 }]}>
-                        <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>{username}</Text>
+                      <View style={[styles.box, { flex: 1 }]}>
+                        <TouchableOpacity
+                          onPress={() => navigation.navigate('EditUserName')} // Điều hướng sang trang EditName
+                        >
+                          <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>@{username}</Text>
+                        </TouchableOpacity>
                       </View>
-
                       {/* Ô sửa tên */}
                       <View style={[styles.box, { flex: 1 }]}>
                         <TouchableOpacity
@@ -143,8 +240,8 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                         }}
                       >
                         {/* Avatar nhỏ bên trái */}
-                        {compressedUri ? (
-                      <Image source={{ uri: compressedUri }} style={[styles.avatarImage, {width: 50, height: 50, borderRadius: 25 }]} />
+                        {avatar ? (
+                      <Image source={{ uri: avatar }} style={[styles.avatarImage, {width: 50, height: 50, borderRadius: 25 }]} />
                     ) : (
                       <Image source={require("../../assets/user.png")} style={[styles.avatarButton, {width: 50, height: 50, borderRadius: 25 }]} />
                     )}
@@ -227,7 +324,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                             <Text style={{ color: 'white', fontSize: 16 }}>Thay đổi địa chỉ email</Text>
                           </TouchableOpacity>
 
-                          {/* Nút "Gửi đề xuất" */}
+                          {/* Nút "Thay đổi ngày sinh" */}
                           <TouchableOpacity
                             style={{
                               backgroundColor: '#222',
@@ -235,7 +332,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                               borderRadius: 5,
                               width: '100%',
                             }}
-                            onPress={() => Alert.alert('Gửi đề xuất', 'Đây là gửi đề xuất!')}
+                            onPress={() => Alert.alert('Thay đổi ngày sinh', 'Bạn đã nhấn vào nút Thay đổi ngày sinh!')}
                           >
                             <Text style={{ color: 'white', fontSize: 16 }}>Gửi đề xuất</Text>
                           </TouchableOpacity>
@@ -281,6 +378,19 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                             onPress={() => Alert.alert('Hiển thị tài khoản', 'Bạn đã nhấn vào nút Hiển thị tài khoản!')}
                           >
                             <Text style={{ color: 'white', fontSize: 16 }}>Hiển thị tài khoản</Text>
+                          </TouchableOpacity>
+
+                          {/* Nút "Hiển thị các thiết bị đăng nhập" */}
+                          <TouchableOpacity
+                            style={{
+                              backgroundColor: '#222',
+                              padding: 15,
+                              borderRadius: 5,
+                              width: '100%',
+                            }}
+                            onPress={() => navigation.navigate('LoggedDevices')} // Điều hướng sang trang LoggedDevices
+                          >
+                            <Text style={{ color: 'white', fontSize: 16 }}>Các thiết bị đăng nhập</Text>
                           </TouchableOpacity>  
                         </View>
                         </View>
@@ -417,7 +527,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                               borderRadius: 5,
                               width: '100%',
                             }}
-                            onPress={() => Alert.alert('Đăng xuất', 'Bạn đã nhấn vào nút Đăng xuất!')}
+                            onPress={() => handleLogout()}
                           >
                             <Text style={{ color: 'white', fontSize: 16 }}>Đăng xuất</Text>
                           </TouchableOpacity>  
@@ -430,7 +540,24 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                               borderRadius: 5,
                               width: '100%',
                             }}
-                            onPress={() => Alert.alert('Xóa tài khoản', 'Bạn đã nhấn vào nút Xóa tài khoản!')}
+                            onPress={() =>
+                              Alert.alert(
+                                'Xóa tài khoản',
+                                'Bạn chắc chắn muốn xóa tài khoản?',
+                                [
+                                  {
+                                    text: 'Hủy',
+                                    onPress: () => console.log('Hủy xóa tài khoản'),
+                                    style: 'cancel',
+                                  },
+                                  {
+                                    text: 'Có',
+                                    onPress: () => handleDeleteAccount(), // Gọi hàm xóa tài khoản nếu người dùng chọn "Có"
+                                  },
+                                ],
+                                { cancelable: false }
+                              )
+                            }
                           >
                             <Text style={{ color: 'red', fontSize: 16 }}>Xóa tài khoản</Text>
                           </TouchableOpacity>  
@@ -457,6 +584,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
           style={{ width: '100%', padding: 20 }}
         />
       )
+    </Modalize>
     </View>
   );
 };
@@ -549,6 +677,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     alignContent: 'center',
     justifyContent: 'center',
+  },
+  dragHandleContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  dragHandle: {
+    width: 60,
+    height: 10,
+    backgroundColor: '#888',
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  modal: {
+    backgroundColor: '#111',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  handle: {
+    backgroundColor: '#666',
+    width: 60,
   },
 });
 
