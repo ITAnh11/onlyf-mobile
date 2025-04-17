@@ -3,7 +3,7 @@ import postReducer from './PostSlice'; // Import reducer từ PostSlice
 
 const PostStore = configureStore({
   reducer: {
-    postManager: postReducer, // Tích hợp PostSlice vào store
+    postManager: postReducer, // Tích hợp PostOfFriendSlice vào store
   },
 });
 

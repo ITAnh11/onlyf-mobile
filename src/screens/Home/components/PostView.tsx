@@ -32,7 +32,7 @@ const PostView = ({ post }: PostViewProps) => {
            <Text style={styles.Caption}>{post.caption}</Text>
         </ImageBackground>
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10, alignItems: 'center', marginBottom: 20 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10, alignItems: 'center', marginBottom: 20,  }}>
         <ImageBackground source={{ uri: post.user.profile.urlPublicAvatar }} style={styles.User_avatar} />
         <Text style={styles.User_name}>{post.user.profile.name}</Text>
       </View>
@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15, 
     backgroundColor: 'white',
+     overflow: 'hidden',
   },
   Message_container:{
     flexDirection: 'row',
