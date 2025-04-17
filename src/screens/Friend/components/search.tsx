@@ -1,26 +1,48 @@
-import React from 'react';
-import { View, TextInput, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
+import React, { useCallback } from 'react';
+import {
+  View,
+  TextInput,
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Keyboard,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import UserItem from './user_search_item'; 
+import UserItem from './user_search_item';
 import { useSearch, User } from '../hooks/useSearch';
 
 type FriendSearchProps = {
-  onUserSelect?: (user: User) => void;
+  onUserSelect: (user: User) => void;
+  onRequestSent?: () => void;
+  refreshCounter: number;
 };
 
-const FriendSearch: React.FC<FriendSearchProps> = ({ onUserSelect }) => {
+const FriendSearch: React.FC<FriendSearchProps> = ({
+  onUserSelect,
+  onRequestSent,
+  refreshCounter,
+}) => {
   const { searchText, setSearchText, results, loading } = useSearch();
 
-  const renderItem = ({ item }: { item: User }) => {
-    if (!item?.user?.id) return null;
+  const renderItem = useCallback(
+    ({ item }: { item: User }) => {
+      if (!item?.user?.id) return null;
 
-    return (
-      <UserItem
-        user={item}
-        onPress={() => onUserSelect?.(item)}
-      />
-    );
-  };
+      return (
+        <UserItem
+          user={item}
+          onRequestSent={onRequestSent}
+          refreshCounter={refreshCounter}
+        />
+      );
+    },
+    [onUserSelect, onRequestSent, refreshCounter]
+  );
+
+  const keyExtractor = useCallback(
+    (item: User) => String(item.user.id),
+    []
+  );
 
   return (
     <View style={styles.container}>
@@ -31,17 +53,19 @@ const FriendSearch: React.FC<FriendSearchProps> = ({ onUserSelect }) => {
           placeholder="Tìm kiếm bạn bè..."
           value={searchText}
           onChangeText={setSearchText}
+          returnKeyType="search"
         />
       </View>
 
       {loading ? (
-        <ActivityIndicator style={{ marginTop: 10 }} />
+        <ActivityIndicator style={styles.loader} />
       ) : (
         <FlatList
           data={results}
-          keyExtractor={(item) => item?.user.id.toString()}
+          keyExtractor={keyExtractor}
           renderItem={renderItem}
           contentContainerStyle={styles.resultsContainer}
+          keyboardShouldPersistTaps="handled"
         />
       )}
     </View>
@@ -60,16 +84,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     alignItems: 'center',
     height: 50,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   icon: {
-    marginRight: 8,
+    marginRight: 10,
   },
   input: {
     flex: 1,
     fontSize: 16,
   },
+  loader: {
+    marginTop: 10,
+  },
   resultsContainer: {
-    paddingTop: 10,
+    paddingTop: 5,
   },
 });
 

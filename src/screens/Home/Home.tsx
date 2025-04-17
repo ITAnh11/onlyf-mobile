@@ -256,6 +256,24 @@ const Home: React.FC<Props> = ({ navigation }) => {
     checkPermissions();
   }, []);
 
+  type UserProfile = {
+    name: string;
+    urlPublicAvatar: string;
+  };
+
+  type User = {
+    id: string;
+    profile: UserProfile;
+  };
+
+  type PostItem = {
+    id: string;
+    caption: string;
+    urlPublicImage: string;
+    createdAt: string;
+    user: User;
+  };
+
   const height = Dimensions.get('screen').height;
   const renderItem = ({ item }: { item: PostItem }) => {
     if (item.id === 'home') {

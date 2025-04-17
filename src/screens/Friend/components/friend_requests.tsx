@@ -5,16 +5,38 @@ import { acceptFriendRequest, rejectFriendRequest } from '../../../networking/fr
 import { Ionicons } from '@expo/vector-icons';
 
 type Props = {
-  refreshFlag: boolean;
+  refreshCounter: number;
   onRefresh: () => void;
 };
 
-const FriendRequestList: React.FC<Props> = ({ refreshFlag }) => {
+const FriendRequestList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
   const { requests, loading, error, fetchFriendRequests } = useRequests();
 
   useEffect(() => {
     fetchFriendRequests();
-  }, [refreshFlag]); // gọi lại khi refreshFlag thay đổi
+  }, [refreshCounter]);
+
+  const handleAcceptRequest = async (requestId: number) => {
+    try {
+      await acceptFriendRequest(requestId);
+      console.log('Friend request accepted!');
+      fetchFriendRequests(); 
+      onRefresh(); 
+    } catch (err) {
+      console.error('Error accepting friend request:', err);
+    }
+  };
+
+  const handleRejectRequest = async (requestId: number) => {
+    try {
+      await rejectFriendRequest(requestId);
+      console.log('Friend request rejected!');
+      fetchFriendRequests();
+      onRefresh();
+    } catch (err) {
+      console.error('Error rejecting friend request:', err);
+    }
+  };
 
   if (loading) {
     return (
@@ -31,30 +53,6 @@ const FriendRequestList: React.FC<Props> = ({ refreshFlag }) => {
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
-  }
-
-  const handleAcceptRequest = (requestId: number) => {
-    acceptFriendRequest(requestId)
-      .then(() => {
-        console.log('Friend request accepted!');
-        fetchFriendRequests(); // cập nhật danh sách yêu cầu kết bạn sau khi chấp nhận
-      })
-      .catch((error: any) => {
-        console.error('Error accepting friend request:', error);
-      }
-    );
-  }
-
-  const handleRejectRequest = (requestId: number) => {
-    rejectFriendRequest(requestId)
-      .then(() => {
-        console.log('Friend request rejected!');
-        fetchFriendRequests(); // cập nhật danh sách yêu cầu kết bạn sau khi từ chối
-      })
-      .catch((error: any) => {
-        console.error('Error rejecting friend request:', error);
-      }
-    );  
   }
 
   return (
@@ -79,10 +77,10 @@ const FriendRequestList: React.FC<Props> = ({ refreshFlag }) => {
                 <Text style={styles.name}>{item.sender.profile.name}</Text>
                 <Text style={styles.username}>@{item.sender.profile.username}</Text>
               </View>
-              <TouchableOpacity onPress={() => {handleAcceptRequest(item.id)}} style={styles.button} >
+              <TouchableOpacity onPress={() => handleAcceptRequest(item.id)} style={styles.button}>
                 <Ionicons name="checkmark" size={24} color="#000" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => {handleRejectRequest(item.id)}} style={styles.button} >
+              <TouchableOpacity onPress={() => handleRejectRequest(item.id)} style={styles.button}>
                 <Ionicons name="close" size={24} color="#000" />
               </TouchableOpacity>
             </View>
@@ -141,7 +139,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     marginLeft: 'auto',
-    borderWidth: 1,
     marginRight: 10,
   },
   centered: {
@@ -151,4 +148,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FriendRequestList;
+export default React.memo(FriendRequestList);
+
