@@ -8,9 +8,10 @@ import TokenService from '../../../services/token.service';
 interface PostingProps {
     compressedUri: string | null;
     setCompressedUri: (compressedUri: string|null) => void;
+    setIsPosted: (isPosted: boolean) => void;
 }
 
-const Posting = ({compressedUri,setCompressedUri} : PostingProps) => {
+const Posting = ({compressedUri,setCompressedUri,setIsPosted} : PostingProps) => {
   const [caption, setCaption] = useState<string>("");
 
   //Hàm trang trí bài post
@@ -37,6 +38,7 @@ const Posting = ({compressedUri,setCompressedUri} : PostingProps) => {
           })
           .then((response) => {
             console.log("Đăng bài thành công:", response.data);
+            setIsPosted(true);
             setCompressedUri(null); // Reset the compressedUri after posting
           })
       }
