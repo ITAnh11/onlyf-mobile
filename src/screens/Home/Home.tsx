@@ -46,15 +46,27 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const nextCursor = useSelector((state: RootState) => state.postManager.nextCursor);
   const hasMore = useSelector((state: RootState) => state.postManager.hasdmore);
 
+  //Trạng thái xem đã đăng bài hay chưa
+  const [isPosted, setIsPosted] = useState(false);
+
   
   //State để theo dõi vị trí trang hiện tại trong Flatlist
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [backToFirstPage, setBacktoFirstPage] = useState(false);
   const onViewRef = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (viewableItems && viewableItems.length > 0) {
       setCurrentIndex(viewableItems[0].index || 0); // cập nhật index đầu tiên đang hiển thị
     }
   });
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
+  // Tạo ref cho FlatList
+  const flatListRef = useRef<FlatList>(null); 
+  useEffect(() => {
+    if (backToFirstPage) {
+      flatListRef.current?.scrollToIndex({ index: 1, animated: true }); // Cuộn đến trang thứ 2
+      setBacktoFirstPage(false); // Đặt lại trạng thái để tránh cuộn lại liên tục
+    }
+  }, [backToFirstPage]);
 
   //Theo dõi danh sách các bài post (trạng thái lọc tất cả hoặc của một người bạn cụ thể)
   const [choosedItem, setChoosedItem] = useState("Tất cả bạn bè");
@@ -88,45 +100,47 @@ const Home: React.FC<Props> = ({ navigation }) => {
   // },[friendList]);
 
 
-  //useEffect để thêm home vào data array khi component mount
-  useEffect(() => {
+  //Hàm khởi tạo các bài post
+  const initAllPost = async () => {
     dispatch(addPost({ id: 'home', caption: 'Home', urlPublicImage: '', createdAt: '', user: { id: '', profile: { name: '', urlPublicAvatar: '' } } })); // Thêm home vào danh sách bài post
-  }, []);
-
-  // useEffect(() => {
-  //   console.log("danhSach đã thay đổi:", danhSach, "\n");
-  // }, [danhSach]);
-
-
+    if (loading) return; // Ngăn việc gọi API nhiều lần khi đang tải
+    setLoading(true); // Bắt đầu trạng thái tải
+    const accessToken = await TokenService.getAccessToken();
+    try {
+      const response = await apiClient.get(`/post/get-posts/`, {
+        params: {
+          limit: 20, // Số lượng bài post muốn lấy
+        },
+        headers: {
+          Authorization: `Bearer ${accessToken}` // Thêm access token vào header
+        }
+      });
+      // console.log("response of POST", response.data.posts); // Kiểm tra dữ liệu trả về từ API
+      dispatch(addPosts(response.data.posts)); // Cập nhật state `data` với bài post mới
+      dispatch(setNextCursor(response.data.nextCursor)); // Cập nhật con trỏ tiếp theo
+      dispatch(setHasMore(response.data.hasMore)); // Cập nhật trạng thái có thêm bài post hay khôngr
+    } catch (error) {
+      console.error("Lỗi khi gọi API get POST:", error); // Xử lý lỗi nếu có
+    } finally {
+      setLoading(false); // Kết thúc trạng thái tải
+    }
+  }
   //useEffect để khỏi tạo các bài post đầu tiên
   useEffect(() => {
-    const fetchCards = async () => {
-      if (loading) return; // Ngăn việc gọi API nhiều lần khi đang tải
-      setLoading(true); // Bắt đầu trạng thái tải
-      const accessToken = await TokenService.getAccessToken();
-      try {
-        const response = await apiClient.get(`/post/get-posts/`, {
-          params: {
-            limit: 20, // Số lượng bài post muốn lấy
-          },
-          headers: {
-            Authorization: `Bearer ${accessToken}` // Thêm access token vào header
-          }
-        });
-        // console.log("response of POST", response.data.posts); // Kiểm tra dữ liệu trả về từ API
-        dispatch(addPosts(response.data.posts)); // Cập nhật state `data` với bài post mới
-        dispatch(setNextCursor(response.data.nextCursor)); // Cập nhật con trỏ tiếp theo
-        dispatch(setHasMore(response.data.hasMore)); // Cập nhật trạng thái có thêm bài post hay khôngr
-      } catch (error) {
-        console.error("Lỗi khi gọi API get POST:", error); // Xử lý lỗi nếu có
-      } finally {
-        setLoading(false); // Kết thúc trạng thái tải
-      }
-    }
-    fetchCards(); 
+    initAllPost(); 
   }, []);
 
+  //useEffect để render lại các bài post sau khi đăng ảnh
+  useEffect(() => {
+    if(isPosted) {
+      dispatch(clearPosts());
+      initAllPost();
+      setIsPosted(false);
+    }
+  },[isPosted])
+
   //hàm thay đổi danh sách bài post khi người dùng thay đổi lựa chọn.
+  const isFirstRender = useRef(true); // Theo dõi lần render đầu tiên
   useEffect(() => {
     const fetchCards = async () => {
       if (loading) return; // Ngăn việc gọi API nhiều lần khi đang tải
@@ -144,25 +158,29 @@ const Home: React.FC<Props> = ({ navigation }) => {
         const response = await apiClient.get(`/post/get-posts/`, {
           params,
           headers: {
-            Authorization: `Bearer ${accessToken}` // Thêm access token vào header
-          }
+            Authorization: `Bearer ${accessToken}`, // Thêm access token vào header
+          },
         });
-        // console.log("response of POST", response.data.posts); // Kiểm tra dữ liệu trả về từ API
+  
         dispatch(clearPosts());
-        setCurrentIndex(1);
         dispatch(addPost({ id: 'home', caption: 'Home', urlPublicImage: '', createdAt: '', user: { id: '', profile: { name: '', urlPublicAvatar: '' } } })); // Thêm home vào danh sách bài post
         dispatch(addPosts(response.data.posts)); // Cập nhật state `data` với bài post mới
         dispatch(setNextCursor(response.data.nextCursor)); // Cập nhật con trỏ tiếp theo
         dispatch(setHasMore(response.data.hasMore)); // Cập nhật trạng thái có thêm bài post hay không
-        
+  
+        // Chỉ gọi setBacktoFirstPage(true) nếu không phải lần render đầu tiên
+        if (!isFirstRender.current) {
+          setBacktoFirstPage(true);
+        }
+        isFirstRender.current = false; // Đánh dấu rằng lần render đầu tiên đã hoàn tất
       } catch (error) {
         console.error("Lỗi khi gọi API get POST:", error); // Xử lý lỗi nếu có
       } finally {
         setLoading(false); // Kết thúc trạng thái tải
       }
-    }
-    fetchCards(); 
-  }, [idItem])
+    };
+    fetchCards();
+  }, [idItem]);
 
   // Hàm gọi API để lấy danh sách bài post
   const fetchCards = async () => {
@@ -275,7 +293,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
             {permissionsGranted ? (
               compressedUri ? (
                 <View style={styles.camera_container}>
-                  <Posting compressedUri={compressedUri} setCompressedUri={setCompressedUri} />
+                  <Posting compressedUri={compressedUri} setCompressedUri={setCompressedUri} setIsPosted={setIsPosted}/>
                 </View>
               ) : (
                 <View style={styles.camera_container}>
@@ -329,6 +347,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
         }
 
         <FlatList
+            ref={flatListRef}
             data={danhSach}
             renderItem={({ item }) => renderItem({ item })}
             keyExtractor={(item, index) => item.id === 'home' ? `home-${index}` : item.id.toString()}
