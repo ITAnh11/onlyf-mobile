@@ -250,7 +250,13 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
   //lấy thông tin người dùng khi component mount
   useEffect(() => {
-    ProfileApi.getProfile(); // Lấy thông tin người dùng từ ProfileApi
+    ProfileApi.getProfile()
+      .then((response) => {
+        ProfileService.saveProfile(response); // Lưu thông tin người dùng vào ProfileService
+      })
+      .catch((error) => {
+        console.error("Lỗi khi lấy thông tin người dùng:", error); // Xử lý lỗi nếu có
+      });
   }, []);
 
   // Kiểm tra quyền camera và thư viện ảnh khi component mount
@@ -297,7 +303,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <View style={{backgroundColor: '#111111',height: height,justifyContent:'center'}}>
         <View style={styles.list_button}>
-            <TouchableOpacity style={[styles.button, { marginLeft: 20 }]} onPress={() => navigation.navigate("Profile")}>
+            <TouchableOpacity style={[styles.button, { marginLeft: 20 }]} onPress={() => {console.log("currentIndex",currentIndex);navigation.navigate("Profile");}}>
               <Image source={require("../../assets/user.png")} resizeMode="contain" style={{ width: 33, height: 33 }} />
             </TouchableOpacity>
             {(currentIndex === 0) ? (
