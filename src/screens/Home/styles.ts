@@ -7,16 +7,22 @@ export const styles = StyleSheet.create({
         marginBottom: 20
     },
     button: {
-        width: '15%',
+        width: '13%',
         aspectRatio: 1,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#333333',
         borderRadius: '50%',
     },
+    button_friend: {
+        flexDirection: "row",
+        alignItems:"center",
+        backgroundColor: "#333333",
+        borderRadius: 30,
+    },
     buttonText: {
         fontSize: 20,
-        fontFamily: "Roboto"
+        fontFamily: "Roboto",
     },
     safeArea_style: {
         flexDirection: 'column',
@@ -29,7 +35,7 @@ export const styles = StyleSheet.create({
         left: 0, // Căn trái
         right: 0, // Căn phải
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         marginBottom: 0, // Không cần marginBottom khi dùng position: 'absolute'
         marginTop: 0, // Không cần marginTop khi dùng position: 'absolute'
         zIndex: 10, // Đảm bảo nằm trên các thành phần khác

@@ -84,7 +84,7 @@ const CustomCamera = ({ onPhotoTaken }: CustomCameraProps) => {
         {/* <CameraView style={styles.camera} facing={facing} />       */}
         <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.get_Picture_button} onPress={pickImage}>
-                <Image source={require("../assets/image_icon.png")} resizeMode="contain" style={{ width:30, height: 30 }}/>
+                <Image source={require("../assets/image_icon.png")} resizeMode="contain" style={{ width:40, height: 40 }}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={takePicture}>
               <View style={{ width: 100, height: 100, backgroundColor: '#EAA905', borderRadius: 50, alignItems: 'center', justifyContent: 'center' }}>
@@ -92,7 +92,7 @@ const CustomCamera = ({ onPhotoTaken }: CustomCameraProps) => {
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.toggleCameraFacing_button} onPress={toggleCameraFacing}>
-                <Image source={require("../assets/circular.png")} resizeMode="contain" style={{ width:30, height: 30 }}/>
+                <Image source={require("../assets/circular.png")} resizeMode="contain" style={{ width:40, height: 40 }}/>
             </TouchableOpacity>
         </View>
     </View>
@@ -125,7 +125,6 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#333333',
     borderRadius: '50%',
   },
   get_Picture_button: {
@@ -133,7 +132,6 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#333333',
     borderRadius: '50%',
   },
   text: {
