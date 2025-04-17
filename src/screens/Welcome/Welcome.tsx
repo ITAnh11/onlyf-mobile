@@ -13,11 +13,11 @@ const Welcome: React.FC<Props> = ({ navigation }) => {
             <View>
                 <Text style={styles.title}>Chào mừng bạn đến với OnlyF!</Text>
             </View>
-            <TouchableOpacity style={styles.button} onPress = {() => navigation.navigate("Login")}>
-                <Text style={styles.buttonText}>Đăng nhập</Text>
+            <TouchableOpacity style={styles.button} onPress = {() => navigation.navigate("Register")}>
+                <Text style={styles.buttonText}>Tạo tài khoản</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress = {() => navigation.navigate("Register")}>  
-                <Text style={styles.buttonText}>Đăng ký</Text>
+            <TouchableOpacity onPress = {() => navigation.navigate("Login")}>  
+                <Text style={styles.buttonLoginText}>Đăng nhập</Text>
             </TouchableOpacity>
         </View>
     );

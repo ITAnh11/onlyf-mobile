@@ -1,21 +1,22 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../constants/Color';
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.primary_background,
         alignItems: 'center',
         justifyContent: 'center',
-        margin: 10
     },
 
-    image: {
+    logo: {
         width: 200,
         height: 200,
         marginBottom: 10
     },
     
     text: {
-        fontSize: 28,   
+        fontSize: 28, 
+        color: Colors.primary_text,  
     }
 });

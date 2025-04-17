@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import Colors from "../../constants/Color";
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingBottom: 40,
@@ -25,58 +25,53 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginLeft: -26,
-    color: Colors.white_button,
+    color: Colors.primary_text,
   },
   body: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
     width: "100%",
-    marginBottom: 20,
+    marginTop: "20%",
   },
-  textInput: {
-    fontSize: 16,
-    marginBottom: "1.5%",
+  content: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginTop: 20,
+  },
+  text: {
+    fontSize: 16, 
+    marginBottom: 10,
     color: Colors.secondary_text,
-    paddingLeft: '8%',
+    alignSelf: "center",
   },
-  input: {
-    width: "90%",
+  inputEmail: {
+    width: "80%",
+    height: "8%",
     fontSize: 16,
     alignSelf: "center",
+    alignContent: "center",
     backgroundColor: Colors.input_background,
     color: Colors.primary_text,
     padding: 12,
-    marginBottom: '2%',  
+    marginBottom: '5%',  
     borderRadius: 25,
   },
   button: {
-    backgroundColor: Colors.secondary_background,
+    backgroundColor: Colors.yellow_button,
     paddingVertical: 12,
     paddingHorizontal: 25,
     alignItems: "center",
-    alignSelf: "center",
     borderRadius: 30,
     marginVertical: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.5,
-    marginTop: 30,
+    marginTop: 20,
   },
   buttonText: {
     color: Colors.tertiary_text,
-    fontSize: 20,
-  },
-  link: {
-    color: Colors.link,
-    fontSize: 14,
-    textAlign: "center",
-    marginTop: 5,
-  },
-  errorText: {
-    color: Colors.error_text,
-    fontSize: 12,
-    alignSelf: "flex-start",
-    marginTop: -3,
-    marginBottom: 5,
+    fontSize: 18,
   },
 });
+
+export default styles;

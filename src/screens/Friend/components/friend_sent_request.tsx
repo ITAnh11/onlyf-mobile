@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, ActivityIndicator, TouchableOp
 import useSentRequests from '../hooks/useSentRequest';
 import { Ionicons } from '@expo/vector-icons';
 import { revokeFriendRequest } from '../../../networking/friend.api';
+import Colors from '../../../constants/Color';
 
 type Props = {
   refreshCounter: number;
@@ -11,6 +12,8 @@ type Props = {
 
 const SentFriendRequestList: React.FC<Props> = ({ refreshCounter, onRequestSent }) => {
   const { sentRequests, loading, error, fetchSentRequests } = useSentRequests();
+  const [showAll, setShowAll] = React.useState(false);
+  const visibleSendRequests = showAll ? sentRequests : sentRequests.slice(0, 5);
 
   useEffect(() => {
     fetchSentRequests(); 
@@ -51,7 +54,7 @@ const SentFriendRequestList: React.FC<Props> = ({ refreshCounter, onRequestSent 
         <Text style={styles.noFriendsText}>Không có lời mời đã gửi</Text>
       ) : (
         <FlatList
-          data={sentRequests}
+          data={visibleSendRequests}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.friendContainer}>
@@ -69,11 +72,18 @@ const SentFriendRequestList: React.FC<Props> = ({ refreshCounter, onRequestSent 
               </View>
 
               <TouchableOpacity onPress={() => { handleRevokeRequest(item.id) }} style={styles.button}>
-                <Ionicons name='close' size={21} color='#000' />
+                <Ionicons name='close' size={24} color={Colors.primary_text} />
               </TouchableOpacity>
             </View>
           )}
         />
+      )}
+      {!showAll && sentRequests.length > 5 && (
+        <TouchableOpacity onPress={() => setShowAll(!showAll)} style={styles.centered}>
+          <Text style={styles.buttonText}>
+            {showAll ? 'Ẩn bớt' : 'Xem thêm'}
+          </Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -86,13 +96,13 @@ const styles = StyleSheet.create({
   noFriendsText: {
     textAlign: 'center',
     fontSize: 16,
-    color: '#888',
+    color: Colors.secondary_text,
     margin: 10,
   },
   errorText: {
     textAlign: 'center',
     fontSize: 16,
-    color: 'red',
+    color: Colors.error_text,
     margin: 10,
   },
   friendContainer: {
@@ -100,15 +110,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     borderRadius: 30,
-    borderWidth: 1.2,
-    borderColor: 'red',
+    borderWidth: 2,
+    borderColor: Colors.border_avt,
     marginRight: 20,
   },
   infoContainer: {
@@ -117,10 +125,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: Colors.primary_text,
   },
   username: {
     fontSize: 12,
-    color: '#555',
+    color: Colors.secondary_text,
   },
   button: {
     marginLeft: 'auto',
@@ -133,6 +142,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 20,
+  },
+  buttonText: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    fontSize: 16,
+    textAlign: 'center',
+    backgroundColor: Colors.gray_button,
+    color: Colors.secondary_text,
   },
 });
 

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, ActivityIndicator, TouchableOp
 import useRequests from '../hooks/useRequest'; 
 import { acceptFriendRequest, rejectFriendRequest } from '../../../networking/friend.api';
 import { Ionicons } from '@expo/vector-icons';
+import Colors from '../../../constants/Color';
 
 type Props = {
   refreshCounter: number;
@@ -11,6 +12,8 @@ type Props = {
 
 const FriendRequestList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
   const { requests, loading, error, fetchFriendRequests } = useRequests();
+  const [showAll, setShowAll] = React.useState(false);
+  const visibleRequests = showAll ? requests : requests.slice(0, 5);
 
   useEffect(() => {
     fetchFriendRequests();
@@ -61,7 +64,7 @@ const FriendRequestList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
         <Text style={styles.noFriendsText}>Không có lời mời kết bạn</Text>
       ) : (
         <FlatList
-          data={requests}
+          data={visibleRequests}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.friendContainer}>
@@ -78,14 +81,19 @@ const FriendRequestList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
                 <Text style={styles.username}>@{item.sender.profile.username}</Text>
               </View>
               <TouchableOpacity onPress={() => handleAcceptRequest(item.id)} style={styles.button}>
-                <Ionicons name="checkmark" size={24} color="#000" />
+                <Ionicons name="checkmark" size={24} color={Colors.primary_text} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleRejectRequest(item.id)} style={styles.button}>
-                <Ionicons name="close" size={24} color="#000" />
+                <Ionicons name="close" size={24} color={Colors.primary_text} />
               </TouchableOpacity>
             </View>
           )}
         />
+      )}
+      {!showAll && requests.length > 5 && (
+        <TouchableOpacity onPress={() => setShowAll(!showAll)} style={styles.centered}>
+          <Text style={styles.buttonText}>{showAll ? 'Ẩn bớt' : 'Xem thêm'}</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -98,13 +106,13 @@ const styles = StyleSheet.create({
   noFriendsText: {
     textAlign: 'center',
     fontSize: 16,
-    color: '#888',
+    color: Colors.secondary_text,
     margin: 10,
   },
   errorText: {
     textAlign: 'center',
     fontSize: 16,
-    color: 'red',
+    color: Colors.error_text,
     margin: 10,
   },
   friendContainer: {
@@ -112,15 +120,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     borderRadius: 30,
-    borderWidth: 1.2,
-    borderColor: 'red',
+    borderWidth: 2,
+    borderColor: Colors.border_avt,
     marginRight: 20,
   },
   infoContainer: {
@@ -130,21 +136,31 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: Colors.primary_text,
   },
   username: {
     fontSize: 12,
-    color: '#888',
+    color: Colors.secondary_text,
   },
   button: {
     paddingVertical: 6,
     paddingHorizontal: 12,
     marginLeft: 'auto',
-    marginRight: 10,
+    marginRight: 5,
   },
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 20,
+  },
+  buttonText: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    fontSize: 16,
+    textAlign: 'center',
+    backgroundColor: Colors.gray_button,
+    color: Colors.secondary_text,
   },
 });
 

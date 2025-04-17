@@ -67,6 +67,10 @@ const Splash: React.FC<Props> = ({ navigation }) => {
     },[navigation]);
     return (
         <View style={styles.container}> 
+            <Image
+                source={require("./../../assets/logo_onlyf.png")}
+                style={styles.logo}
+            />
             <Text style={styles.text}>OnlyF</Text>
         </View>
     );

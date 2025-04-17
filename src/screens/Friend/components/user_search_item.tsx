@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-na
 import useFriendStatus from '../hooks/useFriendStatus';
 import type { FriendStatus } from '../hooks/useFriendStatus';
 import { sendFriendRequest } from '../../../networking/friend.api';
+import Colors from '../../../constants/Color';
 
 type User = {
   name: string;
@@ -28,7 +29,7 @@ const getButtonLabel = (status: FriendStatus) => {
     case 'pending_sent':
       return 'Đã gửi lời mời';
     case 'pending_received':
-      return 'Bạn đang nhận lời mời';
+      return 'Đang nhận lời mời';
     case 'none':
     default:
       return '+ Kết bạn';
@@ -111,16 +112,16 @@ const UserItem: React.FC<Props> = ({ user, refreshCounter, onRequestSent }) => {
 const getButtonStyle = (status: FriendStatus) => {
   switch (status) {
     case 'me':
-      return { backgroundColor: '#aaa', color: '#000' };
+      return { backgroundColor: Colors.background_for_button, color: Colors.primary_text };
     case 'friend':
-      return { backgroundColor: '#aaa', color: '#000' };
+      return { backgroundColor: Colors.background_for_button, color: Colors.primary_text };
     case 'pending_sent':
-      return { backgroundColor: '#aaa', color: '#000' };
+      return { backgroundColor: Colors.background_for_button, color: Colors.primary_text };
     case 'pending_received':
-      return { backgroundColor: '#aaa', color: '#000' };
+      return { backgroundColor: Colors.background_for_button, color: Colors.primary_text };
     case 'none':
     default:
-      return { backgroundColor: '#e4c2a5', color: '#000' };
+      return { backgroundColor: Colors.yellow_button, color: Colors.tertiary_text };
   }
 };
 
@@ -128,17 +129,16 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#ccc',
     flexDirection: 'row',
     alignItems: 'center',
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: Colors.border_avt,
     marginRight: 12,
-    backgroundColor: '#ddd',
   },
   info: {
     flex: 1,
@@ -146,10 +146,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: Colors.primary_text,
   },
   username: {
     fontSize: 12,
-    color: '#666',
+    color: Colors.secondary_text,
   },
   button: {
     paddingVertical: 6,
@@ -157,8 +158,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     fontSize: 16,
     textAlign: 'center',
-    borderColor: 'black',
-    borderWidth: 2,
   },
 });
 

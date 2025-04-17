@@ -28,7 +28,7 @@ const Friend: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <StatusBar />
+      <StatusBar style='auto' />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" style={styles.backButton} />
@@ -44,32 +44,35 @@ const Friend: React.FC<Props> = ({ navigation }) => {
         />
       </View>
 
-      <SectionList
-        contentContainerStyle={styles.container}
-        sections={sections}
-        keyExtractor={(item, index) => String(index)}
-        renderSectionHeader={({ section }) => (
-          <Text style={styles.sectionHeader}>{section.title}</Text>
-        )}
-        renderItem={({ section }) => {
-          switch (section.key) {
-            case 'friends':
-              return <FriendList refreshCounter={refreshCounter} onRefresh={triggerRefresh} />;
-            case 'requests':
-              return (
-                <FriendRequestList
-                  refreshCounter={refreshCounter}
-                  onRefresh={triggerRefresh}
-                />
-              );
-            case 'sent':
-              return <SentFriendRequestList refreshCounter={refreshCounter} onRequestSent={triggerRefresh} />;
-            default:
-              return null;
-          }
-        }}
-        keyboardShouldPersistTaps="handled"
-      />
+      <View style={styles.sectionContainer}>
+        <SectionList
+          contentContainerStyle={styles.container}
+          sections={sections}
+          keyExtractor={(item, index) => String(index)}
+          renderSectionHeader={({ section }) => (
+            <Text style={styles.sectionHeader}>{section.title}</Text>
+          )}
+          stickySectionHeadersEnabled={false}
+          renderItem={({ section }) => {
+            switch (section.key) {
+              case 'friends':
+                return <FriendList refreshCounter={refreshCounter} onRefresh={triggerRefresh} />;
+              case 'requests':
+                return (
+                  <FriendRequestList
+                    refreshCounter={refreshCounter}
+                    onRefresh={triggerRefresh}
+                  />
+                );
+              case 'sent':
+                return <SentFriendRequestList refreshCounter={refreshCounter} onRequestSent={triggerRefresh} />;
+              default:
+                return null;
+            }
+          }}
+          keyboardShouldPersistTaps="handled"
+        />
+      </View>
     </View>
   );
 };

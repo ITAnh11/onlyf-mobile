@@ -1,8 +1,10 @@
 import { StyleSheet } from "react-native";
+import Colors from "../../constants/Color";
 
 const styles = StyleSheet.create({
   container: {
     paddingBottom: 30,
+    backgroundColor: Colors.primary_background,
   },
   header: {
     flexDirection: 'row',
@@ -10,13 +12,12 @@ const styles = StyleSheet.create({
     height: 60,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.primary_background,
     marginTop: '10%',
   },
   backButton: {
     fontSize: 26,
-    color: '#000',
+    color: Colors.white_button,
     zIndex: 2,
   },
   title: {
@@ -25,15 +26,22 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginLeft: -26,
+    color: Colors.primary_text,
+  },
+  sectionContainer: {
+    flex: 1,
+    backgroundColor: Colors.primary_background,
   },
   sectionHeader: {
-    backgroundColor: '#f0f0f0',
     padding: 5,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
+    color: Colors.primary_text,
   },
   searchContainer: {
     padding: 10,
+    backgroundColor: Colors.primary_background,
+    flexShrink: 1,
   },
 });
 

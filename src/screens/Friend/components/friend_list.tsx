@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import useFriends from '../hooks/useFriend';
 import { unfriend } from '../../../networking/friend.api';
+import Colors from '../../../constants/Color';
+import { Ionicons } from '@expo/vector-icons';
 
 type Props = {
   refreshCounter: number;
@@ -10,21 +12,31 @@ type Props = {
 
 const FriendList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
   const { friends,loading, error, fetchFriends } = useFriends(); 
+  const [showAll, setShowAll] = React.useState(false);
+  const visibleFriends = showAll ? friends : friends.slice(0, 5);
 
   useEffect(() => {
     fetchFriends(); 
   }, [refreshCounter]);
 
   const handleUnfriend = (friendId: number) => {
-    unfriend(friendId)
-      .then(() => {
-        console.log('Unfriend successful!');
-        fetchFriends(); 
-        onRefresh();
-      })
-      .catch((error) => {
-        console.error('Error unfriending:', error);
-      }
+    Alert.alert(
+      'Hủy kết bạn',
+      'Bạn có chắc chắn muốn hủy kết bạn với người này không?',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        { text: 'Đồng ý', onPress: () => {
+          unfriend(friendId)
+            .then(() => {
+              console.log('Unfriend successful!');
+              fetchFriends(); 
+              onRefresh(); 
+            })
+            .catch((error) => {
+              console.error('Error unfriending:', error);
+            });
+        }}
+      ]
     );
   }
 
@@ -50,7 +62,7 @@ const FriendList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
         <Text style={styles.noFriendsText}>Chưa có bạn bè</Text>
       ) : (
         <FlatList
-          data={friends}
+          data={visibleFriends}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.friendContainer}>
@@ -68,11 +80,18 @@ const FriendList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
                   onPress={() => {handleUnfriend(item.friend.id)}}
                   style={styles.unfriendButton}
                 >
-                  <Text style={styles.unfriendButtonText}>Hủy kết bạn</Text>
+                  <Ionicons name="close" size={24} color={Colors.primary_text} />
                 </TouchableOpacity>
             </View>
           )}
         />
+      )}
+      {!showAll && friends.length > 5 && (
+        <TouchableOpacity onPress={() => setShowAll(!showAll)} style={styles.centered}>
+          <Text style={styles.buttonText}>
+            {showAll ? 'Ẩn bớt bạn bè' : 'Xem tất cả bạn bè'}
+          </Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -85,13 +104,13 @@ const styles = StyleSheet.create({
   noFriendsText: {
     textAlign: 'center',
     fontSize: 16,
-    color: '#888',
+    color: Colors.secondary_text,
     margin: 10,
   },
   errorText: {
     textAlign: 'center',
     fontSize: 16,
-    color: 'red',
+    color: Colors.error_text,
     margin: 10,
   },
   friendContainer: {
@@ -99,15 +118,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     borderRadius: 30,
-    borderWidth: 1.2,
-    borderColor: 'red',
+    borderWidth: 2,
+    borderColor: Colors.border_avt,
     marginRight: 20,
   },
   infoContainer: {
@@ -117,28 +134,31 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 19,
     fontWeight: 'bold',
+    color: Colors.primary_text,
   },
   username: {
     fontSize: 12,
-    color: '#888',
+    color: Colors.secondary_text,
   },
   unfriendButton: {
-    marginTop: 5,
-    backgroundColor: '#a3a',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    alignSelf: 'flex-start',
-  },
-  unfriendButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginLeft: 'auto',
+    marginRight: 5,
   },
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 20,
+  },
+  buttonText: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    fontSize: 16,
+    textAlign: 'center',
+    backgroundColor: Colors.gray_button,
+    color: Colors.secondary_text,
   },
 });
 

@@ -6,10 +6,13 @@ import {
   FlatList,
   StyleSheet,
   Keyboard,
+  Text,
+  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import UserItem from './user_search_item';
 import { useSearch, User } from '../hooks/useSearch';
+import Colors from '../../../constants/Color';
 
 type FriendSearchProps = {
   onUserSelect: (user: User) => void;
@@ -23,6 +26,8 @@ const FriendSearch: React.FC<FriendSearchProps> = ({
   refreshCounter,
 }) => {
   const { searchText, setSearchText, results, loading } = useSearch();
+  const [showAll, setShowAll] = React.useState(false);
+  const visibleResults = showAll ? results : results.slice(0, 5);
 
   const renderItem = useCallback(
     ({ item }: { item: User }) => {
@@ -47,10 +52,11 @@ const FriendSearch: React.FC<FriendSearchProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.searchBox}>
-        <Ionicons name="search" size={25} color="#888" style={styles.icon} />
+        <Ionicons name="search" size={25} color={Colors.secondary_background} style={styles.icon} />
         <TextInput
           style={styles.input}
           placeholder="Tìm kiếm bạn bè..."
+          placeholderTextColor={Colors.secondary_text}
           value={searchText}
           onChangeText={setSearchText}
           returnKeyType="search"
@@ -60,13 +66,23 @@ const FriendSearch: React.FC<FriendSearchProps> = ({
       {loading ? (
         <ActivityIndicator style={styles.loader} />
       ) : (
-        <FlatList
-          data={results}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          contentContainerStyle={styles.resultsContainer}
-          keyboardShouldPersistTaps="handled"
-        />
+        <View>
+          <FlatList
+            data={visibleResults}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
+            style={{maxHeight: 400}}
+            contentContainerStyle={styles.resultsContainer}
+            keyboardShouldPersistTaps="handled"
+          />
+        </View>
+      )}
+      {!showAll && results.length > 5 && (
+        <TouchableOpacity onPress={() => setShowAll(!showAll)} style={styles.centered}>
+          <Text style={styles.buttonText}>
+            {showAll ? 'Ẩn bớt' : 'Xem thêm'}
+          </Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -79,13 +95,11 @@ const styles = StyleSheet.create({
   },
   searchBox: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.input_background,
     borderRadius: 30,
     paddingHorizontal: 10,
     alignItems: 'center',
     height: 50,
-    borderWidth: 1,
-    borderColor: '#ddd',
   },
   icon: {
     marginRight: 10,
@@ -93,12 +107,26 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
+    color: Colors.secondary_text,
   },
   loader: {
     marginTop: 10,
   },
   resultsContainer: {
     paddingTop: 5,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    fontSize: 16,
+    textAlign: 'center',
+    backgroundColor: Colors.gray_button,
+    color: Colors.secondary_text,
   },
 });
 
