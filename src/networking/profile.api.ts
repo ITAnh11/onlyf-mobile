@@ -194,6 +194,24 @@ class ProfileApi {
           throw error;
         }
       }
+
+    static async changePassword(data: any): Promise<any> {
+        const accessToken = await TokenService.getAccessToken();
+        if (!accessToken) {
+            throw new Error("No access token found");
+        }
+        try {
+            const response = await apiClient.post("/user/reset-password", data, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error changing password:", error);
+            throw error;
+        }
+    }
 }
 
 export default ProfileApi;

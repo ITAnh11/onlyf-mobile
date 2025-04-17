@@ -19,6 +19,19 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
   const [username, setUsername] = useState<string | null>(null); // Hiển thị username
   const modalRef = useRef<ModalizeType>(null);
   const [modalHeight, setModalHeight] = useState(0);
+  const [email, setEmail] = useState<string | null>(null); // Lưu email người dùng
+  const [id, setId] = useState<string | null>(null); // Lưu id người dùng
+  const [phone, setPhone] = useState<string | null>(null); // Lưu số điện thoại người dùng
+  const [dob, setDob] = useState<string | null>(null); // Lưu ngày sinh người dùng
+
+  // Hàm lưu thông tin người dùng vào SecureStore
+  const saveUserInfo = async (userInfo: any) => {
+    try {
+      await ProfileService.saveProfile(userInfo);
+    } catch (error) {
+      console.error('Error saving user info:', error);
+    }
+  }
 
   useEffect(() => {
     modalRef.current?.open();
@@ -138,6 +151,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
       getAvatar(); // Lấy avatar mới từ server khi màn hình được focus
       getName(); // Lấy tên mới từ server khi
       getusername(); // Lấy username mới từ server khi
+      saveUserInfo({ name, avatar, username, email }); // Lưu thông tin người dùng vào SecureStore
     }, [])
   );
 
@@ -176,7 +190,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                     onPress={() => {
                       navigation.navigate('CameraScreen');
                     }}>
-                    {avatar ? (
+                    {avatar ? (   
                       <Image source={{ uri: avatar }} style={styles.avatarImage} />
                     ) : (
                       <Image source={require("../../assets/user.png")} style={styles.avatarImage} />
@@ -206,7 +220,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                     {/* Hiển thị hai ô trên cùng một hàng */}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                       {/* Ô hiển thị username */}
-                      <View style={[styles.box, { flex: 1 }]}>
+                      <View style={[styles.box, { flex: 1 }, { marginRight: 10 }]}>
                         <TouchableOpacity
                           onPress={() => navigation.navigate('EditUserName')} // Điều hướng sang trang EditName
                         >
@@ -367,7 +381,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                             marginBottom: 10,
                           }}
                         >
-                          {/* Nút "Hiển thị tài khoản" */}
+                          {/* Nút "Đổi mật khẩu" */}
                           <TouchableOpacity
                             style={{
                               backgroundColor: '#222',
@@ -375,9 +389,9 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                               borderRadius: 5,
                               width: '100%',
                             }}
-                            onPress={() => Alert.alert('Hiển thị tài khoản', 'Bạn đã nhấn vào nút Hiển thị tài khoản!')}
+                            onPress={() => navigation.navigate('ChangePassword')} // Điều hướng sang trang ChangePassword
                           >
-                            <Text style={{ color: 'white', fontSize: 16 }}>Hiển thị tài khoản</Text>
+                            <Text style={{ color: 'white', fontSize: 16 }}>Đổi mật khẩu</Text>
                           </TouchableOpacity>
 
                           {/* Nút "Hiển thị các thiết bị đăng nhập" */}
@@ -656,21 +670,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   avatarButton: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 170,
+    height: 170,
+    borderRadius: 85,
     backgroundColor: '#444',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    marginTop: 20,
+    marginTop: 5,
+    alignSelf: 'center', // căn giữa theo chiều ngang
   },
   avatarImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#444',
-    alignContent: 'center',
-    justifyContent: 'center',
+    resizeMode: 'cover',
   },
   avatarPlaceholder: {
     color: 'white',

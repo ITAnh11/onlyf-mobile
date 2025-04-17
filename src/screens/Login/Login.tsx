@@ -6,7 +6,6 @@ import { styles } from "./styles";
 import * as Device from "expo-device";
 import apiClient from "../../networking/apiclient";
 import TokenService from "../../services/token.service";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -35,11 +34,6 @@ const Login: React.FC<Props> = ({ navigation }) => {
         const data = await response.data;
 
         TokenService.saveTokens(data.accessToken, data.refreshToken);
-
-        const userProfileResponse = await apiClient.get("/userprofile/get-profile");
-        const userProfile = userProfileResponse.data;
-
-        await AsyncStorage.setItem("userInfo", JSON.stringify(userProfile));
         
         await alert("Đăng nhập thành công!" );
 

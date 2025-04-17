@@ -27,6 +27,10 @@ const EditUserName = ({ navigation }: any) => {
       style={styles.container}
       behavior={Platform.OS === 'android' ? 'padding' : undefined}
     >
+        {/* Nút quay lại */}
+        <TouchableOpacity style={[styles.backButton]} onPress={() => navigation.goBack()}>
+          <Text style={styles.backButtonText}>Quay lại</Text>
+        </TouchableOpacity>
       <Text style={styles.title}>Sửa tên người dùng của bạn</Text>
 
       <TextInput
@@ -52,6 +56,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#1c1c1c',
     padding: 20,
     justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute', // Đặt vị trí tuyệt đối
+    top: 20, // Cách mép trên màn hình 20px
+    left: 20, // Cách mép trái màn hình 20px
+    backgroundColor: '#444',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignSelf: 'flex-start',
+    marginTop: 10,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 26,

@@ -2,30 +2,35 @@ import React, { useState, useEffect} from 'react';
 import {View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform} from 'react-native';
 import ProfileApi from '../../../networking/profile.api';
 
-const EditName = ({ navigation }: any) => {
-  const [firstName, setFirstName] = useState('');  // Giá trị ban đầu có thể lấy từ props hoặc API
-  const [lastName, setLastName] = useState('');
-  const [name, setFullName] = useState(''); // Giá trị ban đầu có thể lấy từ props hoặc API
+const ChangePassword = ({ navigation }: any) => {
+  const [password, setPassword] = useState('');  // Giá trị ban đầu có thể lấy từ props hoặc API
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Cập nhật fullName khi firstName hoặc lastName thay đổi
+  // Cập nhật mât khẩu cũ 
   useEffect(() => {
-    setFullName(`${firstName} ${lastName}`.trim());
-  }, [firstName, lastName]);
+    setPassword(`${password}`.trim());
+  }, [password]);
+
+  // Cập nhật mât khẩu mới
+  useEffect(() => {
+    setConfirmPassword(`${confirmPassword}`.trim());
+  }, [confirmPassword]);
 
   const handleSave = async () => {
     try {
-      await ProfileApi.updateProfile({
-        name
+      await ProfileApi.changePassword({
+        password,
+        confirmPassword
       });
 
-      Alert.alert('Thành công', 'Đã cập nhật tên!');
+      Alert.alert('Thành công', 'Đã cập nhật đổi mật khẩu!');
       navigation.reset({
         index: 0,
         routes: [{ name: "Profile" }], // Đặt lại stack và chuyển đến màn hình Profile
       });
     } catch (error) {
-      console.error('Error updating name:', error);
-      Alert.alert('Lỗi', 'Không thể cập nhật tên. Vui lòng thử lại.');
+      console.error('Error updating password:', error);
+      Alert.alert('Lỗi', 'Không thể cập nhật mật khẩu. Vui lòng thử lại.');
     }
   };
 
@@ -35,25 +40,25 @@ const EditName = ({ navigation }: any) => {
       behavior={Platform.OS === 'android' ? 'padding' : undefined}
     >
       {/* Nút quay lại */}
-            <TouchableOpacity style={[styles.backButton]} onPress={() => navigation.goBack()}>
-              <Text style={styles.backButtonText}>Quay lại</Text>
-            </TouchableOpacity>
-      <Text style={styles.title}>Sửa tên của bạn</Text>
+       <TouchableOpacity style={[styles.backButton]} onPress={() => navigation.goBack()}>
+       <Text style={styles.backButtonText}>Quay lại</Text>
+       </TouchableOpacity>
+      <Text style={styles.title}>Sửa mật khẩu của bạn</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Họ"
+        placeholder="Mật khẩu mới"
         placeholderTextColor="#aaa"
-        value={firstName}
-        onChangeText={setFirstName}
+        value={password}
+        onChangeText={setPassword}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Tên"
+        placeholder="Xác nhận mật khẩu mới"
         placeholderTextColor="#aaa"
-        value={lastName}
-        onChangeText={setLastName}
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSave}>
@@ -63,7 +68,7 @@ const EditName = ({ navigation }: any) => {
   );
 };
 
-export default EditName;
+export default ChangePassword;
 
 const styles = StyleSheet.create({
   container: {

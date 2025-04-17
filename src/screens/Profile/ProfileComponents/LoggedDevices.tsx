@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import ProfileApi from '../../../networking/profile.api';
 
+
 interface Device {
   id: string;
   deviceName: string;
@@ -9,7 +10,7 @@ interface Device {
   userAgent: string;
 }
 
-const LoggedDevices = () => {
+const LoggedDevices: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [devices, setDevices] = useState<Device[]>([]);
 
   useEffect(() => {
@@ -68,6 +69,11 @@ const LoggedDevices = () => {
 
   return (
     <View style={styles.container}>
+        {/* Nút quay lại */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.backButtonText}>Quay lại</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Thiết bị đã đăng nhập</Text>
       <FlatList
         data={devices}
@@ -91,6 +97,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1c1c1c',
     padding: 20
+  },
+  backButton: {
+    backgroundColor: '#444',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignSelf: 'flex-start',
+    marginTop: 10,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 24,

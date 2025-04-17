@@ -5,6 +5,7 @@ import EditName from '../ProfileComponents/EditName';
 import CameraScreen from '../ProfileComponents/CameraScreen';
 import EditUserName from '../ProfileComponents/EditUserName';
 import LoggedDevices from '../ProfileComponents/LoggedDevices';
+import ChangePassword from '../ProfileComponents/ChangePassword';
 
 const Stack = createStackNavigator();
 
@@ -16,6 +17,7 @@ const ProfileRoute = () => {
             <Stack.Screen name="CameraScreen" component={CameraScreen} />
             <Stack.Screen name="EditUserName" component={EditUserName} />
             <Stack.Screen name="LoggedDevices" component={LoggedDevices} />
+            <Stack.Screen name="ChangePassword" component={ChangePassword} />
         </Stack.Navigator>
     );
 }
