@@ -27,18 +27,18 @@ export class FirebaseService {
     }
 
     //Trả về liên kết ảnh từ avatar
-    static async uploadImage_avatar(uri: string): Promise<{ pathImage: string; urlPublicImage: string } | null> {
+    static async uploadImage_avatar(uri: string): Promise<{ pathAvatar: string; urlPublicAvatar: string } | null> {
         try {
             const response = await fetch(uri);
             const blob = await response.blob();
 
-            const pathImage = `onlyf/user_${ProfileService.getId()}/avartar/${Date.now()}.jpg`;
-            const imageRef = ref(storage, pathImage);
+            const pathAvatar = `onlyf/user_${ProfileService.getId()}/avartar/${Date.now()}.jpg`;
+            const imageRef = ref(storage, pathAvatar);
 
             await uploadBytes(imageRef, blob);
-            const urlPublicImage = await getDownloadURL(imageRef);
+            const urlPublicAvatar = await getDownloadURL(imageRef);
 
-            return { pathImage, urlPublicImage };
+            return { pathAvatar, urlPublicAvatar };
         } catch (error) {
             console.error('Error uploading image:', error);
             return null;

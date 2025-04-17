@@ -259,6 +259,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
   }, []);
 
   const height = Dimensions.get('screen').height;
+
   const renderItem = ({ item }: { item: PostItem }) => {
     if (item.id === 'home') {
       return (
