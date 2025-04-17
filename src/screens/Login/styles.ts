@@ -1,11 +1,12 @@
 import { StyleSheet } from "react-native";
+import Colors from "../../constants/Color";
 
 export const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingBottom: 40,
     paddingHorizontal: 20,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.primary_background,
   },
   header: {
     flexDirection: "row",
@@ -16,7 +17,6 @@ export const styles = StyleSheet.create({
   backButton: {
     padding: 8,
     fontSize: 26,
-    color: "#000",
     zIndex: 2,
   },
   title: {
@@ -25,33 +25,37 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginLeft: -26,
+    color: Colors.white_button,
   },
   body: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
     width: "100%",
     marginBottom: 20,
   },
-  input: {
-    width: "100%",
-    borderWidth: 2,
-    borderColor: "#5E6A6E",
-    padding: 12,
+  textInput: {
     fontSize: 16,
-    marginVertical: 6,
-    borderRadius: 10,
-    fontFamily: "Roboto",
+    marginBottom: "3%",
+    color: Colors.secondary_text,
+    paddingLeft: '8%',
+  },
+  input: {
+    width: "90%",
+    fontSize: 16,
+    alignSelf: "center",
+    backgroundColor: Colors.input_background,
+    color: Colors.primary_text,
+    padding: 12,
+    marginBottom: '5%',  
+    borderRadius: 25,
   },
   button: {
-    backgroundColor: "lightblue",
+    backgroundColor: Colors.secondary_background,
     paddingVertical: 12,
     paddingHorizontal: 25,
-    width: "60%",
     alignItems: "center",
-    borderColor: "#000",
-    borderWidth: 2,
-    borderRadius: 10,
+    alignSelf: "center",
+    borderRadius: 30,
     marginVertical: 10,
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 2 },
@@ -59,18 +63,17 @@ export const styles = StyleSheet.create({
     marginTop: 30,
   },
   buttonText: {
-    color: "#000",
-    fontSize: 18,
-    fontFamily: "Roboto",
+    color: Colors.tertiary_text,
+    fontSize: 20,
   },
   link: {
-    color: "#AA5A4A",
+    color: Colors.link,
     fontSize: 14,
-    fontFamily: "Roboto",
+    textAlign: "center",
     marginTop: 5,
   },
   errorText: {
-    color: "red",
+    color: Colors.error_text,
     fontSize: 12,
     alignSelf: "flex-start",
     marginTop: -3,

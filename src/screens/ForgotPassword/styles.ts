@@ -45,18 +45,19 @@ const styles = StyleSheet.create({
     fontSize: 16, 
     marginBottom: 10,
     color: Colors.secondary_text,
+    alignSelf: "center",
   },
-  input: {
-    width: 45,
-    height: 55,
-    borderWidth: 1,
-    borderRadius: 8,
-    textAlign: 'center',
-    fontSize: 22,
-    marginHorizontal: 2,
-    marginTop: 10,
-    marginBottom: 20,
+  inputEmail: {
+    width: "80%",
+    height: "8%",
+    fontSize: 16,
+    alignSelf: "center",
+    alignContent: "center",
     backgroundColor: Colors.input_background,
+    color: Colors.primary_text,
+    padding: 12,
+    marginBottom: '5%',  
+    borderRadius: 25,
   },
   button: {
     backgroundColor: Colors.yellow_button,
@@ -70,20 +71,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: Colors.tertiary_text,
     fontSize: 18,
-  },
-  link: {
-    color: Colors.link,
-    fontSize: 14,
-    margin: 5,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    alignSelf: "flex-start",
-    marginTop: -3,
-    marginBottom: 5,
   },
 });
 

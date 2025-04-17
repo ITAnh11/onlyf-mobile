@@ -10,6 +10,9 @@ import Message from '../screens/Message';
 import Friend from '../screens/Friend';
 import ProfileNavigator from '../screens/Profile/ProfileNavigation/ProfileNavigationContainer';
 import Activate from '../screens/Activate';
+import ForgotPassword from '../screens/ForgotPassword';
+import ConfirmOtp from '../screens/ConfirmOtp';
+import ResetPassword from '../screens/ResetPassword/ResetPassword';
 
 const Stack = createStackNavigator();
 
@@ -25,6 +28,9 @@ const Route = () => {
             <Stack.Screen name="Message" component={Message} />
             <Stack.Screen name="Friend" component={Friend} />
             <Stack.Screen name="Profile" component={ProfileNavigator} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+            <Stack.Screen name="ConfirmOtp" component={ConfirmOtp} />
+            <Stack.Screen name="ResetPassword" component={ResetPassword} />
         </Stack.Navigator>
     );
 }

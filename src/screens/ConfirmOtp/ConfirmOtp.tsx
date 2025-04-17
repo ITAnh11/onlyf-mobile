@@ -11,7 +11,7 @@ type Props = {
     navigation: any;
 };
 
-const Activate: React.FC<Props> = ({navigation}) => {  
+const ConfirmOtp: React.FC<Props> = ({navigation}) => {  
     const route = useRoute();
     const email = (route.params as { email: string })?.email;
     const [otp, setOtp] = useState(Array(6).fill(""));
@@ -36,7 +36,7 @@ const Activate: React.FC<Props> = ({navigation}) => {
     };
 
     const resendOtp = async () => {
-        const response = await apiClient.get("/auth/get-otp-mail-for-register", {params: {email}});
+        const response = await apiClient.get("/auth/get-otp-mail-for-forgot-password", {params: {email}});
         if (response.status === 200) {
             alert("Mã OTP đã được gửi lại!");
         } else {
@@ -44,19 +44,26 @@ const Activate: React.FC<Props> = ({navigation}) => {
         }
     }
     const handledSubmit = async () => {
-        const codeOtp = otp.join('');
-        if (codeOtp.length < 6) {
-            alert("Mã OTP không hợp lệ");
-            return;
-        }
-        else {
-            const response = await apiClient.post("/auth/verify-otp-mail-for-register", {email: email, OTPCode: codeOtp});
+        try {
+            const otpCode = otp.join("");
+            const response = await apiClient.post("/auth/verify-otp-mail-for-forgot-password", { email: email, OTPCode: otpCode });
             if (response.status === 201) {
-                alert("Xác thực thành công. Vui lòng đăng nhập!");
-                navigation.navigate("Login");
+                const accessToken = response.data.response.accessToken;
+                alert("Xác thực thành công!");
+                navigation.navigate("ResetPassword", {accessToken});
             } else {
-                console.log("Mã OTP không hợp lệ:", response.data);
-                alert("Mã OTP không hợp lệ");
+                alert("Mã OTP không chính xác!");
+            }
+        }
+        catch (error: any) {
+            if (error.response) {
+                console.error("Lỗi từ server:", error.response.data);
+                alert("Đã xảy ra lỗi, vui lòng thử lại!");
+            } else if (error.request) {
+                alert("Không kết nối được đến server, vui lòng kiểm tra mạng!");
+            } else {
+                console.error("Lỗi khác:", error.message);
+                alert("Đã xảy ra lỗi, vui lòng thử lại!");
             }
         }
     };
@@ -118,4 +125,4 @@ const Activate: React.FC<Props> = ({navigation}) => {
     );
 }
 
-export default Activate;
+export default ConfirmOtp;
