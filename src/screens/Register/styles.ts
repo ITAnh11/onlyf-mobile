@@ -1,85 +1,77 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-    container: { 
-      flex: 1, 
-      justifyContent: "center", 
-      alignItems: "center", 
-      backgroundColor: "#fff" 
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
   },
-    header: {
-      padding: 5,
-      flexDirection: "row",
-      alignItems: "center",
-      width: "100%",
-      paddingHorizontal: 20,
-      position: "absolute",
-      top: 50,
-      left: 0,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    paddingTop: '11%',
   },
-    title: { 
-      fontSize: 24, 
-      fontFamily: "Roboto", 
-      marginLeft: "30%"
+  backButton: {
+    padding: 8,
+    fontSize: 26,
+    color: "#000",
+    zIndex: 2,
   },
-    body: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        marginTop: 220,
-    },
-    input: { 
-      width: "80%", 
-      borderWidth: 2, 
-      borderColor: "#5E6A6E", 
-      padding: 12, 
-      fontSize: 16,
-      marginVertical: 5, 
-      borderRadius: 10,
-      fontFamily: "Roboto",
+  title: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginLeft: -26,
   },
-    footer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        marginTop: 20,
-    },
-    button: { 
-      backgroundColor: "lightblue",
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      width: "30%",
-      alignItems: "center",
-      borderColor: "#000", 
-      borderWidth: 2,
-      borderRadius: 10,
-      marginVertical: 10,
-      shadowColor: "#000", 
-      shadowOffset: { width: 4, height: 4 }, 
-      shadowOpacity: 1,
-      marginBottom: 10,
-      marginTop: 30 
+  body: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
   },
-    buttonText: { 
-      color: "#000", 
-      fontSize: 18,
-      fontFamily: "Roboto"
+  input: {
+    width: "100%",
+    borderWidth: 2,
+    borderColor: "#5E6A6E",
+    padding: 12,
+    fontSize: 16,
+    marginVertical: 6,
+    borderRadius: 10,
+    fontFamily: "Roboto",
   },
-    link: { 
-      color: "#AA5A4A", 
-      fontSize: 14,
-      fontFamily: "Roboto",
-      marginTop: 5
+  button: {
+    backgroundColor: "lightblue",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    width: "60%",
+    alignItems: "center",
+    borderColor: "#000",
+    borderWidth: 2,
+    borderRadius: 10,
+    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.5,
+    marginTop: 30,
   },
-    errorText: {
-      color: "red",
-      fontSize: 12,
-      alignSelf: "flex-start",
-      marginLeft: "12%",
-      marginRight: "12%",
-      marginBottom: 5,
-      marginTop: -5,
+  buttonText: {
+    color: "#000",
+    fontSize: 18,
+    fontFamily: "Roboto",
   },
-  });
+  link: {
+    color: "#AA5A4A",
+    fontSize: 14,
+    fontFamily: "Roboto",
+    marginTop: 5,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    alignSelf: "flex-start",
+    marginTop: -3,
+    marginBottom: 5,
+  },
+});

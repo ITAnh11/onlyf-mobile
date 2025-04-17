@@ -1,7 +1,5 @@
-// Gọi API để lấy danh sách lời mời đã gửi
 import { useEffect, useState, useCallback } from 'react';
 import apiClient from '../../../networking/apiclient';
-import TokenService from '../../../services/token.service';
 
 export type SentFriendRequest = {
   userId: number;
@@ -18,9 +16,9 @@ export type SentFriendRequest = {
   createdAt: string;
 };
 
-export default function useSentRequests() {
+export default function useSentRequests(initialFetch = false) {
   const [sentRequests, setSentRequests] = useState<SentFriendRequest[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchSentRequests = useCallback(async () => {
@@ -30,7 +28,7 @@ export default function useSentRequests() {
       setSentRequests(response.data);
       setError(null);
     } catch (err) {
-      console.error(err);
+      console.error('Lỗi khi tải lời mời đã gửi:', err);
       setError('Lỗi khi tải dữ liệu lời mời đã gửi');
     } finally {
       setLoading(false);
@@ -38,8 +36,10 @@ export default function useSentRequests() {
   }, []);
 
   useEffect(() => {
-    fetchSentRequests();
-  }, [fetchSentRequests]);
+    if (initialFetch) {
+      fetchSentRequests();
+    }
+  }, [initialFetch, fetchSentRequests]);
 
   return { sentRequests, loading, error, fetchSentRequests };
 }

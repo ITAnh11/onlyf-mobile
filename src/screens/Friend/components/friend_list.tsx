@@ -1,29 +1,46 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import useFriends from '../hooks/useFriend';
 import { unfriend } from '../../../networking/friend.api';
 
 type Props = {
-  refreshFlag: boolean;
+  refreshCounter: number;
   onRefresh: () => void;
 };
 
-const FriendList: React.FC<Props> = ({ refreshFlag, onRefresh }) => {
-  const { friends, fetchFriends } = useFriends(); 
+const FriendList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
+  const { friends,loading, error, fetchFriends } = useFriends(); 
 
   useEffect(() => {
-    fetchFriends();
-  }, [refreshFlag]);
+    fetchFriends(); 
+  }, [refreshCounter]);
 
   const handleUnfriend = (friendId: number) => {
     unfriend(friendId)
       .then(() => {
         console.log('Unfriend successful!');
-        onRefresh(); // gọi lại hàm refresh từ component cha
+        fetchFriends(); 
+        onRefresh();
       })
       .catch((error) => {
         console.error('Error unfriending:', error);
       }
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <Text>Đang tải danh sách bạn bè...</Text>
+      </View>
+    );
+  } 
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
     );
   }
 
@@ -71,6 +88,12 @@ const styles = StyleSheet.create({
     color: '#888',
     margin: 10,
   },
+  errorText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: 'red',
+    margin: 10,
+  },
   friendContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -112,6 +135,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
 });
 
-export default FriendList;
+
+export default React.memo(FriendList);
+
