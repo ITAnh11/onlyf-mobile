@@ -27,10 +27,16 @@ const Route = () => {
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="Message" component={Message} />
             <Stack.Screen name="Friend" component={Friend} />
-            <Stack.Screen name="Profile" component={ProfileNavigator} />
             <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
             <Stack.Screen name="ConfirmOtp" component={ConfirmOtp} />
             <Stack.Screen name="ResetPassword" component={ResetPassword} />
+            <Stack.Screen 
+                name="Profile" 
+                component={ProfileNavigator}
+                options={{ 
+                presentation: 'transparentModal'
+                }} 
+            />
         </Stack.Navigator>
     );
 }
