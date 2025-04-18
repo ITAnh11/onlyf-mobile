@@ -4,7 +4,8 @@ class ProfileService {
   private static ID_KEY = 'id';
   private static NAME_KEY = 'name';
   private static EMAIL_KEY = 'email';
-  private static URL_PUBLIC_AVATAR_KEY = 'avatar';
+  private static URL_PUBLIC_AVATAR_KEY = 'urlPublicAvatar';
+  private static PATH_AVATAR_KEY = 'pathAvatar';
   private static PHONE_KEY = 'phone';
   private static DOB_KEY = 'dob';
   private static USERNAME_KEY = 'username';
@@ -15,7 +16,8 @@ class ProfileService {
         data.user.id,
         data.name,
         data.user.email,
-        data.avatar,
+        data.urlPublicAvatar,
+        data.pathAvatar,
         data.phone,
         data.dob,
         data.username
@@ -24,7 +26,8 @@ class ProfileService {
     await SecureStore.setItemAsync(this.ID_KEY, String(data.user.id)); // Chuyển số thành chuỗi
     await SecureStore.setItemAsync(this.NAME_KEY, data.name || ""); // Đảm bảo giá trị không phải null
     await SecureStore.setItemAsync(this.EMAIL_KEY, data.user.email || "");
-    await SecureStore.setItemAsync(this.URL_PUBLIC_AVATAR_KEY, data.avatar || "");
+    await SecureStore.setItemAsync(this.URL_PUBLIC_AVATAR_KEY, data.urlPublicAvatar || "");
+    await SecureStore.setItemAsync(this.PATH_AVATAR_KEY, data.pathAvatar || "");
     await SecureStore.setItemAsync(this.PHONE_KEY, data.phone ? String(data.phone) : ""); // Chuyển số hoặc null thành chuỗi
     await SecureStore.setItemAsync(this.DOB_KEY, data.dob || "");
     await SecureStore.setItemAsync(this.USERNAME_KEY, data.username || "");
@@ -34,11 +37,12 @@ class ProfileService {
     const id = await SecureStore.getItemAsync(this.ID_KEY);
     const name = await SecureStore.getItemAsync(this.NAME_KEY);
     const email = await SecureStore.getItemAsync(this.EMAIL_KEY);
-    const avatar = await SecureStore.getItemAsync(this.URL_PUBLIC_AVATAR_KEY);
+    const urlPublicAvatar = await SecureStore.getItemAsync(this.URL_PUBLIC_AVATAR_KEY);   
+    const pathAvatar = await SecureStore.getItemAsync(this.PATH_AVATAR_KEY);
     const phone = await SecureStore.getItemAsync(this.PHONE_KEY);
     const dob = await SecureStore.getItemAsync(this.DOB_KEY);
     const username = await SecureStore.getItemAsync(this.USERNAME_KEY);
-    if (!id || !name || !email || !avatar || !phone || !dob || !username) {
+    if (!id || !name || !email || !urlPublicAvatar || !pathAvatar || !phone || !dob || !username) {
       return null;
     }
 
@@ -46,7 +50,8 @@ class ProfileService {
         id: id ? parseInt(id) : null,
         name: name,
         email: email,
-        avatar: avatar,
+        urlPublicAvatar: urlPublicAvatar,
+        pathavatar: pathAvatar,
         phone: phone,
         dob: dob,
         username: username,
@@ -58,6 +63,7 @@ class ProfileService {
         await SecureStore.deleteItemAsync(this.NAME_KEY);
         await SecureStore.deleteItemAsync(this.EMAIL_KEY);
         await SecureStore.deleteItemAsync(this.URL_PUBLIC_AVATAR_KEY);
+        await SecureStore.deleteItemAsync(this.PATH_AVATAR_KEY);
         await SecureStore.deleteItemAsync(this.PHONE_KEY);
         await SecureStore.deleteItemAsync(this.DOB_KEY);
         await SecureStore.deleteItemAsync(this.USERNAME_KEY);
@@ -76,8 +82,12 @@ class ProfileService {
         return await SecureStore.getItemAsync(this.EMAIL_KEY);
     }
 
-    static async getAvatar(): Promise<string | null> {
+    static async geturlPublicAvatar(): Promise<string | null> {
         return await SecureStore.getItemAsync(this.URL_PUBLIC_AVATAR_KEY);
+    }
+
+    static async getpathAvatar(): Promise<string | null> {
+        return await SecureStore.getItemAsync(this.PATH_AVATAR_KEY);
     }
 
     static async getPhone(): Promise<string | null> {
@@ -99,8 +109,11 @@ class ProfileService {
         if (data.email) {
             await SecureStore.setItemAsync(this.EMAIL_KEY, data.email);
         }
-        if (data.avatar) {
-            await SecureStore.setItemAsync(this.URL_PUBLIC_AVATAR_KEY, data.avatar);
+        if (data.urlPublicAvatar) {
+            await SecureStore.setItemAsync(this.URL_PUBLIC_AVATAR_KEY, data.urlavatar);
+        }
+        if (data.pathAvatar) {
+            await SecureStore.setItemAsync(this.PATH_AVATAR_KEY, data.pathavatar);
         }
         if (data.phone) {
             await SecureStore.setItemAsync(this.PHONE_KEY, data.phone);

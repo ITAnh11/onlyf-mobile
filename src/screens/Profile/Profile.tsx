@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, TextInput } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, TextInput, Dimensions } from 'react-native';
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import ProfileService from '../../services/profile.service'; // Import ProfileService
 import TokenService from '../../services/token.service'; // Import TokenService
@@ -14,35 +14,49 @@ type Props = {
 };
 
 const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route }) => {
-  const [name, setName] = useState<string | null>('Người dùng');
-  const [avatar, setAvatar] = useState<string | null>(null); // Lưu đường dẫn ảnh avatar
-  const [username, setUsername] = useState<string | null>(null); // Hiển thị username
   const modalRef = useRef<ModalizeType>(null);
   const [modalHeight, setModalHeight] = useState(0);
-  const [email, setEmail] = useState<string | null>(null); // Lưu email người dùng
-  const [id, setId] = useState<string | null>(null); // Lưu id người dùng
-  const [phone, setPhone] = useState<string | null>(null); // Lưu số điện thoại người dùng
-  const [dob, setDob] = useState<string | null>(null); // Lưu ngày sinh người dùng
+  const [userProfile, setUserProfile] = useState<any>(null);
 
-  // Hàm lưu thông tin người dùng vào SecureStore
-  const saveUserInfo = async (userInfo: any) => {
-    try {
-      await ProfileService.saveProfile(userInfo);
-    } catch (error) {
-      console.error('Error saving user info:', error);
-    }
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const profile = await ProfileService.getProfile(); // Lấy thông tin người dùng từ local
+      setUserProfile(profile);
+    };
+
+    fetchProfile();
   }
+  , []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchAndSyncProfile = async () => {
+        try {
+          const profile = await ProfileApi.getProfile(); // Lấy thông tin từ server
+          await ProfileService.saveProfile(profile); // Lưu vào local
+          setUserProfile(profile); // Cập nhật state
+        }
+        catch (error) {
+          console.error('Error syncing profile:', error);
+        }
+    };
+  
+    fetchAndSyncProfile();
+  }, [])
+  );
+
+  const height = Dimensions.get('screen').height;
 
   useEffect(() => {
     modalRef.current?.open();
     setTimeout(() => {
-      setModalHeight(800); // Chiều cao mong muốn
+      setModalHeight(height*0.925); // Chiều cao mong muốn
     }, 120); // Delay nhẹ để tránh animation trượt lên
   }, []);
 
   // Đóng và quay lại Home khi vuốt xuống
   const handleClosed = () => {
-    navigation.navigate('Home');
+    navigation.goBack();
   };
 
   // Hàm xử lý đăng xuất
@@ -67,6 +81,14 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
         console.error("Lỗi khi kiểm tra trạng thái đăng nhập:", error);
       }
     } 
+    // Xóa thông tin người dùng khỏi local storage
+    try {
+      await ProfileService.removeProfile();
+      console.log("Thông tin người dùng đã được xóa khỏi thiết bị.");
+    } catch (error) {
+      console.error("Lỗi khi xóa thông tin người dùng:", error);
+    }
+
     TokenService.removeTokens();
     navigation.reset(
       {
@@ -109,52 +131,6 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     alert("Xóa tài khoản thành công!");
   }
 
-  // Hàm lấy tên từ ProfileApi
-  function getName() {
-    ProfileApi.getProfile()
-      .then((response) => {
-        setName(response.name || null); // Lưu tên từ server
-      })
-      .catch((error) => {
-        console.error('Error fetching name:', error);
-      });
-    console.log('Name:', name);
-  }
-
-  // Hàm lấy username từ ProfileApi
-  function getusername() {
-    ProfileApi.getProfile()
-      .then((response) => {
-        setUsername(response.username || null); // Lưu username từ server
-      })
-      .catch((error) => {
-        console.error('Error fetching username:', error);
-      });
-    console.log('username:', username);
-  }
-
-  // Hàm lấy avatar từ ProfileApi
-  function getAvatar() {   
-    ProfileApi.getProfile()
-      .then((response) => {
-        console.log('Avatar từ server:', response.urlPublicAvatar); // Log giá trị avatar từ server
-        setAvatar(response.urlPublicAvatar || null); // Đảm bảo avatar là chuỗi hoặc null
-      })
-      .catch((error) => {
-        console.error('Error fetching avatar:', error);
-      });
-    console.log('Avatar:', avatar);
-  }
-
-  useFocusEffect(
-    React.useCallback(() => {
-      getAvatar(); // Lấy avatar mới từ server khi màn hình được focus
-      getName(); // Lấy tên mới từ server khi
-      getusername(); // Lấy username mới từ server khi
-      saveUserInfo({ name, avatar, username, email }); // Lưu thông tin người dùng vào SecureStore
-    }, [])
-  );
-
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#111111', }}>
       <Modalize
@@ -163,13 +139,8 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
         onClosed={handleClosed}
         modalStyle={styles.modal}
         handleStyle={styles.handle}
-        scrollViewProps={{
-          showsVerticalScrollIndicator: false,
-          bounces: false,
-        }}
-      >
-        <FlatList
-          data={[
+        flatListProps={{
+          data:[
             { key: 'avatar' },
             { key: 'name' },
             { key: 'sửa' },
@@ -179,8 +150,8 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
             { key: 'rieng tu va bao mat' },
             { key: 'gioi thieu' },
             { key: 'vung nguy hiem' },
-          ]}
-          renderItem={({ item }) => {
+          ],
+          renderItem:({ item }) => {
             switch (item.key) {
 
               case 'avatar':
@@ -190,8 +161,8 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                     onPress={() => {
                       navigation.navigate('CameraScreen');
                     }}>
-                    {avatar ? (   
-                      <Image source={{ uri: avatar }} style={styles.avatarImage} />
+                    {userProfile && userProfile.urlPublicAvatar ? (   
+                      <Image source={{ uri:userProfile.urlPublicAvatar }} style={styles.avatarImage} />
                     ) : (
                       <Image source={require("../../assets/user.png")} style={styles.avatarImage} />
                     )}
@@ -209,8 +180,12 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                       alignItems: 'center', 
                       justifyContent: 'center'
                     }}
-                  >
-                    <Text style={{ color: 'white', fontSize: 30, alignItems: 'center', justifyContent: 'center' }}>{name}</Text>
+                  > 
+                  {userProfile ? (
+                      <Text style={{ color: 'white', fontSize: 30, alignItems: 'center', justifyContent: 'center' }}>
+                        {userProfile.name}
+                      </Text>
+                    ) : null}
                   </View>
                 );
 
@@ -224,7 +199,9 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                         <TouchableOpacity
                           onPress={() => navigation.navigate('EditUserName')} // Điều hướng sang trang EditName
                         >
-                          <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>@{username}</Text>
+                          {userProfile ? (
+                          <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>@{userProfile.username}</Text>
+                          ) : null}
                         </TouchableOpacity>
                       </View>
                       {/* Ô sửa tên */}
@@ -254,8 +231,8 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                         }}
                       >
                         {/* Avatar nhỏ bên trái */}
-                        {avatar ? (
-                      <Image source={{ uri: avatar }} style={[styles.avatarImage, {width: 50, height: 50, borderRadius: 25 }]} />
+                        {userProfile && userProfile.urlPublicAvatar ? (
+                      <Image source={{ uri: userProfile.urlPublicAvatar }} style={[styles.avatarImage, {width: 50, height: 50, borderRadius: 25 }]} />
                     ) : (
                       <Image source={require("../../assets/user.png")} style={[styles.avatarButton, {width: 50, height: 50, borderRadius: 25 }]} />
                     )}
@@ -593,12 +570,11 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                   </View>
                 );
             }
-          }}
-          keyExtractor={(item, index) => index.toString()}
-          style={{ width: '100%', padding: 20 }}
+          },
+          keyExtractor:(item, index) => index.toString(),
+          contentContainerStyle:{ width: '100%', padding: 20 },
+        }}
         />
-      )
-    </Modalize>
     </View>
   );
 };
