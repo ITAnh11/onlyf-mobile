@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from './Global/PostStore';
 import { addPost, addPosts, clearPosts, setHasMore, setNextCursor } from './Global/PostSlice';
 import PostView from './components/PostView';
+import AllImageView from './components/AllImageView';
 import ProfileService from '../../services/profile.service';
 
 
@@ -28,14 +29,14 @@ type Props = {
 const Home: React.FC<Props> = ({ navigation }) => {  
   const [compressedUri, setCompressedUri] = useState<string | null>(null); 
 
-  const avatar = ProfileService.getAvatar(); // Lấy avatar từ ProfileService
+
   // State để theo dõi trạng thái quyền
   const [permission, requestPermission] = useCameraPermissions();
   const [permission_library, requestPermission_library] = useMediaLibraryPermissions();
   const [permissionsGranted, setPermissionsGranted] = useState(false); // State để theo dõi trạng thái quyền
 
 
-  // State để theo dõi số lượng các bài post
+  // State để theo dõi trạng thái load các bài post
   const [loading, setLoading] = useState(false);
 
   // Khởi tạo dispatch từ Redux
@@ -46,6 +47,11 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const nextCursor = useSelector((state: RootState) => state.postManager.nextCursor);
   const hasMore = useSelector((state: RootState) => state.postManager.hasdmore);
 
+  //trang thái đang ở trang các bài post hay là trang xem tất cả ảnh
+  const [isAllImageView, setIsAllImageView] = useState(false); 
+  const [isLinkToPostView, setIsLinkToPostView] = useState(false);//trang thái link từ ảnh của trang AllImageView tới trang postView
+  const [postIndexToLink, setPostIndexToLink] = useState(0); // vị trí bài post đưuọc chọn để dẫn từ bên trang AllPostImageView
+
   //Trạng thái xem đã đăng bài hay chưa
   const [isPosted, setIsPosted] = useState(false);
 
@@ -53,6 +59,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
   //State để theo dõi vị trí trang hiện tại trong Flatlist
   const [currentIndex, setCurrentIndex] = useState(0);
   const [backToFirstPage, setBacktoFirstPage] = useState(false);
+  const [backToHomePage, setBackToHomePage] = useState(false);
   const onViewRef = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (viewableItems && viewableItems.length > 0) {
       setCurrentIndex(viewableItems[0].index || 0); // cập nhật index đầu tiên đang hiển thị
@@ -63,10 +70,22 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const flatListRef = useRef<FlatList>(null); 
   useEffect(() => {
     if (backToFirstPage) {
-      flatListRef.current?.scrollToIndex({ index: 1, animated: true }); // Cuộn đến trang thứ 2
+      flatListRef.current?.scrollToIndex({ index: 1, animated: false }); // Cuộn đến trang thứ 2
       setBacktoFirstPage(false); // Đặt lại trạng thái để tránh cuộn lại liên tục
     }
-  }, [backToFirstPage]);
+  
+    if (backToHomePage) {
+      flatListRef.current?.scrollToIndex({ index: 0, animated: false }); // Cuộn đến trang thứ 1
+      setBackToHomePage(false); // Đặt lại trạng thái để tránh cuộn lại liên tục
+    }
+
+    if (isLinkToPostView) {
+      flatListRef.current?.scrollToIndex({ index: postIndexToLink + 1, animated: false});// +1 do bên AllPosstImage không có trang home
+      setIsLinkToPostView(false);
+    }
+  }, [backToFirstPage, backToHomePage, isLinkToPostView]);
+
+
 
   //Theo dõi danh sách các bài post (trạng thái lọc tất cả hoặc của một người bạn cụ thể)
   const [choosedItem, setChoosedItem] = useState("Tất cả bạn bè");
@@ -92,15 +111,9 @@ const Home: React.FC<Props> = ({ navigation }) => {
     fetchAPI();
   },[]);
 
-  // useEffect(() => {
-  //   console.log('Danh sách bạn bè:');
-  //   friendList.forEach((item) => {
-  //     console.log(item.friend.profile.urlPublicAvatar, item.friend.profile.name);
-  //   });
-  // },[friendList]);
 
 
-  //Hàm khởi tạo các bài post
+  // Hàm khởi tạo các bài post
   const initAllPost = async () => {
     dispatch(addPost({ id: 'home', caption: 'Home', urlPublicImage: '', createdAt: '', user: { id: '', profile: { name: '', urlPublicAvatar: '' } } })); // Thêm home vào danh sách bài post
     if (loading) return; // Ngăn việc gọi API nhiều lần khi đang tải
@@ -109,7 +122,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
     try {
       const response = await apiClient.get(`/post/get-posts/`, {
         params: {
-          limit: 20, // Số lượng bài post muốn lấy
+          limit: 50, // Số lượng bài post muốn lấy
         },
         headers: {
           Authorization: `Bearer ${accessToken}` // Thêm access token vào header
@@ -120,7 +133,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
       dispatch(setNextCursor(response.data.nextCursor)); // Cập nhật con trỏ tiếp theo
       dispatch(setHasMore(response.data.hasMore)); // Cập nhật trạng thái có thêm bài post hay khôngr
     } catch (error) {
-      console.error("Lỗi khi gọi API get POST:", error); // Xử lý lỗi nếu có
+      console.error("Lỗi khi gọi API get POST 1:", error); // Xử lý lỗi nếu có
     } finally {
       setLoading(false); // Kết thúc trạng thái tải
     }
@@ -148,7 +161,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
       const accessToken = await TokenService.getAccessToken();
       try {
         const params: any = {
-          limit: 20, // Số lượng bài post muốn lấy
+          limit: 50, // Số lượng bài post muốn lấy
         };
   
         // Nếu idItem khác "Tất cả bạn bè", thêm thuộc tính friendId
@@ -167,20 +180,21 @@ const Home: React.FC<Props> = ({ navigation }) => {
         dispatch(addPosts(response.data.posts)); // Cập nhật state `data` với bài post mới
         dispatch(setNextCursor(response.data.nextCursor)); // Cập nhật con trỏ tiếp theo
         dispatch(setHasMore(response.data.hasMore)); // Cập nhật trạng thái có thêm bài post hay không
-  
         // Chỉ gọi setBacktoFirstPage(true) nếu không phải lần render đầu tiên
         if (!isFirstRender.current) {
           setBacktoFirstPage(true);
         }
         isFirstRender.current = false; // Đánh dấu rằng lần render đầu tiên đã hoàn tất
       } catch (error) {
-        console.error("Lỗi khi gọi API get POST:", error); // Xử lý lỗi nếu có
+        console.error("Lỗi khi gọi API get POST 2:", error); // Xử lý lỗi nếu có
+        console.log(idItem);
       } finally {
         setLoading(false); // Kết thúc trạng thái tải
       }
     };
     fetchCards();
   }, [idItem]);
+
 
   // Hàm gọi API để lấy danh sách bài post
   const fetchCards = async () => {
@@ -190,7 +204,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
           const accessToken = await TokenService.getAccessToken();
           try {
             const params: any = {
-              limit: 20, // Số lượng bài post muốn lấy
+              limit: 50, // Số lượng bài post muốn lấy
               cursor: nextCursor // Tham số con trỏ để phân trang
             };
             // Nếu idItem khác "Tất cả bạn bè", thêm thuộc tính friendId
@@ -267,10 +281,12 @@ const Home: React.FC<Props> = ({ navigation }) => {
   }
 
   //lấy thông tin người dùng khi component mount
+  const [avatar, setAvatar] = useState<string | null>(null);
   useEffect(() => {
     ProfileApi.getProfile()
       .then((response) => {
         ProfileService.saveProfile(response); // Lưu thông tin người dùng vào ProfileService
+        ProfileService.geturlPublicAvatar().then((url) => setAvatar(url)); // Lấy avatar từ ProfileService và cập nhật state
       })
       .catch((error) => {
         console.error("Lỗi khi lấy thông tin người dùng:", error); // Xử lý lỗi nếu có
@@ -283,7 +299,6 @@ const Home: React.FC<Props> = ({ navigation }) => {
   }, []);
 
   const height = Dimensions.get('screen').height;
-
   const renderItem = ({ item }: { item: PostItem }) => {
     if (item.id === 'home') {
       return (
@@ -310,7 +325,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
       );
     } else {
       return (
-        <PostView post={item} /> // Hiển thị bài post
+        <PostView post={item} setBackToHomePage={setBackToHomePage} setIsAllImageView={setIsAllImageView}/> // Hiển thị bài post
       );
     }
 
@@ -321,10 +336,10 @@ const Home: React.FC<Props> = ({ navigation }) => {
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <View style={{backgroundColor: '#111111',height: height,justifyContent:'center'}}>
         <View style={styles.list_button}>
-            <TouchableOpacity style={[styles.button, { marginLeft: 20 }]} onPress={() => {console.log("currentIndex",currentIndex);navigation.navigate("Profile");}}>
+            <TouchableOpacity style={[styles.button, { marginLeft: 20 }]} onPress={() => {navigation.navigate("Profile");}}>
               <Image source={require("../../assets/user.png")} resizeMode="contain" style={{ width: 33, height: 33 }} />
             </TouchableOpacity>
-            {(currentIndex === 0) ? (
+            {(currentIndex === 0 && isAllImageView === false) ? (
               <TouchableOpacity style={styles.button_friend} onPress={() => navigation.navigate("Friend")}>
                 <Image source={require("../../assets/add-friend.png")} resizeMode="contain" style={{ width: 20, height: 20, marginLeft: 20 }} />
                 <Text style = {{fontSize: 15, fontWeight: 'bold', color: "white", marginLeft: 7, marginRight: 20}}>Bạn bè</Text>
@@ -346,22 +361,27 @@ const Home: React.FC<Props> = ({ navigation }) => {
           )
         }
 
-        <FlatList
-            ref={flatListRef}
-            data={danhSach}
-            renderItem={({ item }) => renderItem({ item })}
-            keyExtractor={(item, index) => item.id === 'home' ? `home-${index}` : item.id.toString()}
-            contentContainerStyle={{ flexGrow: 1 }} // Đảm bảo FlatList chiếm toàn bộ không gian
-            showsVerticalScrollIndicator={false} // Ẩn thanh cuộn dọc
-            onEndReached={fetchCards}
-            onEndReachedThreshold={0.3}
-            pagingEnabled={true} // Bật chế độ cuộn trang
-            getItemLayout={(_data, index) => (
-              { length: height, offset: height * index, index } // Cung cấp chiều cao của mỗi mục
-            )}
-            onViewableItemsChanged={onViewRef.current}
-            viewabilityConfig={viewConfigRef.current}
-          />
+        { (isAllImageView === false) ? (
+            <FlatList
+              ref={flatListRef}
+              data={danhSach}
+              renderItem={({ item }) => renderItem({ item })}
+              keyExtractor={(item, index) => item.id === 'home' ? `home-${index}` : item.id.toString()}
+              contentContainerStyle={{ flexGrow: 1 }} // Đảm bảo FlatList chiếm toàn bộ không gian
+              showsVerticalScrollIndicator={false} // Ẩn thanh cuộn dọc
+              onEndReached={fetchCards}
+              onEndReachedThreshold={0.5}
+              pagingEnabled={true} // Bật chế độ cuộn trang
+              getItemLayout={(_data, index) => (
+                { length: height, offset: height * index, index } // Cung cấp chiều cao của mỗi mục
+              )}
+              onViewableItemsChanged={onViewRef.current}
+              viewabilityConfig={viewConfigRef.current}
+            />
+          ) : (
+            <AllImageView setIsAllImageView={setIsAllImageView} danhSach={danhSach} fetchCards={fetchCards} idItem={idItem} setBackToHomePage={setBackToHomePage} setIsLinkToPostView={setIsLinkToPostView} setPostIndexToLink={setPostIndexToLink}/>
+          )}
+
       </View>
     </>
   );

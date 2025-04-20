@@ -1,30 +1,15 @@
 import { View, Text, ImageBackground, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { PostItem } from './Type';
 
-
-type UserProfile = {
-  name: string;
-  urlPublicAvatar: string;
-};
-
-type User = {
-  id: string;
-  profile: UserProfile;
-};
-
-type PostItem = {
-  id: string;
-  caption: string;
-  urlPublicImage: string;
-  createdAt: string;
-  user: User;
-};
 type PostViewProps = {
   post: PostItem;
+  setBackToHomePage: (backToHomePage : boolean) => void;
+  setIsAllImageView : (isAllImageView : boolean) => void;
 };
 
-const PostView = ({ post }: PostViewProps) => {
+const PostView = ({ post, setBackToHomePage, setIsAllImageView}: PostViewProps) => {
   return (
     <SafeAreaView style={{ flexDirection: "column", height: Dimensions.get('screen').height, flex: 1 }}>
       <View style={styles.Post_container}>
@@ -45,10 +30,10 @@ const PostView = ({ post }: PostViewProps) => {
         </View>
       </View>
       <View style={styles.Button_container}>
-        <TouchableOpacity >
+        <TouchableOpacity onPress={() => setIsAllImageView(true)} >
           <ImageBackground source={require("../../../assets/All_post_icon.png")} resizeMode="contain" style={{ width: 30, height: 30 }} />
         </TouchableOpacity>
-        <TouchableOpacity >
+        <TouchableOpacity onPress={() => setBackToHomePage(true)}>
           <View style={{ width: 60, height: 60, backgroundColor: '#EAA905', borderRadius: 50, alignItems: 'center', justifyContent: 'center' }}>
             <View style={{ width: 53, height: 53, backgroundColor: 'white', borderRadius: 50, alignItems: 'center', justifyContent: 'center',borderWidth: 3, borderColor: "black" }}/>
           </View>

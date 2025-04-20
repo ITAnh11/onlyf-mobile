@@ -1,22 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-type UserProfile = {
-  name: string;
-  urlPublicAvatar: string;
-};
-
-type User = {
-  id: string;
-  profile: UserProfile;
-};
-
-type PostItem = {
-  id: string;
-  caption: string;
-  urlPublicImage: string;
-  createdAt: string;
-  user: User;
-};
+import { PostItem } from '../components/Type';
 
 const postSlice = createSlice({
   name: 'PostManager',
