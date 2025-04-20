@@ -5,7 +5,7 @@ const { width, height } = Dimensions.get('window');
 
 interface ChoosedButtonProps {
   choosedItem: string;
-  setChoosing: (choosing : boolean) => void
+  setChoosing: (choosing : boolean) => void;
 }
 
 const ChoosedButton = ({choosedItem, setChoosing}:ChoosedButtonProps) => {
