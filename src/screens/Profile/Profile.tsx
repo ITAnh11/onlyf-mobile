@@ -56,7 +56,14 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
 
   // Đóng và quay lại Home khi vuốt xuống
   const handleClosed = () => {
-    navigation.goBack();
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }], // Điều hướng đến màn hình Home nếu không thể quay lại
+      });
+    }
   };
 
   // Hàm xử lý đăng xuất
