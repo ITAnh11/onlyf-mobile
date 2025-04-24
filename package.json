@@ -27,6 +27,7 @@
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.9",
     "firebase": "^11.6.0",
+    "install": "^0.13.0",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "onlyf-mobile": "file:",
@@ -41,6 +42,7 @@
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "^4.10.0",
     "react-redux": "^9.2.0",
+    "socket.io-client": "^4.8.1",
     "use-debounce": "^10.0.4"
   },
   "devDependencies": {
@@ -48,6 +50,7 @@
     "@types/firebase": "^2.4.32",
     "@types/lodash.debounce": "^4.0.9",
     "@types/react": "~18.3.12",
+    "@types/socket.io-client": "^1.4.36",
     "typescript": "^5.3.3"
   },
   "private": true

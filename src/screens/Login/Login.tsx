@@ -38,9 +38,10 @@ const Login: React.FC<Props> = ({ navigation }) => {
       TokenService.saveTokens(data.accessToken, data.refreshToken);
   
       alert("Đăng nhập thành công!");
+      
       navigation.reset({
         index: 0,
-        routes: [{ name: "Home" }],
+        routes: [{ name: "Loading" }],
       });
   
     } catch (error: any) {

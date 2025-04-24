@@ -38,7 +38,7 @@ const Splash: React.FC<Props> = ({ navigation }) => {
                         navigation.reset(
                             {
                                 index: 0,
-                                routes: [{ name: "Home" }],
+                                routes: [{ name: "Loading" }],
                             }
                         )
                     } else {

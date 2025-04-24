@@ -13,6 +13,8 @@ import Activate from '../screens/Activate';
 import ForgotPassword from '../screens/ForgotPassword';
 import ConfirmOtp from '../screens/ConfirmOtp';
 import ResetPassword from '../screens/ResetPassword/ResetPassword';
+import Chat from '../screens/Chat/Chat';
+import Loading from '../screens/Loading';
 
 const Stack = createStackNavigator();
 
@@ -37,6 +39,8 @@ const Route = () => {
                 presentation: 'transparentModal'
                 }} 
             />
+            <Stack.Screen name="Chat" component={Chat} />
+            <Stack.Screen name="Loading" component={Loading} />
         </Stack.Navigator>
     );
 }

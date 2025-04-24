@@ -14,6 +14,7 @@ const Colors = {
     link: '#C7C4BF', 
     input_background: "#4E4E4E", // màu nền xám inputText
     border_avt: "#FFB700", // màu vàng
+    border_avt2: '#4E4E4E', // màu xám
 }
   
   export default Colors;
