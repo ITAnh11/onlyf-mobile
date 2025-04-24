@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, TextInput, Dimensions } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, SafeAreaView } from 'react-native';
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import ProfileService from '../../services/profile.service'; // Import ProfileService
 import TokenService from '../../services/token.service'; // Import TokenService
 import apiClient from '../../networking/apiclient'; // Import apiClient
-import { Modalize } from 'react-native-modalize'; // Import Modalize
-import type { Modalize as ModalizeType } from 'react-native-modalize';
 import ProfileApi from '../../networking/profile.api';
 
 
@@ -14,8 +12,6 @@ type Props = {
 };
 
 const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route }) => {
-  const modalRef = useRef<ModalizeType>(null);
-  const [modalHeight, setModalHeight] = useState(0);
   const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
@@ -44,20 +40,6 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     fetchAndSyncProfile();
   }, [])
   );
-
-  const height = Dimensions.get('screen').height;
-
-  useEffect(() => {
-    modalRef.current?.open();
-    setTimeout(() => {
-      setModalHeight(height*0.925); // Chiều cao mong muốn
-    }, 120); // Delay nhẹ để tránh animation trượt lên
-  }, []);
-
-  // Đóng và quay lại Home khi vuốt xuống
-  const handleClosed = () => {
-    navigation.goBack();
-  };
 
   // Hàm xử lý đăng xuất
   const handleLogout = async () => {
@@ -132,15 +114,9 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#111111', }}>
-      <Modalize
-        ref={modalRef}
-        modalHeight={modalHeight}
-        onClosed={handleClosed}
-        modalStyle={styles.modal}
-        handleStyle={styles.handle}
-        flatListProps={{
-          data:[
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', backgroundColor: '#111111' }}>
+      <FlatList
+          data={[
             { key: 'avatar' },
             { key: 'name' },
             { key: 'sửa' },
@@ -150,13 +126,31 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
             { key: 'rieng tu va bao mat' },
             { key: 'gioi thieu' },
             { key: 'vung nguy hiem' },
-          ],
-          renderItem:({ item }) => {
+          ]}
+          renderItem={({ item }) => {
             switch (item.key) {
 
               case 'avatar':
-                return (
+                return (                 
                   <View style={{flex : 1, alignContent: 'center', justifyContent: 'center'}}>
+                    {/* Nút ở góc phải trên */}
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      width: 40,
+                      height: 40,
+                      backgroundColor: 'transparent',
+                      borderRadius: 20,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Image source={require("../../assets/home.png")} resizeMode="contain" style={{ width: 45, height: 45 }} />
+                  </TouchableOpacity>
+                  {/* Avatar lớn ở giữa*/}
                   <TouchableOpacity style={styles.avatarButton}
                     onPress={() => {
                       navigation.navigate('CameraScreen');
@@ -570,12 +564,12 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                   </View>
                 );
             }
-          },
-          keyExtractor:(item, index) => index.toString(),
-          contentContainerStyle:{ width: '100%', padding: 20 },
-        }}
+          }}
+          keyExtractor={(item, idex) => idex.toString()}
+          contentContainerStyle={{ paddingTop: 30, paddingHorizontal: 20 }}
+          showsVerticalScrollIndicator={false} // Ẩn thanh cuộn dọc
         />
-    </View>
+        </SafeAreaView>
   );
 };
 
