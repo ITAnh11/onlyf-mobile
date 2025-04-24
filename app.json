@@ -19,11 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.onlyf.mobile",
-      "googleServicesFile": "./google-services.json"
+      }
     },
-    "plugins": ["expo-notifications"],
     "web": {
       "favicon": "./src/assets/favicon.png"
     }
