@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "688538499350",
+    "project_id": "onlyf-4aa06",
+    "storage_bucket": "onlyf-4aa06.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:688538499350:android:e8323794c0a5d3dfc93837",
+        "android_client_info": {
+          "package_name": "com.buianhkc11.onlyfmobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_VTxStEA-bjruSuv_Hytv2oh1Ta1C640"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
