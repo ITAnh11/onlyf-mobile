@@ -5,7 +5,8 @@ import ProfileService from '../../services/profile.service'; // Import ProfileSe
 import TokenService from '../../services/token.service'; // Import TokenService
 import apiClient from '../../networking/apiclient'; // Import apiClient
 import ProfileApi from '../../networking/profile.api';
-
+import * as SecureStore from 'expo-secure-store';
+import FCM from '../../services/fcm';
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -70,6 +71,8 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     } catch (error) {
       console.error("Lỗi khi xóa thông tin người dùng:", error);
     }
+
+   FCM.deleteTokenFromSecureStore();
 
     TokenService.removeTokens();
     navigation.reset(
