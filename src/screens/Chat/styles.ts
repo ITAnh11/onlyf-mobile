@@ -72,7 +72,8 @@ const styles = StyleSheet.create({
   },
   friendMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.gray_button,
+    backgroundColor: Colors.yellow_button,
+    color: Colors.primary_text,
   },
   messageText: {
     color: Colors.tertiary_text,
@@ -122,6 +123,12 @@ const styles = StyleSheet.create({
   iconSend: {
     fontSize: 20,
     color: Colors.yellow_button,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    borderRadius: 15,
+    marginBottom: 10,
   },
 });
 
