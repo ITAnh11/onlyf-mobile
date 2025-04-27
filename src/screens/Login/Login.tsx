@@ -19,6 +19,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleLogin = async () => {
+    console.log("Login button pressed");
     setErrors({});
     try {
       const deviceInfo = {
@@ -35,6 +36,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
       });
   
       const data = response.data;
+      console.log("Login response:", data);
       TokenService.saveTokens(data.accessToken, data.refreshToken);
   
       alert("Đăng nhập thành công!");
