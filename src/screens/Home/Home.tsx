@@ -281,17 +281,17 @@ const Home: React.FC<Props> = ({ navigation }) => {
   }
 
   //lấy thông tin người dùng khi component mount
-  const [avatar, setAvatar] = useState<string | null>(null);
-  useEffect(() => {
-    ProfileApi.getProfile()
-      .then((response) => {
-        ProfileService.saveProfile(response); // Lưu thông tin người dùng vào ProfileService
-        ProfileService.geturlPublicAvatar().then((url) => setAvatar(url)); // Lấy avatar từ ProfileService và cập nhật state
-      })
-      .catch((error) => {
-        console.error("Lỗi khi lấy thông tin người dùng:", error); // Xử lý lỗi nếu có
-      });
-  }, []);
+   const [avatar, setAvatar] = useState<string | null>(null);
+  // useEffect(() => {
+  //   ProfileApi.getProfile()
+  //     .then((response) => {
+  //       ProfileService.saveProfile(response); // Lưu thông tin người dùng vào ProfileService
+  //       ProfileService.geturlPublicAvatar().then((url) => setAvatar(url)); // Lấy avatar từ ProfileService và cập nhật state
+  //     })
+  //     .catch((error) => {
+  //       console.error("Lỗi khi lấy thông tin người dùng:", error); // Xử lý lỗi nếu có
+  //     });
+  // }, []);
 
   // Kiểm tra quyền camera và thư viện ảnh khi component mount
   useEffect(() => {

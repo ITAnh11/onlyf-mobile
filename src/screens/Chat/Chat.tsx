@@ -7,7 +7,7 @@ import ProfileService from '../../services/profile.service';
 import Colors from '../../constants/Color';
 import * as ImagePicker from 'expo-image-picker';
 import { get } from 'lodash';
-import { getSocket } from '../../utils/test';
+import { getSocket } from '../../utils/socket';
 
 type Message = {
   id: number;
