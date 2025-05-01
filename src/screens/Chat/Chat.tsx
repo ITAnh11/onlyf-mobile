@@ -10,12 +10,15 @@ import { getSocket } from '../../utils/socket';
 import useMessage from '../Message/hooks/useMessage'; 
 
 type Message = {
-  id: number;
-  message: string;
-  createdAt: string;
   senderId: number;
-  recipientId?: number;
-  type?: 'text' | 'image';
+  recipientId: number;
+  message: {
+    type: 'text' | 'image' | 'video';
+    text?: string;
+    image?: string;
+    video?: string;
+    createdAt: string;
+  }
 };
 
 type Props = {
@@ -37,22 +40,40 @@ const Chat: React.FC<Props> = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    const handleReceiveMessage = (data: { senderId: number; message: string }) => {
-      const newMsg: Message = {
-        id: Date.now(),
-        message: data.message,
-        createdAt: new Date().toISOString(),
-        senderId: data.senderId,
+    const handleReceiveMessage = (data: {
+      senderId: number;
+      message: {
+        type: 'text' | 'image' | 'video';
+        text?: string;
+        mediaUrl?: string;
+        createdAt: string;
       };
+    }) => {
+      const { senderId, message } = data;
+  
+      if (senderId !== friendId) return;
+  
+      const newMsg: Message = {
+        recipientId: myId!, 
+        senderId,
+        message: {
+          type: message.type,
+          text: message.type === 'text' ? message.text : undefined,
+          image: message.type === 'image' ? message.mediaUrl : undefined,
+          video: message.type === 'video' ? message.mediaUrl : undefined,
+          createdAt: message.createdAt,
+        },
+      };
+  
       setMessages((prevMessages) => [...prevMessages, newMsg]);
     };
   
     socket?.on('receiveMessage', handleReceiveMessage);
-
     return () => {
       socket?.off('receiveMessage', handleReceiveMessage);
     };
-  }, [friendId]);
+  }, [friendId, myId]);
+  
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return; // Kiểm tra tin nhắn rỗng
@@ -63,12 +84,13 @@ const Chat: React.FC<Props> = ({ navigation }) => {
     }
     
     const message: Message = {
-      recipientId: friendId,
       senderId: myId,
-      message: newMessage,
-      createdAt: new Date().toISOString(),
-      id: Date.now(),
-      type: 'text',  
+      recipientId: friendId,
+      message: {
+        type: "text",
+        text: newMessage,
+        createdAt: new Date().toISOString(),
+      },
     };
   
     setMessages((prevMessages) => [...prevMessages, message]);
@@ -103,11 +125,13 @@ const Chat: React.FC<Props> = ({ navigation }) => {
       const photoUri = result.assets[0].uri;
 
       const newMessage: Message = {
-        id: Date.now(),
-        type: 'image',
-        message: photoUri,
         senderId: myId!,
-        createdAt: new Date().toISOString(),
+        recipientId: friendId,
+        message: {
+          type: 'image',
+          image: photoUri,
+          createdAt: new Date().toISOString(),
+        },
       };
   
       setMessages((prev) => [...prev, newMessage]);
@@ -130,11 +154,13 @@ const Chat: React.FC<Props> = ({ navigation }) => {
       const photoUri = result.assets[0].uri;
 
       const newMessage: Message = {
-        id: Date.now(),
-        type: 'image',
-        message: photoUri,
         senderId: myId!,
-        createdAt: new Date().toISOString(),
+        recipientId: friendId,
+        message: {
+          type: 'image',
+          image: photoUri,
+          createdAt: new Date().toISOString(),
+        },
       };
   
       setMessages((prev) => [...prev, newMessage]);
@@ -173,15 +199,21 @@ const Chat: React.FC<Props> = ({ navigation }) => {
         <FlatList
           ref={flatListRef}
           data={[...fetchedMessages, ...messages]} 
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item, index) => `${item.message.createdAt}-${index}`}
           renderItem={({ item }) => (
             <View style={[styles.messageBubble, item.senderId === myId ? styles.myMessage : styles.friendMessage]}>
-              {item.type === 'image' ? (
-                <Image source={{ uri: item.message }} style={styles.image} />
-              ) : (
-                <Text style={styles.messageText}>{item.message}</Text>
+              {item.message.type === 'text' && (
+                <Text style={styles.messageText}>{item.message.text}</Text>
               )}
-              <Text style={styles.time}>{new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+              {item.message.type === 'image' && (
+                <Image source={{ uri: item.message.mediaUrl }} style={styles.image} />
+              )}
+              {item.message.type === 'video' && (
+                // <Video source={{ uri: item.message.mediaUrl }} style={styles.video} />
+                <Text>Video</Text>
+              )}
+
+              <Text style={styles.time}>{new Date(item.message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
             </View>
           )}
           contentContainerStyle={styles.messageList}
