@@ -2,8 +2,17 @@ import messaging from "@react-native-firebase/messaging";
 import * as SecureStore from "expo-secure-store";
 import NotificationApi from "../networking/notification.api";
 import { Alert } from "react-native";
+import { NavigationProp } from "@react-navigation/native";
 
 export class FCM {
+
+  static navigation: NavigationProp<any>;
+
+  // Set navigation từ App.js hoặc nơi khởi tạo
+  static setNavigation(nav: NavigationProp<any>) {
+    this.navigation = nav;
+  }
+
   static async requestUserPermission(): Promise<boolean> {
     try {
       const authStatus = await messaging().requestPermission();
@@ -38,20 +47,49 @@ export class FCM {
     console.log("Handling notification:", data, notification);
 
     if (data?.messageId && data?.postId) {
+      // Reply to post
       console.log("Template: Reply to Post");
-      Alert.alert("Reply to your post", notification?.body || "");
+      const ms = data.messageText || notification?.body || "";
+      Alert.alert(`${data.senderName} replied to your post: ${ms}`);
+
+      if (isFromTap && this.navigation) {
+        this.navigation.navigate("PostDetail", { postId: data.postId });
+      }
+
     } else if (data?.reactType && data?.postId) {
+      // React to post
       console.log("Template: Reaction to Post");
-    } else if (data?.senderId && !data?.postId) {
-      console.log("Template: Friend Request");
-    } else {
-      console.log("Unknown notification type");
       Alert.alert(
-        "Notification",
-        notification?.body || "You have a new message!"
+        "Reaction",
+        `${data.senderName} reacted with "${data.reactType}" to your post.`
       );
+
+      if (isFromTap && this.navigation) {
+        this.navigation.navigate("PostDetail", { postId: data.postId });
+      }
+
+    } else if (data?.senderId && !data?.postId) {
+      // Friend request
+      console.log("Template: Friend Request");
+      Alert.alert("Friend Request", `${data.senderName} sent you a friend request.`);
+
+      if (isFromTap && this.navigation) {
+        this.navigation.navigate("FriendRequests");
+      }
+
+    } else {
+      // Default: Message or unknown
+      console.log("New message");
+      const ms = data.messageText || notification?.body || "";
+      Alert.alert("New Message", `${data.senderName}: ${ms}`
+      );
+
+      if (isFromTap && data?.senderId && this.navigation) {
+        this.navigation.navigate("Chat", { userId: data.senderId });
+      }
     }
   }
+
 
   static async getToken() {
     if (!this.requestUserPermission()) return null;
