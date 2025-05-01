@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "onlyf-mobile",
     "name": "onlyf-mobile",
     "slug": "onlyf-mobile",
     "version": "1.0.0",
