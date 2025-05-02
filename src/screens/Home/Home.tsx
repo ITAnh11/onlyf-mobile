@@ -20,6 +20,7 @@ import { addPost, addPosts, clearPosts, setHasMore, setNextCursor } from './Glob
 import PostView from './components/PostView';
 import AllImageView from './components/AllImageView';
 import ProfileService from '../../services/profile.service';
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 
 type Props = {
@@ -382,6 +383,13 @@ const Home: React.FC<Props> = ({ navigation }) => {
             <AllImageView setIsAllImageView={setIsAllImageView} danhSach={danhSach} fetchCards={fetchCards} idItem={idItem} setBackToHomePage={setBackToHomePage} setIsLinkToPostView={setIsLinkToPostView} setPostIndexToLink={setPostIndexToLink}/>
           )}
 
+        <BannerAd
+          unitId={TestIds.BANNER}
+          size={BannerAdSize.BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+          }}
+        />
       </View>
     </>
   );
