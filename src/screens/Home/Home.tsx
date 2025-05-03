@@ -11,7 +11,7 @@ import Posting from './components/Posting';
 import ButtonList from './components/ButtonList';
 import ChoosedButton from './components/ChoosedButton';
 import { FriendItem, PostItem } from './components/Type';
-import { useCameraPermissions } from 'expo-camera';
+import { useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import { useMediaLibraryPermissions } from 'expo-image-picker';
 import { Dimensions } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,6 +20,7 @@ import { addPost, addPosts, clearPosts, setHasMore, setNextCursor } from './Glob
 import PostView from './components/PostView';
 import AllImageView from './components/AllImageView';
 import ProfileService from '../../services/profile.service';
+import 'expo-dev-client';
 
 
 type Props = {
@@ -33,6 +34,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
   // State để theo dõi trạng thái quyền
   const [permission, requestPermission] = useCameraPermissions();
   const [permission_library, requestPermission_library] = useMediaLibraryPermissions();
+  const [microphonePermission, requestMicrophonePermission] = useMicrophonePermissions();
   const [permissionsGranted, setPermissionsGranted] = useState(false); // State để theo dõi trạng thái quyền
 
 
@@ -60,9 +62,13 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [backToFirstPage, setBacktoFirstPage] = useState(false);
   const [backToHomePage, setBackToHomePage] = useState(false);
+  const [currentPostId, setCurrentPostId] = useState<string | null>(null);
   const onViewRef = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (viewableItems && viewableItems.length > 0) {
       setCurrentIndex(viewableItems[0].index || 0); // cập nhật index đầu tiên đang hiển thị
+      const currentItem = viewableItems[0].item; // Lấy item đầu tiên đang hiển thị
+      console.log('Item hiện tại:', currentItem.id); // Log item.id
+      setCurrentPostId(currentItem.id); // Cập nhật item.id hiện tại
     }
   });
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
@@ -232,6 +238,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
   //Ham xử lý cấp quyền camera và thư viện ảnh
   const checkPermissions = async () => {
     let cameraGranted = permission?.granted;
+    let micGranted = microphonePermission?.granted;
     let libraryGranted = permission_library?.granted;
     if (!cameraGranted) {
       const cameraPermission = await requestPermission();
@@ -241,59 +248,16 @@ const Home: React.FC<Props> = ({ navigation }) => {
       const libraryPermission = await requestPermission_library();
       libraryGranted = libraryPermission.granted;
     }
+    if (!micGranted) {
+      const mic = await requestMicrophonePermission();
+      micGranted = mic.granted;
+    }
     // Cập nhật trạng thái nếu cả hai quyền đều được cấp
-    if (cameraGranted && libraryGranted) {
+    if (cameraGranted && libraryGranted && micGranted) {
       setPermissionsGranted(true);
     }
   };
 
-  // Hàm xử lý đăng xuất
-  const handleLogout = async () => {
-    const refreshToken = await TokenService.getRefreshToken();
-    if (!refreshToken) {
-      navigation.reset(
-        {
-          index: 0,
-          routes: [{ name: 'Welcome' }],
-        }
-      );
-      return;
-    } else {
-      try {
-        await apiClient.delete("/auth/logout", {
-          headers: {
-            Authorization: `Bearer ${refreshToken}`
-          }
-        })
-      } catch (error) {
-        console.error("Lỗi khi kiểm tra trạng thái đăng nhập:", error);
-      }
-    } 
-    TokenService.removeTokens();
-    navigation.reset(
-      {
-        index: 0,
-        routes: [{ name: 'Welcome' }],
-      }
-    );
-    dispatch(clearPosts());
-    alert("Đăng xuất thành công!");
-  }
-
-  //lấy thông tin người dùng khi component mount
-   const [avatar, setAvatar] = useState<string | null>(null);
-  // useEffect(() => {
-  //   ProfileApi.getProfile()
-  //     .then((response) => {
-  //       ProfileService.saveProfile(response); // Lưu thông tin người dùng vào ProfileService
-  //       ProfileService.geturlPublicAvatar().then((url) => setAvatar(url)); // Lấy avatar từ ProfileService và cập nhật state
-  //     })
-  //     .catch((error) => {
-  //       console.error("Lỗi khi lấy thông tin người dùng:", error); // Xử lý lỗi nếu có
-  //     });
-  // }, []);
-
-  // Kiểm tra quyền camera và thư viện ảnh khi component mount
   useEffect(() => {
     checkPermissions();
   }, []);
@@ -325,7 +289,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
       );
     } else {
       return (
-        <PostView post={item} setBackToHomePage={setBackToHomePage} setIsAllImageView={setIsAllImageView}/> // Hiển thị bài post
+        <PostView post={item} setBackToHomePage={setBackToHomePage} setIsAllImageView={setIsAllImageView} currentPostId={currentPostId}/> // Hiển thị bài post
       );
     }
 
@@ -381,7 +345,6 @@ const Home: React.FC<Props> = ({ navigation }) => {
           ) : (
             <AllImageView setIsAllImageView={setIsAllImageView} danhSach={danhSach} fetchCards={fetchCards} idItem={idItem} setBackToHomePage={setBackToHomePage} setIsLinkToPostView={setIsLinkToPostView} setPostIndexToLink={setPostIndexToLink}/>
           )}
-
       </View>
     </>
   );

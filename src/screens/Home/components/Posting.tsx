@@ -1,8 +1,10 @@
-import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ImageBackground, TextInput } from 'react-native'
+import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ImageBackground, TextInput, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react';
 import {FirebaseService} from '../../../services/firebase.service';
 import apiClient from '../../../networking/apiclient';
 import TokenService from '../../../services/token.service';
+import { CloudinaryService } from '../../../services/cloudinary.service';
+import { Video } from 'react-native-video';
 
 
 interface PostingProps {
@@ -13,7 +15,7 @@ interface PostingProps {
 
 const Posting = ({compressedUri,setCompressedUri,setIsPosted} : PostingProps) => {
   const [caption, setCaption] = useState<string>("");
-
+  const [isLoading, setIsLoading] = useState(false);
   //Hàm trang trí bài post
   async function style_posting() {
     
@@ -21,17 +23,20 @@ const Posting = ({compressedUri,setCompressedUri,setIsPosted} : PostingProps) =>
 
   //Hàm đăng bài
   async function post() {
-    try {
-      if (compressedUri) {
-        // Upload the image to Firebase and get the URL
-        const URL = await FirebaseService.uploadImage_post(compressedUri);
+    if (compressedUri?.endsWith('.mp4') || compressedUri?.endsWith('.mov')) {
+      try {
+        // Upload the video to Firebase and get the URL
+        setIsLoading(true); // Bắt đầu loading
+        const URL = await CloudinaryService.uploadVideo_post(compressedUri);
         const accessToken = await TokenService.getAccessToken();
 
+        console.log("URL", URL);
         await apiClient.post("/post/create", 
           {
             caption: caption,
-            urlPublicImage: URL?.urlPublicImage,
-            pathImage : URL?.pathImage,
+            type: 'video',
+            urlPublicVideo: URL?.urlPublicVideo,
+            publicIdVideo : URL?.publicId,
           }, 
           {
             headers: {Authorization: `Bearer ${accessToken}`}
@@ -41,12 +46,44 @@ const Posting = ({compressedUri,setCompressedUri,setIsPosted} : PostingProps) =>
             setIsPosted(true);
             setCompressedUri(null); // Reset the compressedUri after posting
           })
+      } catch (error) {
+        console.error("Lỗi khi đăng bài:", error);
+      } finally {
+        setIsLoading(false); // Kết thúc loading
       }
-      else {
-        alert("Vui lòng chọn ảnh trước khi đăng bài");
+    } 
+    else {
+      try {
+        if (compressedUri) {
+          // Upload the image to Firebase and get the URL
+          setIsLoading(true); // Bắt đầu loading
+          const URL = await FirebaseService.uploadImage_post(compressedUri);
+          const accessToken = await TokenService.getAccessToken();
+
+          await apiClient.post("/post/create", 
+            {
+              caption: caption,
+              type: 'image',
+              urlPublicImage: URL?.urlPublicImage,
+              pathImage : URL?.pathImage,
+            }, 
+            {
+              headers: {Authorization: `Bearer ${accessToken}`}
+            })
+            .then((response) => {
+              console.log("Đăng bài thành công:", response.data);
+              setIsPosted(true);
+              setCompressedUri(null); // Reset the compressedUri after posting
+            })
+        }
+        else {
+          alert("Vui lòng chọn ảnh trước khi đăng bài");
+        }
+      } catch (error) {
+        console.error("Lỗi khi đăng bài:", error);
+      } finally {
+        setIsLoading(false); // Kết thúc loading
       }
-    } catch (error) {
-      console.error("Lỗi khi đăng bài:", error);
     }
   }
 
@@ -54,22 +91,58 @@ const Posting = ({compressedUri,setCompressedUri,setIsPosted} : PostingProps) =>
     compressedUri ? (
       <View style={styles.Post_container}>
 
-        <ImageBackground source={{ uri: compressedUri }} style={styles.Image}>
-          <TextInput
-            style={[styles.TextInput, {width: Math.max(160, caption.length * 10)}]}
-            placeholder="Thêm một tin nhắn"
-            placeholderTextColor="white"
-            value={caption}
-            onChangeText={setCaption}
-          />
-        </ImageBackground>
+        {compressedUri.endsWith('.mp4') || compressedUri.endsWith('.mov') ? (
+          // Hiển thị video nếu compressedUri là video
+          <View style={{ position: 'relative', width: '100%', aspectRatio: 1 }}>
+            <Video
+              source={{ uri: compressedUri }}
+              style={styles.Video}
+              controls
+              repeat
+              resizeMode="cover"
+            />
+            <View style={styles.Overlay}>
+              <TextInput
+                style={[styles.TextInput, { width: Math.max(160, caption.length * 10) }]}
+                placeholder="Thêm một tin nhắn"
+                placeholderTextColor="white"
+                value={caption}
+                onChangeText={setCaption}
+              />
+            </View>
+          </View>
+        ) : (
+          // Hiển thị hình ảnh nếu compressedUri là ảnh
+          <ImageBackground source={{ uri: compressedUri }} style={styles.Image}>
+            <TextInput
+              numberOfLines={1}
+              style={[styles.TextInput, { width: Math.max(160, caption.length * 10)}]}
+              placeholder="Thêm một tin nhắn"
+              placeholderTextColor="white"
+              value={caption}
+              onChangeText={setCaption}
+            />
+          </ImageBackground>
+        )}
 
         <View style={styles.Button_container}>
             <TouchableOpacity style={styles.exit_button} onPress={() => setCompressedUri(null)}>
                 <Image source={require("../../../assets/X.png")} resizeMode="contain" style={{ width:40, height: 40 }}/>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.upload_button} onPress={() => post()}>
-                <Image source={require("../../../assets/upload.png")} resizeMode="contain" style={{marginLeft:5 , width:50, height: 50 }}/>
+            <TouchableOpacity
+              style={styles.upload_button}
+              onPress={() => !isLoading && post()} // Chỉ gọi hàm post nếu không đang loading
+              disabled={isLoading} // Vô hiệu hóa nút khi đang loading
+            >
+              {isLoading ? (
+                <ActivityIndicator size={50} color="#ffffff" /> // Hiển thị spinner khi đang loading
+              ) : (
+                <Image
+                  source={require("../../../assets/upload.png")}
+                  resizeMode="contain"
+                  style={{ marginLeft: 5, width: 50, height: 50 }}
+                />
+              )}
             </TouchableOpacity>
             <TouchableOpacity style={styles.edit_button} onPress={() => style_posting()}>
                 <Image source={require("../../../assets/Edit.png")} resizeMode="contain" style={{ width:50, height: 50 }}/>
@@ -89,6 +162,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     flexDirection: 'column',
+  },
+  Video:{
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 60,
+    overflow: 'hidden',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   Image: {
     width: '100%',
@@ -138,6 +220,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     height: 45,
     marginBottom:20,
+  },  
+  Overlay: {
+    position: 'absolute', // Đặt vị trí tuyệt đối
+    top: 10, // Khoảng cách từ trên xuống (tùy chỉnh)
+    left: 10, // Khoảng cách từ trái sang (tùy chỉnh)
+    right: 10, // Khoảng cách từ phải sang (tùy chỉnh)
+    alignItems: 'center', // Căn giữa nội dung theo chiều ngang
   },
 });
 
