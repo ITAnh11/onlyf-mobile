@@ -22,7 +22,23 @@
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.buianhkc11.onlyfmobile"
+      "package": "com.buianhkc11.onlyfmobile",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "onlyf-4aa06.web.app",
+              "pathPrefix": "/"
+            },
+            {
+              "scheme": "onlyf-mobile"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
@@ -31,6 +47,15 @@
       "eas": {
         "projectId": "64766fc2-2739-4601-ab17-db7ac5e93380"
       }
-    }
+    },
+    "plugins": [
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-6779097997978939~4774611654"
+        }
+      ]
+    ]
   }
 }
