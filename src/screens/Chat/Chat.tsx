@@ -2,12 +2,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StatusBar, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
-import styles from './styles'; 
+import styles from './styles';
 import ProfileService from '../../services/profile.service';
 import Colors from '../../constants/Color';
 import * as ImagePicker from 'expo-image-picker';
 import { getSocket } from '../../utils/socket';
-import useMessage from '../Message/hooks/useMessage'; 
+import useMessage from '../Message/hooks/useMessage';
+import Video from 'react-native-video';
 
 type Message = {
   senderId: number;
@@ -15,10 +16,9 @@ type Message = {
   message: {
     type: 'text' | 'image' | 'video';
     text?: string;
-    image?: string;
-    video?: string;
+    mediaUrl?: string;
     createdAt: string;
-  }
+  };
 };
 
 type Props = {
@@ -28,11 +28,24 @@ type Props = {
 const Chat: React.FC<Props> = ({ navigation }) => {
   const socket = getSocket();
   const route = useRoute();
-  const { friendId, friendName, friendUsername, avatar } = route.params as { friendId: number; friendName: string; friendUsername: string; avatar: string };
+  const { friendId, friendName, friendUsername, avatar } = route.params as {
+    friendId: number;
+    friendName: string;
+    friendUsername: string;
+    avatar: string;
+  };
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [myId, setMyId] = useState<number | null>(null);
-  const { messages: fetchedMessages, loading: messagesLoading, error, loadMoreMessages, hasMore } = useMessage('', 20, friendId); 
+  const {
+    messages: fetchedMessages,
+    loading: messagesLoading,
+    error,
+    loadMoreMessages,
+    hasMore,
+  } = useMessage('', 20, friendId);
+
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -40,6 +53,7 @@ const Chat: React.FC<Props> = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
+    // Lắng nghe tin nhắn mới và xử lý sự kiện 'receiveMessage'
     const handleReceiveMessage = (data: {
       senderId: number;
       message: {
@@ -49,55 +63,41 @@ const Chat: React.FC<Props> = ({ navigation }) => {
         createdAt: string;
       };
     }) => {
-      const { senderId, message } = data;
-  
-      if (senderId !== friendId) return;
-  
+      if (data.senderId !== friendId) return;
+
       const newMsg: Message = {
-        recipientId: myId!, 
-        senderId,
-        message: {
-          type: message.type,
-          text: message.type === 'text' ? message.text : undefined,
-          image: message.type === 'image' ? message.mediaUrl : undefined,
-          video: message.type === 'video' ? message.mediaUrl : undefined,
-          createdAt: message.createdAt,
-        },
+        senderId: data.senderId,
+        recipientId: myId!,
+        message: data.message,
       };
-  
-      setMessages((prevMessages) => [...prevMessages, newMsg]);
+      setMessages((prev) => [...prev, newMsg]);
     };
-  
+
     socket?.on('receiveMessage', handleReceiveMessage);
+
     return () => {
       socket?.off('receiveMessage', handleReceiveMessage);
     };
   }, [friendId, myId]);
-  
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return; // Kiểm tra tin nhắn rỗng
-    
-    if (myId == null) {
-      alert('Không thể gửi tin nhắn vì không có ID người dùng');
-      return;
-    }
-    
-    const message: Message = {
+  const sendMessage = (type: 'text' | 'image' | 'video', content: string) => {
+    if (!myId) return;
+
+    const newMsg: Message = {
       senderId: myId,
       recipientId: friendId,
       message: {
-        type: "text",
-        text: newMessage,
+        type,
+        ...(type === 'text' && { text: content }),
+        ...(type !== 'text' && { mediaUrl: content }),
         createdAt: new Date().toISOString(),
       },
     };
-  
-    setMessages((prevMessages) => [...prevMessages, message]);
-  
+
+    setMessages((prev) => [...prev, newMsg]);
+
     if (socket?.connected) {
-      socket.emit('sendMessage', message, (response: any) => {
-        console.log('Response from server:', response);
+      socket.emit('sendMessage', newMsg, (response: any) => {
         if (!response.success) {
           alert('Gửi tin nhắn không thành công');
         }
@@ -105,9 +105,13 @@ const Chat: React.FC<Props> = ({ navigation }) => {
     } else {
       alert('Mất kết nối với server');
     }
-  
-    setNewMessage(''); 
-  };  
+  };
+
+  const handleSendMessage = () => {
+    if (!newMessage.trim()) return;
+    sendMessage('text', newMessage);
+    setNewMessage('');
+  };
 
   const openCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -115,71 +119,52 @@ const Chat: React.FC<Props> = ({ navigation }) => {
       alert('Không có quyền truy cập camera');
       return;
     }
-  
+
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ['images', 'videos'],
       quality: 1,
     });
-  
-    if (!result.canceled) {
-      const photoUri = result.assets[0].uri;
 
-      const newMessage: Message = {
-        senderId: myId!,
-        recipientId: friendId,
-        message: {
-          type: 'image',
-          image: photoUri,
-          createdAt: new Date().toISOString(),
-        },
-      };
-  
-      setMessages((prev) => [...prev, newMessage]);
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      const uri = asset.uri;
+      const type = asset.type;
+
+      if (type === 'image') sendMessage('image', uri);
+      else if (type === 'video') sendMessage('video', uri);
     }
   };
 
   const openGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Không có quyền truy cập thư viện ảnh');
+      alert('Không có quyền truy cập thư viện');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ['images', 'videos'],
       quality: 1,
     });
 
     if (!result.canceled) {
-      const photoUri = result.assets[0].uri;
+      const asset = result.assets[0];
+      const uri = asset.uri;
+      const type = asset.type;
 
-      const newMessage: Message = {
-        senderId: myId!,
-        recipientId: friendId,
-        message: {
-          type: 'image',
-          image: photoUri,
-          createdAt: new Date().toISOString(),
-        },
-      };
-  
-      setMessages((prev) => [...prev, newMessage]);
+      if (type === 'image') sendMessage('image', uri);
+      else if (type === 'video') sendMessage('video', uri);
     }
   };
 
   useEffect(() => {
-    if (flatListRef.current) {
-      flatListRef.current.scrollToEnd({ animated: true });
-    }
+    flatListRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
-  if (messagesLoading) {
-    return <Text>Đang tải...</Text>;
-  }
+  if (messagesLoading) return <Text>Đang tải...</Text>;
+  if (error) return <Text>{error}</Text>;
 
-  if (error) {
-    return <Text>{error}</Text>;
-  }
+  const combinedMessages = [...fetchedMessages, ...messages];
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
@@ -198,27 +183,31 @@ const Chat: React.FC<Props> = ({ navigation }) => {
 
         <FlatList
           ref={flatListRef}
-          data={[...fetchedMessages, ...messages]} 
-          keyExtractor={(item, index) => `${item.message.createdAt}-${index}`}
+          data={combinedMessages}
+          keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => (
-            <View style={[styles.messageBubble, item.senderId === myId ? styles.myMessage : styles.friendMessage]}>
-              {item.message.type === 'text' && (
-                <Text style={styles.messageText}>{item.message.text}</Text>
-              )}
-              {item.message.type === 'image' && (
-                <Image source={{ uri: item.message.mediaUrl }} style={styles.image} />
-              )}
-              {item.message.type === 'video' && (
-                // <Video source={{ uri: item.message.mediaUrl }} style={styles.video} />
-                <Text>Video</Text>
-              )}
-
-              <Text style={styles.time}>{new Date(item.message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+            <View
+              style={[
+                styles.messageBubble,
+                item.senderId === myId ? styles.myMessage : styles.friendMessage,
+              ]}
+            >
+              {item.message.type === 'text' && <Text style={styles.messageText}>{item.message.text}</Text>}
+              {item.message.type === 'image' && <Image source={{ uri: item.message.mediaUrl }} style={styles.image} resizeMode="contain" />}
+              {item.message.type === 'video' && <Video source={{ uri: item.message.mediaUrl }} style={styles.video} resizeMode="contain" paused={true} />}
+              
+              <Text style={styles.time}>
+                {new Date(item.message.createdAt).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false,
+                })}
+              </Text>
             </View>
           )}
           contentContainerStyle={styles.messageList}
-          onEndReached={loadMoreMessages}  
-          onEndReachedThreshold={0.1}  
+          onEndReached={loadMoreMessages}
+          onEndReachedThreshold={0.1}
         />
 
         <View style={styles.inputContainer}>

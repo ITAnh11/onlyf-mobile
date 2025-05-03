@@ -125,10 +125,14 @@ const styles = StyleSheet.create({
     color: Colors.yellow_button,
   },
   image: {
-    width: 200,
-    height: 200,
-    borderRadius: 15,
-    marginBottom: 10,
+    width: '60%',
+    height: undefined,
+    aspectRatio: 1,
+  },
+  video: {
+    width: '60%',
+    height: undefined,
+    aspectRatio: 1,
   },
 });
 
