@@ -80,14 +80,7 @@ export class FCM {
     } else {
       // Default: Message or unknown
       console.log("New message");
-      const ms = notification?.body;
-      if(data.messageType=="text"){
-      const ms = data.messageText;
-      }
-      else
-      {
-        const ms ="";
-      }
+      const ms = data.messageText || notification?.body || "";
       Alert.alert("New Message", `${data.senderName}: ${ms}`
       );
 

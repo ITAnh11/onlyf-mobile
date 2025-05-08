@@ -80,6 +80,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     FCM.deleteTokenFromSecureStore();
     dispatch(clearPosts()); // Xóa tất cả bài viết trong Redux store
     TokenService.removeTokens();
+    
     navigation.reset(
       {
         index: 0,
