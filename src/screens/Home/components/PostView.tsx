@@ -177,6 +177,8 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
       } catch (error) {
         console.error('Error deleting post:', error);
       }
+    } else {
+      alert('Bạn không thể xóa bài của người khác!');
     }
     setShowOptions(false);
   }
