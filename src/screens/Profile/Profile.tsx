@@ -5,7 +5,10 @@ import ProfileService from '../../services/profile.service'; // Import ProfileSe
 import TokenService from '../../services/token.service'; // Import TokenService
 import apiClient from '../../networking/apiclient'; // Import apiClient
 import ProfileApi from '../../networking/profile.api';
-
+import * as SecureStore from 'expo-secure-store';
+import FCM from '../../services/fcm';
+import { useDispatch } from 'react-redux';
+import { clearPosts } from '../Home/Global/PostSlice';
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -41,6 +44,9 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
   }, [])
   );
 
+  // Khởi tạo dispatch từ Redux
+  const dispatch = useDispatch();
+
   // Hàm xử lý đăng xuất
   const handleLogout = async () => {
     const refreshToken = await TokenService.getRefreshToken();
@@ -71,7 +77,10 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
       console.error("Lỗi khi xóa thông tin người dùng:", error);
     }
 
+    FCM.deleteTokenFromSecureStore();
+    dispatch(clearPosts()); // Xóa tất cả bài viết trong Redux store
     TokenService.removeTokens();
+    
     navigation.reset(
       {
         index: 0,

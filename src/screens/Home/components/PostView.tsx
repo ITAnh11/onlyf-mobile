@@ -1,17 +1,19 @@
-import { View, Text, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated } from 'react-native'
+import { View, Text, Image, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PostItem } from './Type';
 import apiClient from '../../../networking/apiclient';
 import TokenService from '../../../services/token.service';
+import Video from 'react-native-video';
 
 type PostViewProps = {
   post: PostItem;
   setBackToHomePage: (backToHomePage : boolean) => void;
   setIsAllImageView : (isAllImageView : boolean) => void;
+  currentPostId: string | null;
 };
 
-const PostView = ({ post, setBackToHomePage, setIsAllImageView }: PostViewProps) => {
+const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId }: PostViewProps) => {
   
   //theo dõi trạng thái của TextInput
   const [message, setMessage] = useState('');
@@ -148,12 +150,32 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView }: PostViewProps)
   return (
     <SafeAreaView style={{ flexDirection: "column", height: Dimensions.get('screen').height, flex: 1 }}>
       <View style={styles.Post_container}>
-        <ImageBackground source={{ uri: post.urlPublicImage }} style={styles.Image}>
-           { post.caption && <Text style={styles.Caption} numberOfLines={1} ellipsizeMode="tail" >{post.caption}</Text>}
-        </ImageBackground>
+        {post.type === 'image' ? (
+          <ImageBackground source={{ uri: post.urlPublicImage }} style={styles.Image}>
+            { post.caption && <Text style={styles.Caption} numberOfLines={1} ellipsizeMode="tail" >{post.caption}</Text>}
+          </ImageBackground>
+        ):(
+          <View style={{ position: 'relative', width: '100%', aspectRatio: 1 }}>
+            <Video
+              source={{ uri: post.urlPublicVideo }}
+              style={styles.Video}
+              controls
+              repeat
+              paused = {currentPostId !== post.id} // Tạm dừng video nếu không phải video hiện tại
+              resizeMode="cover"
+            />
+            { post.caption && <Text style={{position:'absolute', alignSelf: 'center', top: 20, color: 'white', fontWeight: "bold", height: 45, overflow: 'hidden', fontSize: 16, backgroundColor: 'rgba(0, 0, 0, 0.3)', alignItems: 'center', borderRadius: 30, padding: 10, }} numberOfLines={1} ellipsizeMode="tail" >{post.caption}</Text>}
+          </View>
+        )}
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10, alignItems: 'center', marginBottom: 20,  }}>
-        <ImageBackground source={{ uri: post.user.profile.urlPublicAvatar }} style={styles.User_avatar} />
+          { post.user.profile.urlPublicAvatar !== null ?
+            (
+              <ImageBackground source={{ uri: post.user.profile.urlPublicAvatar }} style={styles.User_avatar} />
+            ) : (
+              <Image source={require("../../../assets/user.png")} style={styles.User_avatar} />
+            )
+          }
         <Text style={styles.User_name}>{post.user.profile.name}</Text>
       </View>
 
@@ -291,8 +313,8 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15, 
-    backgroundColor: 'white',
-     overflow: 'hidden',
+    backgroundColor: '#333333',
+    overflow: 'hidden',
   },
   Message_container:{
     flexDirection: 'row',
@@ -326,6 +348,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     marginTop: 25,
+  },
+  Video:{
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 60,
+    overflow: 'hidden',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
 });
 export default PostView

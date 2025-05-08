@@ -27,11 +27,20 @@
     profile: UserProfile;
   };
 
+  export type ReactItem = {
+    userId: string;        
+    type: string;          
+  };
+
   //định nghĩa một bài post
   export type PostItem = {
     id: string;
     caption: string;
+    type: 'image' | 'video';
     urlPublicImage: string;
+    urlPublicVideo?: string;
+    hlsUrlVideo?: string;
     createdAt: string;
     user: User;
+    reacts: ReactItem[];
   };

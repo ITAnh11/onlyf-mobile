@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, Alert } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import ProfileApi from '../../networking/profile.api';
 import ProfileService from '../../services/profile.service';
 import { connectSocket } from '../../utils/socket';
+import { FCM } from '../../services/fcm';
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -34,6 +35,8 @@ const Loading: React.FC<Props> = ({ navigation }) => {
       }
     };
 
+    FCM.initializeFCM(); // Khởi tạo FCM
+    
     loadData();
   }, [navigation]);
 
