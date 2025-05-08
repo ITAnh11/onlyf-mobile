@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import NotificationApi from "../networking/notification.api";
 import { Alert } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
+import notifee, { AndroidImportance } from '@notifee/react-native';
 
 export class FCM {
 
@@ -11,6 +12,23 @@ export class FCM {
   // Set navigation từ App.js hoặc nơi khởi tạo
   static setNavigation(nav: NavigationProp<any>) {
     this.navigation = nav;
+  }
+
+  static async displayLocalNotification(title: string, body: string) {
+    await notifee.requestPermission();
+  
+    await notifee.displayNotification({
+      title,
+      body,
+      android: {
+        channelId: 'default',
+        smallIcon: 'ic_launcher', // đặt tên icon của bạn ở đây
+        importance: AndroidImportance.HIGH,
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
   }
 
   static async requestUserPermission(): Promise<boolean> {
@@ -40,11 +58,28 @@ export class FCM {
     }
   }
 
+  static handledKeys = new Set<string>();
+
+  static getUniqueKey(data: any): string | null {
+    if (data?.messageId) return `reply-${data.messageId}`;
+    if (data?.reactType && data?.postId) return `react-${data.reactType}-${data.postId}`;
+    if (data?.senderId && !data?.postId) return `friend-${data.senderId}`;
+    return null;
+  }
+
   static async handleRemoteMessage(remoteMessage: any, isFromTap = false) {
     if (!remoteMessage) return;
     const { data, notification } = remoteMessage;
 
-    console.log("Handling notification:", data, notification);
+    const uniqueKey = this.getUniqueKey(data);
+    if (uniqueKey && this.handledKeys.has(uniqueKey)) {
+      console.log("Already handled:", uniqueKey);
+      return;
+    }
+    if (uniqueKey) {
+      this.handledKeys.add(uniqueKey);
+      setTimeout(() => this.handledKeys.delete(uniqueKey), 30000); // Xoá sau 30s
+    }
 
     if (data?.messageId && data?.postId) {
       // Reply to post
@@ -81,8 +116,7 @@ export class FCM {
       // Default: Message or unknown
       console.log("New message");
       const ms = data.messageText || notification?.body || "";
-      Alert.alert("New Message", `${data.senderName}: ${ms}`
-      );
+      await this.displayLocalNotification("New Message", `${data.senderName}: ${ms}`);
 
       if (isFromTap && data?.senderId && this.navigation) {
         this.navigation.navigate("Chat", { userId: data.senderId });
@@ -154,6 +188,12 @@ export class FCM {
     messaging().setBackgroundMessageHandler(async (remoteMessage) => {
       console.log("Message handled in the background!", remoteMessage);
       this.handleRemoteMessage(remoteMessage);
+    });
+
+    await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: AndroidImportance.HIGH,
     });
 
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
