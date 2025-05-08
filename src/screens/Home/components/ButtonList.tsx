@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { FriendItem } from './Type'
 import { ScrollView } from 'react-native-gesture-handler';
+import ProfileService from '../../../services/profile.service';
 
 interface ButtonListProps {
   friendList: FriendItem[];
@@ -22,6 +23,26 @@ const Choose = (key: string, name : string , idItem: string, setChoosing: (choos
 };
 
 const ButtonList = ({ friendList, setChoosing, setChoosedItem, setIdItem, idItem }: ButtonListProps) => {
+    const [userId, setUserID] = useState<string | number>(); // State để lưu tên người dùng
+    // lấy thông tin người dùng từ ProfileService
+    ProfileService.getId().then((id) => {
+        if (id !== null) {
+            setUserID(id.toString()); // Cập nhật state userId với giá trị từ ProfileService
+        }
+    });
+    const [urlPublicAvatar, setUrlPublicAvatar] = useState<string | null>(null); // State để lưu tên người dùng
+    // lấy thông tin người dùng từ ProfileService
+    ProfileService.geturlPublicAvatar().then((url) => {
+        if (url !== null) {
+            setUrlPublicAvatar(url.toString()); // Cập nhật state userId với giá trị từ ProfileService
+        }
+    });
+
+    useEffect(() => {
+      console.log("userId", userId);
+      console.log("urlPublicAvatar", urlPublicAvatar);
+    },[userId, urlPublicAvatar]);
+    
   return (
     <View style={styles.container}>
       <ScrollView style={styles.button_list}>
@@ -29,6 +50,21 @@ const ButtonList = ({ friendList, setChoosing, setChoosedItem, setIdItem, idItem
           <View style = {{flexDirection: 'row', alignItems: 'center'}}>
             <Image source={require("../../../assets/add-friend.png")} resizeMode="contain" style={{ width: 20, height: 20, marginLeft: 25 }} />
             <Text style = {styles.User_Name}>Tất cả bạn bè</Text>
+          </View>
+          <Image source={require("../../../assets/choose.png")} resizeMode="contain" style={{ width: 15, height: 15, marginRight: 17 }} />
+        </TouchableOpacity>
+        <TouchableOpacity key="Bạn" style={styles.Item} onPress={() => Choose(`${userId}`, "Bạn", idItem, setChoosing, setChoosedItem, setIdItem)}>
+          <View style = {{flexDirection: 'row', alignItems: 'center'}}>
+            <ImageBackground
+              source={
+                urlPublicAvatar !== ""
+                  ? { uri: urlPublicAvatar}
+                  : require('../../../assets/user.png') // Sử dụng require cho hình ảnh cục bộ
+              }
+              resizeMode="contain"
+              style={styles.User_Avatar}
+            />
+            <Text style = {styles.User_Name}>Bạn</Text>
           </View>
           <Image source={require("../../../assets/choose.png")} resizeMode="contain" style={{ width: 15, height: 15, marginRight: 17 }} />
         </TouchableOpacity>

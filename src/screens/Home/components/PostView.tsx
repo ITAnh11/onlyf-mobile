@@ -1,20 +1,31 @@
-import { View, Text, Image, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated } from 'react-native'
+import { View, Text, Image, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated, TouchableWithoutFeedback } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PostItem } from './Type';
 import apiClient from '../../../networking/apiclient';
 import TokenService from '../../../services/token.service';
 import Video from 'react-native-video';
+import ProfileService from '../../../services/profile.service';
 
 type PostViewProps = {
   post: PostItem;
   setBackToHomePage: (backToHomePage : boolean) => void;
   setIsAllImageView : (isAllImageView : boolean) => void;
+  setIsDelete : (isDelete : boolean) => void;
   currentPostId: string | null;
 };
 
-const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId }: PostViewProps) => {
-  
+const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, setIsDelete }: PostViewProps) => {
+  //lấy id người dùng
+  const [userId, setUserID] = useState<string | number>(); // State để lưu tên người dùng
+  // lấy thông tin người dùng từ ProfileService
+  ProfileService.getId().then((id) => {
+      if (id !== null) {
+          setUserID(id); // Cập nhật state userId với giá trị từ ProfileService
+      }
+  });
+
+
   //theo dõi trạng thái của TextInput
   const [message, setMessage] = useState('');
   const [showInput, setShowInput] = useState(false);
@@ -25,6 +36,9 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId }:
       inputRef.current?.focus(); // đảm bảo TextInput đã render xong
     }, 100);
   };
+
+  //bật nút option
+  const [showOptions, setShowOptions] = useState(false);
 
   //Tạo state để quản lý danh sách emoji animation
   const [flyingEmojis, setFlyingEmojis] = useState<Array<{ id: number, emoji: string, y: Animated.Value, x: Animated.Value, opacity: Animated.Value }>>([]);
@@ -147,6 +161,36 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId }:
     }
   };
 
+  //Hàm xóa bài post
+  const deletePost = async () => {
+    if(post.user.id === userId){
+      try {
+        const accessToken = await TokenService.getAccessToken();
+        await apiClient.delete(`/post/delete?postId=${post.id}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}`},
+          }
+        ).then((response) => {
+          console.log("Xóa bài thành công: ", response.data);
+          setIsDelete(true);
+        })
+      } catch (error) {
+        console.error('Error deleting post:', error);
+      }
+    }
+    setShowOptions(false);
+  }
+
+  //Hàm chia sẻ
+  const sharePost = () => {
+    setShowOptions(false);
+  }
+
+  //Hoàm tắt Option
+  const cancelOption = () => {
+    setShowOptions(false);
+  }
+
   return (
     <SafeAreaView style={{ flexDirection: "column", height: Dimensions.get('screen').height, flex: 1 }}>
       <View style={styles.Post_container}>
@@ -235,10 +279,26 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId }:
             <View style={{ width: 53, height: 53, backgroundColor: 'white', borderRadius: 50, alignItems: 'center', justifyContent: 'center',borderWidth: 3, borderColor: "black" }}/>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => setShowOptions(true)}>
           <ImageBackground source={require("../../../assets/option.png")} resizeMode="contain" style={{ width: 30, height: 30 }} />
         </TouchableOpacity>
       </View>
+      {showOptions && (
+        <View style={{ position: 'absolute', height: 180, width: 150, backgroundColor: '#333333', right: 30, bottom: 100, borderRadius: 20 , borderWidth: 1, borderColor: '#EAA905'}}> 
+          <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', width: 150, height: 60, paddingTop: 7 }} onPress={deletePost}>
+            <Image source={require("../../../assets/delete.png")} resizeMode="contain" style={{ width: 19, height: 19, marginLeft: 20 }} />
+            <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16, marginLeft: 10 }}>Xóa</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', width: 150, height: 60, paddingBottom: 10 }} onPress={sharePost}>
+            <Image source={require("../../../assets/share.png")} resizeMode="contain" style={{ width: 20, height: 20, marginLeft: 20 }} />
+            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, marginLeft: 10 }}>Chia sẻ</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', width: 150, height: 60, paddingBottom: 10 }} onPress={cancelOption}>
+            <Image source={require("../../../assets/cancel.png")} resizeMode="contain" style={{ width: 24, height: 24, marginLeft: 20 }} />
+            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, marginLeft: 10 }}>Hủy</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       {flyingEmojis.map((emoji) => (
         <Animated.Text
           key={emoji.id}
@@ -269,7 +329,7 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId }:
           }}
           resizeMode="contain"
         />
-    ))}
+      ))}
 
     </SafeAreaView>
   )
