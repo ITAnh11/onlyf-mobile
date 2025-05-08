@@ -36,7 +36,6 @@ const Loading: React.FC<Props> = ({ navigation }) => {
     };
 
     FCM.initializeFCM(); // Khởi tạo FCM
-    
     loadData();
   }, [navigation]);
 

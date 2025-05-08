@@ -9,28 +9,37 @@ class ProfileService {
   private static PHONE_KEY = 'phone';
   private static DOB_KEY = 'dob';
   private static USERNAME_KEY = 'username';
+  private static IS_PREMIUM = 'isPremium';
+  private static PREMIUM_EXPIRE_AT = 'premiumExpireAt';
+  private static PREMIUM_ID = 'premiumId';
 
   static async saveProfile(data: any): Promise<void> {
     console.log(
         "Lưu thông tin người dùng thành công:",
-        data.user.id,
+        data.id,
         data.name,
-        data.user.email,
+        data.email,
         data.urlPublicAvatar,
         data.pathAvatar,
         data.phone,
         data.dob,
-        data.username
+        data.username,
+        data.isPremium,
+        data.premiumExpireAt,
+        data.premiumId
     );
 
-    await SecureStore.setItemAsync(this.ID_KEY, String(data.user.id)); // Chuyển số thành chuỗi
+    await SecureStore.setItemAsync(this.ID_KEY, String(data.id)); // Chuyển số thành chuỗi
     await SecureStore.setItemAsync(this.NAME_KEY, data.name || ""); // Đảm bảo giá trị không phải null
-    await SecureStore.setItemAsync(this.EMAIL_KEY, data.user.email || "");
+    await SecureStore.setItemAsync(this.EMAIL_KEY, data.email || "");
     await SecureStore.setItemAsync(this.URL_PUBLIC_AVATAR_KEY, data.urlPublicAvatar || "");
     await SecureStore.setItemAsync(this.PATH_AVATAR_KEY, data.pathAvatar || "");
     await SecureStore.setItemAsync(this.PHONE_KEY, data.phone ? String(data.phone) : ""); // Chuyển số hoặc null thành chuỗi
     await SecureStore.setItemAsync(this.DOB_KEY, data.dob || "");
     await SecureStore.setItemAsync(this.USERNAME_KEY, data.username || "");
+    await SecureStore.setItemAsync(this.IS_PREMIUM, data.isPremium || ""); 
+    await SecureStore.setItemAsync(this.PREMIUM_EXPIRE_AT, data.premiumExpireAt || "");
+    await SecureStore.setItemAsync(this.PREMIUM_ID, data.premiumId || "");
     }
     
     static async getProfile(): Promise<any> {
@@ -42,7 +51,10 @@ class ProfileService {
     const phone = await SecureStore.getItemAsync(this.PHONE_KEY);
     const dob = await SecureStore.getItemAsync(this.DOB_KEY);
     const username = await SecureStore.getItemAsync(this.USERNAME_KEY);
-    if (!id || !name || !email || !urlPublicAvatar || !pathAvatar || !phone || !dob || !username) {
+    const isPremium = await SecureStore.getItemAsync(this.IS_PREMIUM);
+    const premiumExpireAt = await SecureStore.getItemAsync(this.PREMIUM_EXPIRE_AT);
+    const premiumId = await SecureStore.getItemAsync(this.PREMIUM_ID);
+    if (!id || !name || !email || !urlPublicAvatar || !pathAvatar || !phone || !dob || !username || !isPremium || !premiumExpireAt || !premiumId) {
       return null;
     }
 
@@ -55,6 +67,9 @@ class ProfileService {
         phone: phone,
         dob: dob,
         username: username,
+        isPremium: isPremium,
+        premiumExpireAt: premiumExpireAt,
+        premiumId: premiumId
         }
     }
 
@@ -67,6 +82,9 @@ class ProfileService {
         await SecureStore.deleteItemAsync(this.PHONE_KEY);
         await SecureStore.deleteItemAsync(this.DOB_KEY);
         await SecureStore.deleteItemAsync(this.USERNAME_KEY);
+        await SecureStore.deleteItemAsync(this.IS_PREMIUM);
+        await SecureStore.deleteItemAsync(this.PREMIUM_EXPIRE_AT);
+        await SecureStore.deleteItemAsync(this.PREMIUM_ID);
         }
     
     static async getId(): Promise<number | null> {
@@ -102,6 +120,18 @@ class ProfileService {
         return await SecureStore.getItemAsync(this.USERNAME_KEY);
     }
 
+    static async getIsPremium(): Promise<string | null> {
+        return await SecureStore.getItemAsync(this.IS_PREMIUM);
+    }
+
+    static async getPremiumExpireAt(): Promise<string | null> {
+        return await SecureStore.getItemAsync(this.PREMIUM_EXPIRE_AT);
+    }
+
+    static async getPremiumId(): Promise<string | null> {
+        return await SecureStore.getItemAsync(this.PREMIUM_ID);
+    }
+
     static async updateProfile(data:any): Promise<void> {
         if (data.name) {
             await SecureStore.setItemAsync(this.NAME_KEY, data.name);
@@ -124,6 +154,37 @@ class ProfileService {
         if (data.username) {
             await SecureStore.setItemAsync(this.USERNAME_KEY, data.username);
         }
+        if (data.isPremium) {
+            await SecureStore.setItemAsync(this.IS_PREMIUM, data.isPremium);
+        }
+        if (data.premiumExpireAt) {
+            await SecureStore.setItemAsync(this.PREMIUM_EXPIRE_AT, data.premiumExpireAt);
+        }
+        if (data.premiumId) {
+            await SecureStore.setItemAsync(this.PREMIUM_ID, data.premiumId);
+        }
     }
+
+    static async isPremium(): Promise<boolean> {
+        try {
+          const isPremium = await SecureStore.getItemAsync(this.IS_PREMIUM);
+          const premiumExpireAt = await SecureStore.getItemAsync(this.PREMIUM_EXPIRE_AT);
+      
+          // Kiểm tra nếu `isPremium` không tồn tại hoặc không phải "true"
+          if (!isPremium || isPremium !== "true") {
+            return false;
+          }
+      
+          // Kiểm tra nếu `premiumExpireAt` không tồn tại hoặc đã hết hạn
+          if (!premiumExpireAt || new Date(premiumExpireAt) <= new Date()) {
+            return false;
+          }
+      
+          return true; // Người dùng là Premium và chưa hết hạn
+        } catch (error) {
+          console.error("Error checking premium status:", error);
+          return false; // Trả về false nếu có lỗi
+        }
+      }
 }
 export default ProfileService;
