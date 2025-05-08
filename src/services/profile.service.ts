@@ -31,15 +31,15 @@ class ProfileService {
 
     await SecureStore.setItemAsync(this.ID_KEY, String(data.id)); // Chuyển số thành chuỗi
     await SecureStore.setItemAsync(this.NAME_KEY, data.name || ""); // Đảm bảo giá trị không phải null
-    await SecureStore.setItemAsync(this.EMAIL_KEY, data.user.email || "");
+    await SecureStore.setItemAsync(this.EMAIL_KEY, data.email || "");
     await SecureStore.setItemAsync(this.URL_PUBLIC_AVATAR_KEY, data.urlPublicAvatar || "");
     await SecureStore.setItemAsync(this.PATH_AVATAR_KEY, data.pathAvatar || "");
     await SecureStore.setItemAsync(this.PHONE_KEY, data.phone ? String(data.phone) : ""); // Chuyển số hoặc null thành chuỗi
     await SecureStore.setItemAsync(this.DOB_KEY, data.dob || "");
     await SecureStore.setItemAsync(this.USERNAME_KEY, data.username || "");
-    await SecureStore.setItemAsync(this.IS_PREMIUM, data.isPremium || ""); 
+    await SecureStore.setItemAsync(this.IS_PREMIUM, data.isPremium? String(data.isPremium):""); // Chuyển số hoặc null thành chuỗi""
     await SecureStore.setItemAsync(this.PREMIUM_EXPIRE_AT, data.premiumExpireAt || "");
-    await SecureStore.setItemAsync(this.PREMIUM_ID, data.premiumId || "");
+    await SecureStore.setItemAsync(this.PREMIUM_ID, data.premiumId? String(data.premiumId):""); // Chuyển số hoặc null thành chuỗi
     }
     
     static async getProfile(): Promise<any> {

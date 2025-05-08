@@ -15,6 +15,7 @@ import ConfirmOtp from '../screens/ConfirmOtp';
 import ResetPassword from '../screens/ResetPassword/ResetPassword';
 import Chat from '../screens/Chat/Chat';
 import Loading from '../screens/Loading';
+import Payment from '../screens/Payment/Payment';
 
 const Stack = createStackNavigator();
 
@@ -41,6 +42,7 @@ const Route = () => {
             />
             <Stack.Screen name="Chat" component={Chat} />
             <Stack.Screen name="Loading" component={Loading} />
+            <Stack.Screen name="Payment" component={Payment} />
         </Stack.Navigator>
     );
 }

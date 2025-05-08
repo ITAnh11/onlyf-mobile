@@ -16,6 +16,7 @@ type Props = {
 
 const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route }) => {
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [premium, setPremium] = useState(false); // Trạng thái premium
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -24,6 +25,18 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     };
 
     fetchProfile();
+  }
+  , []);
+
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      const isPremium = await SecureStore.getItemAsync('isPremium'); // Lấy trạng thái premium từ local storage
+      if(isPremium =='true'){
+      setPremium(isPremium === 'true'); // Cập nhật trạng thái premium
+    };
+
+    }
+    checkPremiumStatus();
   }
   , []);
 
@@ -170,6 +183,13 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                       <Image source={require("../../assets/user.png")} style={styles.avatarImage} />
                     )}
                   </TouchableOpacity>
+                  <View>
+                    {premium ? (
+                      <Text style={{ color: 'gold', fontSize: 15, textAlign: 'center' }}>Premium</Text>
+                    ) : (
+                      <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>Free</Text>
+                    )}
+                  </View>
                   </View>
                 );
           
@@ -262,6 +282,20 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                             marginBottom: 10,
                           }}
                         >
+
+                          {/* Nút "Mua Premium" */}
+                          <TouchableOpacity
+                            style={{
+                              backgroundColor: '#222',
+                              padding: 15,
+                              borderRadius: 5,
+                              width: '100%',
+                            }}
+                            onPress={() => navigation.navigate('Payment')} // Điều hướng sang trang Upgrade
+                          >
+                            <Text style={{ color: 'white', fontSize: 16 }}>Upgrade Premium</Text>
+                          </TouchableOpacity>
+
                           {/* Nút "Thêm tiện ích" */}
                           <TouchableOpacity
                             style={{
