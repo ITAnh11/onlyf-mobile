@@ -32,7 +32,14 @@ type Props = {
 const Home: React.FC<Props> = ({ navigation }) => {  
   const [compressedUri, setCompressedUri] = useState<string | null>(null); 
 
-
+  const [userId, setUserID] = useState<string | number>(); // State để lưu tên người dùng
+  // lấy thông tin người dùng từ ProfileService
+  ProfileService.getId().then((id) => {
+      if (id !== null) {
+          setUserID(id); // Cập nhật state userId với giá trị từ ProfileService
+      }
+  });
+  
   // State để theo dõi trạng thái quyền
   const [permission, requestPermission] = useCameraPermissions();
   const [permission_library, requestPermission_library] = useMediaLibraryPermissions();
@@ -58,6 +65,8 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
   //Trạng thái xem đã đăng bài hay chưa
   const [isPosted, setIsPosted] = useState(false);
+  //Trang thái xem xóa bài hay chưa
+  const [isDelete, setIsDelete] = useState(false);
   
   
   //State để theo dõi vị trí trang hiện tại trong Flatlist
@@ -152,12 +161,13 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
   //useEffect để render lại các bài post sau khi đăng ảnh
   useEffect(() => {
-    if(isPosted) {
+    if(isPosted || isDelete) {
       dispatch(clearPosts());
       initAllPost();
       setIsPosted(false);
+      setIsDelete(false);
     }
-  },[isPosted])
+  },[isPosted, isDelete])
 
   //hàm thay đổi danh sách bài post khi người dùng thay đổi lựa chọn.
   const isFirstRender = useRef(true); // Theo dõi lần render đầu tiên
@@ -170,18 +180,32 @@ const Home: React.FC<Props> = ({ navigation }) => {
         const params: any = {
           limit: 50, // Số lượng bài post muốn lấy
         };
-  
+        
+        let response: any;
         // Nếu idItem khác "Tất cả bạn bè", thêm thuộc tính friendId
-        if (idItem !== "Tất cả bạn bè") {
+        if (idItem !== "Tất cả bạn bè" && idItem !== `${userId}`) {
           params.friendId = idItem;
+          response  = await apiClient.get(`/post/get-posts/`, {
+            params,
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Thêm access token vào header
+            },
+          });
+        } else if (idItem === `${userId}`) {
+          response  = await apiClient.get(`/post/get-my-posts`, {
+            params,
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Thêm access token vào header
+            },
+          });       
+        } else {
+          response  = await apiClient.get(`/post/get-posts/`, {
+            params,
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Thêm access token vào header
+            },
+          });
         }
-        const response = await apiClient.get(`/post/get-posts/`, {
-          params,
-          headers: {
-            Authorization: `Bearer ${accessToken}`, // Thêm access token vào header
-          },
-        });
-  
         dispatch(clearPosts());
         dispatch(addPost({ id: 'home', caption: 'Home', urlPublicImage: '', createdAt: '', user: { id: '', profile: { name: '', urlPublicAvatar: '' } } })); // Thêm home vào danh sách bài post
         dispatch(addPosts(response.data.posts)); // Cập nhật state `data` với bài post mới
@@ -195,6 +219,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
       } catch (error) {
         console.error("Lỗi khi gọi API get POST 2:", error); // Xử lý lỗi nếu có
         console.log(idItem);
+        console.log("ID: ", userId); // Xử lý lỗi nếu có
       } finally {
         setLoading(false); // Kết thúc trạng thái tải
       }
@@ -213,16 +238,31 @@ const Home: React.FC<Props> = ({ navigation }) => {
               limit: 50, // Số lượng bài post muốn lấy
               cursor: nextCursor // Tham số con trỏ để phân trang
             };
+            let response: any;
             // Nếu idItem khác "Tất cả bạn bè", thêm thuộc tính friendId
-            if (idItem !== "Tất cả bạn bè") {
+            if (idItem !== "Tất cả bạn bè" && idItem !== `${userId}`) {
               params.friendId = idItem;
+              response  = await apiClient.get(`/post/get-posts/`, {
+                params,
+                headers: {
+                  Authorization: `Bearer ${accessToken}`, // Thêm access token vào header
+                },
+              });
+            } else if (idItem === `${userId}`) {
+              response  = await apiClient.get(`/post/get-my-posts`, {
+                params,
+                headers: {
+                  Authorization: `Bearer ${accessToken}`, // Thêm access token vào header
+                },
+              });       
+            } else {
+              response  = await apiClient.get(`/post/get-posts/`, {
+                params,
+                headers: {
+                  Authorization: `Bearer ${accessToken}`, // Thêm access token vào header
+                },
+              });
             }
-            const response = await apiClient.get(`/post/get-posts/`, {
-              params,
-              headers: {
-                Authorization: `Bearer ${accessToken}` // Thêm access token vào header
-              }
-            });
             dispatch(addPosts(response.data.posts)); // Cập nhật state `data` với bài post mới
             dispatch(setNextCursor(response.data.nextCursor)); // Cập nhật con trỏ tiếp theo
             dispatch(setHasMore(response.data.hasMore)); // Cập nhật trạng thái có thêm bài post hay khôngr
@@ -289,7 +329,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
       );
     } else {
       return (
-        <PostView post={item} setBackToHomePage={setBackToHomePage} setIsAllImageView={setIsAllImageView} currentPostId={currentPostId}/> // Hiển thị bài post
+        <PostView post={item} setBackToHomePage={setBackToHomePage} setIsAllImageView={setIsAllImageView} currentPostId={currentPostId} setIsDelete={setIsDelete}/> // Hiển thị bài post
       );
     }
 
@@ -300,7 +340,10 @@ const Home: React.FC<Props> = ({ navigation }) => {
       requestNonPersonalizedAdsOnly: true,
     });
     const currentIndexRef = useRef(currentIndex);
-  
+    useEffect(() => {
+      currentIndexRef.current = currentIndex; // Cập nhật giá trị ref mỗi khi currentIndex thay đổi
+    }, [currentIndex]);
+
     //mở quảng cáo khi nó được tải
     const lastShownRef = useRef(0);
     const showInterstitialAdIfNeeded = () => {
@@ -317,7 +360,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
   
         interstitial.load();
       } else {
-        console.log('Chưa đủ 5 phút, chưa hiển thị quảng cáo', currentIndex);
+        console.log('Chưa đủ 5 phút, chưa hiển thị quảng cáo', currentIndexRef.current);
       }
     };
 
