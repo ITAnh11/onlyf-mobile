@@ -21,7 +21,7 @@ import PostView from './components/PostView';
 import AllImageView from './components/AllImageView';
 import ProfileService from '../../services/profile.service';
 import 'expo-dev-client';
-import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+import { BannerAd, BannerAdSize, TestIds, InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
 
 
 
@@ -58,7 +58,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
   //Trạng thái xem đã đăng bài hay chưa
   const [isPosted, setIsPosted] = useState(false);
-
+  
   
   //State để theo dõi vị trí trang hiện tại trong Flatlist
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -92,7 +92,6 @@ const Home: React.FC<Props> = ({ navigation }) => {
       setIsLinkToPostView(false);
     }
   }, [backToFirstPage, backToHomePage, isLinkToPostView]);
-
 
 
   //Theo dõi danh sách các bài post (trạng thái lọc tất cả hoặc của một người bạn cụ thể)
@@ -203,7 +202,6 @@ const Home: React.FC<Props> = ({ navigation }) => {
     fetchCards();
   }, [idItem]);
 
-
   // Hàm gọi API để lấy danh sách bài post
   const fetchCards = async () => {
       if (nextCursor !== null && hasMore) { // Kiểm tra xem có con trỏ tiếp theo và còn bài post để tải không
@@ -296,6 +294,44 @@ const Home: React.FC<Props> = ({ navigation }) => {
     }
 
   };
+
+    //Khởi tạo quảng cáo
+    const interstitial = InterstitialAd.createForAdRequest(TestIds.INTERSTITIAL, {
+      requestNonPersonalizedAdsOnly: true,
+    });
+    const currentIndexRef = useRef(currentIndex);
+  
+    //mở quảng cáo khi nó được tải
+    const lastShownRef = useRef(0);
+    const showInterstitialAdIfNeeded = () => {
+      const now = Date.now();
+      const FIVE_MINUTES = 5 * 60 * 1000;
+      const enoughTimePassed = now - lastShownRef.current >= FIVE_MINUTES;
+  
+      if (enoughTimePassed && currentIndexRef.current !== 0) {
+        const unsubscribe = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+          interstitial.show();
+          lastShownRef.current = Date.now();
+          unsubscribe();
+        });
+  
+        interstitial.load();
+      } else {
+        console.log('Chưa đủ 5 phút, chưa hiển thị quảng cáo', currentIndex);
+      }
+    };
+
+    // ⏰ Lặp lại quảng cáo mỗi 5 phút
+    useEffect(() => {
+      // Hiển thị quảng cáo lần đầu sau khi app mở
+      showInterstitialAdIfNeeded();
+  
+      const interval = setInterval(() => {
+        showInterstitialAdIfNeeded();
+      }, 5 * 60 * 1000); // 5 phút
+  
+      return () => clearInterval(interval);
+    }, []);
   
   return (
     <>
@@ -347,13 +383,6 @@ const Home: React.FC<Props> = ({ navigation }) => {
           ) : (
             <AllImageView setIsAllImageView={setIsAllImageView} danhSach={danhSach} fetchCards={fetchCards} idItem={idItem} setBackToHomePage={setBackToHomePage} setIsLinkToPostView={setIsLinkToPostView} setPostIndexToLink={setPostIndexToLink}/>
           )}
-        <BannerAd
-          unitId={TestIds.BANNER}
-          size={BannerAdSize.BANNER}
-          requestOptions={{
-            requestNonPersonalizedAdsOnly: true,
-          }}
-        />
       </View>
     </>
   );
