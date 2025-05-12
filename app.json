@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./src/assets/splash-icon.png",
+      "image": "./src/assets/logo_onlyf.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff",
       "deepLinking": true
@@ -20,7 +20,7 @@
     "android": {
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "foregroundImage": "./src/assets/logo_onlyf.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.buianhkc11.onlyfmobile",
@@ -42,7 +42,7 @@
       ]
     },
     "web": {
-      "favicon": "./src/assets/favicon.png"
+      "favicon": "./src/assets/logo_onlyf.png"
     },
     "extra": {
       "eas": {
