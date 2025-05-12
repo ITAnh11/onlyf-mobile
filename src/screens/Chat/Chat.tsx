@@ -170,7 +170,7 @@ const Chat: React.FC<Props> = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      const asset = result.assets[0];
+      const asset = result.assets[0]; 
       const uri = asset.uri;
       const type = asset.type;
 
@@ -284,18 +284,18 @@ const Chat: React.FC<Props> = ({ navigation }) => {
                   <Image source={{ uri: item.message.mediaUrl }} style={styles.image} resizeMode="contain" />
                 )}
                 {item.message?.type === 'video' && item.message.mediaUrl && (
-                  <Video source={{ uri: item.message.mediaUrl }} style={styles.video} resizeMode="contain" paused={true} />
+                  <Video source={{ uri: item.message.mediaUrl }} style={styles.video} controls repeat resizeMode="contain" paused={true} />
                 )}
 
                 {item.postId && (
-                  <View>
+                  <TouchableOpacity>
                     {item.post.urlPublicImage && (
                       <Image source={{ uri: item.post.urlPublicImage }} style={styles.image} resizeMode="contain" />
                     )}
-                    {item.post.urlPublicVideo && (
-                      <Video source={{ uri: item.post.urlPublicVideo }} style={styles.video} resizeMode="contain" paused={true} />
+                    {item.post.hlsUrlVideo && (
+                      <Video source={{ uri: item.post.hlsUrlVideo }} style={styles.video} controls repeat resizeMode="contain" paused={true} />
                     )}
-                  </View>
+                  </TouchableOpacity>
                 )}
               </View>
             </View>

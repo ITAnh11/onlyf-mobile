@@ -128,9 +128,10 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   video: {
-    width: '60%',
+    width: '100%',
     height: undefined,
     aspectRatio: 1,
+    padding: 10,
   },
   newMessageAlert: {
     position: 'absolute',
