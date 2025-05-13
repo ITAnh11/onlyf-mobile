@@ -11,7 +11,7 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://super-space-computing-machine-5gqp9gq7wrv3qv-3000.app.github.dev/"
+        "EXPO_PUBLIC_API_URL": "https://super-space-computing-machine-5gqp9gq7wrv3qv-3000.app.github.dev"
       }
     },
     "production": {
