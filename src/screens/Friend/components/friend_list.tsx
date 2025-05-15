@@ -8,16 +8,21 @@ import { Ionicons } from '@expo/vector-icons';
 type Props = {
   refreshCounter: number;
   onRefresh: () => void;
+  onFriendCountChange?: (count: number) => void;
 };
 
-const FriendList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
+const FriendList: React.FC<Props> = ({ refreshCounter, onRefresh, onFriendCountChange }) => {
   const { friends,loading, error, fetchFriends } = useFriends(); 
   const [showAll, setShowAll] = React.useState(false);
   const visibleFriends = showAll ? friends : friends.slice(0, 5);
 
   useEffect(() => {
-    fetchFriends(); 
-  }, [refreshCounter]);
+    fetchFriends().then(() => {
+      if (onFriendCountChange) {
+        onFriendCountChange(friends.length);
+      }
+    });
+  }, [refreshCounter, friends.length]);
 
   const handleUnfriend = (friendId: number) => {
     Alert.alert(
@@ -28,7 +33,7 @@ const FriendList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
         { text: 'Đồng ý', onPress: () => {
           unfriend(friendId)
             .then(() => {
-              console.log('Unfriend successful!');
+              console.log('Hủy kết bạn thành công!');
               fetchFriends(); 
               onRefresh(); 
             })
