@@ -12,8 +12,8 @@ export default function UpgradeScreen() {
 
       <View style={styles.planCard}>
         <Text style={styles.planTitle}>1 Month Plan</Text>
-        <Text style={styles.planPrice}>$9.99/month</Text>
-        <Text style={styles.planDescription}>Enjoy premium features for one month.</Text>
+        <Text style={styles.planPrice}>129.000đ/tháng</Text>
+        <Text style={styles.planDescription}>Kết bạn không giới hạn, đăng video, không quảng cáo</Text>
         <TouchableOpacity
           style={[
             styles.selectButton,
@@ -21,14 +21,14 @@ export default function UpgradeScreen() {
           ]}
           onPress={() => setSelectedPlan('1month')}
         >
-          <Text style={styles.buttonText}>Choose 1 Month</Text>
+          <Text style={styles.buttonText}>Chọn 1 tháng</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.planCard}>
-        <Text style={styles.planTitle}>1 Year Plan</Text>
-        <Text style={styles.planPrice}>$99.99/year</Text>
-        <Text style={styles.planDescription}>Enjoy premium features for one year</Text>
+        <Text style={styles.planTitle}>1 Year</Text>
+        <Text style={styles.planPrice}>1.290.000đ/năm</Text>
+        <Text style={styles.planDescription}>Kết bạn không giới hạn, đăng video, không quảng cáo</Text>
         <TouchableOpacity
           style={[
             styles.selectButton,
@@ -36,7 +36,7 @@ export default function UpgradeScreen() {
           ]}
           onPress={() => setSelectedPlan('1year')}
         >
-          <Text style={styles.buttonText}>Choose 1 Year</Text>
+          <Text style={styles.buttonText}>Chọn 1 năm</Text>
         </TouchableOpacity>
       </View>
 
@@ -61,7 +61,7 @@ export default function UpgradeScreen() {
             }
         }}
         >
-        <Text style={styles.buttonText}>Proceed to Payment</Text>
+        <Text style={styles.buttonText}>Thanh toán</Text>
         </TouchableOpacity>
     </View>
   );
