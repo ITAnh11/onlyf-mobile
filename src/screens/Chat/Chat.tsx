@@ -2,17 +2,21 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity,
   StatusBar, Image, KeyboardAvoidingView, Platform,
-  Vibration
+  Vibration,
+  TouchableWithoutFeedback, StyleSheet, 
+  Modal
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import styles from './styles';
 import ProfileService from '../../services/profile.service';
 import Colors from '../../constants/Color';
-import * as ImagePicker from 'expo-image-picker';
 import { getSocket } from '../../utils/socket';
 import Video from 'react-native-video';
 import useChat from './hooks/useChat';
+import { FirebaseService } from '../../services/firebase.service';
+import { CloudinaryService } from '../../services/cloudinary.service';
+import { launchImageLibrary, Asset, launchCamera } from 'react-native-image-picker';
 
 type Message = {
   senderId: number;
@@ -22,6 +26,10 @@ type Message = {
     text?: string;
     mediaUrl?: string;
     createdAt: string;
+  };
+  post?: {
+    urlPublicImage?: string;
+    hlsUrlVideo?: string;
   };
 };
 
@@ -43,10 +51,11 @@ const Chat: React.FC<Props> = ({ navigation }) => {
   const [messages, setMessages] = useState<Message[]>([]); 
   const [newMessage, setNewMessage] = useState(''); 
   const [myId, setMyId] = useState<number | null>(null); 
-  const flatListRef = useRef<FlatList>(null); // Ref để cuộn FlatList
-  const isUserScrolling = useRef<boolean>(false); // Cờ đánh dấu người dùng đang cuộn
-  const previousMessageCount = useRef<number>(0); // Đếm số lượng tin nhắn trước đó
+  const flatListRef = useRef<FlatList>(null); 
+  const isUserScrolling = useRef<boolean>(false); 
+  const previousMessageCount = useRef<number>(0); 
   const [showNewMessageAlert, setShowNewMessageAlert] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
   
   const isCloseToTop = ({ contentOffset }: any) => {
     const paddingToTop = 100;
@@ -59,7 +68,7 @@ const Chat: React.FC<Props> = ({ navigation }) => {
     error,
     loadMoreMessages,
     hasMore,
-  } = useChat('', 30, friendId);
+  } = useChat('', 50, friendId);
 
   useEffect(() => {
     ProfileService.getId().then((id) => {
@@ -156,50 +165,67 @@ const Chat: React.FC<Props> = ({ navigation }) => {
     setNewMessage('');
   };
 
-  /* Mở camera để chụp ảnh/gửi video */
-  const openCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Không có quyền truy cập camera');
-      return;
-    }
+  // Hàm xử lý media (ảnh hoặc video)
+  const handleMedia = async (asset: Asset | undefined) => {
+    if (!asset || !asset.uri || !asset.type) return;
 
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images', 'videos'],
-      quality: 1,
-    });
+    const uri = asset.uri;
+    const type = asset.type;
 
-    if (!result.canceled) {
-      const asset = result.assets[0]; 
-      const uri = asset.uri;
-      const type = asset.type;
-
-      if (type === 'image') sendMessage('image', uri);
-      else if (type === 'video') sendMessage('video', uri);
+    try {
+      if (type.startsWith('image')) {
+        const imageUrl = await FirebaseService.uploadImage_chat(uri);
+        if (imageUrl) {
+          sendMessage('image', imageUrl.urlPublicImageChat);
+        }
+      } else if (type.startsWith('video')) {
+        const videoUrl = await CloudinaryService.uploadVideo_chat(uri);
+        if (videoUrl) {
+          sendMessage('video', videoUrl.urlPublicVideo); 
+        }
+      } else {
+        console.warn('Không hỗ trợ định dạng media:', type);
+      }
+    } catch (error) {
+      console.error('Lỗi khi upload media:', error);
     }
   };
 
-  /* Mở thư viện để chọn ảnh/video */
+  // Mở camera
+  const openCamera = (mode: 'photo' | 'video') => {
+    launchCamera(
+      {
+        mediaType: mode === 'photo' ? 'photo' : 'video',
+        cameraType: 'back',
+        videoQuality: 'high', 
+        durationLimit: 60,
+      },
+      async (response) => {
+        if (response.didCancel || response.errorCode) {
+          console.warn('Camera bị hủy hoặc lỗi:', response.errorMessage);
+          return;
+        }
+        const asset = response.assets?.[0];
+        await handleMedia(asset);
+      }
+    );
+  };
+
+  // Mở thư viện ảnh
   const openGallery = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Không có quyền truy cập thư viện');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images', 'videos'],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const asset = result.assets[0];
-      const uri = asset.uri;
-      const type = asset.type;
-
-      if (type === 'image') sendMessage('image', uri);
-      else if (type === 'video') sendMessage('video', uri);
-    }
+    launchImageLibrary(
+      {
+        mediaType: 'mixed',
+      },
+      async (response) => {
+        if (response.didCancel || response.errorCode) {
+          console.warn('Gallery bị hủy hoặc lỗi:', response.errorMessage);
+          return;
+        }
+        const asset = response.assets?.[0];
+        await handleMedia(asset);
+      }
+    );
   };
 
   /* Xử lý cuộn và cập nhật chiều cao nội dung */
@@ -271,7 +297,7 @@ const Chat: React.FC<Props> = ({ navigation }) => {
                   styles.messageBubble, 
                   item.senderId === myId ? styles.myMessage : styles.friendMessage 
                 ]}>
-                {item.message?.type === 'text' && (
+                {item.message.type === 'text' && (
                   <Text
                     style={[ 
                       item.senderId === myId ? styles.myMessageText : styles.friendMessageText 
@@ -280,10 +306,10 @@ const Chat: React.FC<Props> = ({ navigation }) => {
                     {item.message.text}
                   </Text>
                 )}
-                {item.message?.type === 'image' && item.message.mediaUrl && (
+                {item.message.type === 'image' && item.message.mediaUrl && (
                   <Image source={{ uri: item.message.mediaUrl }} style={styles.image} resizeMode="contain" />
                 )}
-                {item.message?.type === 'video' && item.message.mediaUrl && (
+                {item.message.type === 'video' && item.message.mediaUrl && (
                   <Video source={{ uri: item.message.mediaUrl }} style={styles.video} controls repeat resizeMode="contain" paused={true} />
                 )}
 
@@ -317,13 +343,48 @@ const Chat: React.FC<Props> = ({ navigation }) => {
             }}
           >
             <Text style={styles.newMessageText}>Tin nhắn mới</Text>
+            <Ionicons name="chevron-down" style={styles.newMessageText}/>
           </TouchableOpacity>
         )}
 
         <View style={styles.inputContainer}>
-          <TouchableOpacity onPress={openCamera} style={styles.iconsButton}>
+          <TouchableOpacity onPress={() => setShowOptions(true)} style={styles.iconsButton}>
             <Ionicons name="camera" style={styles.icons} />
           </TouchableOpacity>
+          {showOptions && (
+            <Modal
+              transparent
+              animationType="fade"
+              visible={showOptions}
+              onRequestClose={() => setShowOptions(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => setShowOptions(false)}>
+                <View style={styles.modalOverlay}>
+                  <TouchableWithoutFeedback>
+                    <View style={styles.optionBox}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowOptions(false);
+                          openCamera('photo');
+                        }}
+                      >
+                        <Text style={styles.option}>Chụp ảnh</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowOptions(false);
+                          openCamera('video');
+                        }}
+                      >
+                        <Text style={styles.option}>Quay video</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+          )}
+
           <TouchableOpacity onPress={openGallery} style={styles.iconsButton}>
             <Ionicons name="image" style={styles.icons} />
           </TouchableOpacity>

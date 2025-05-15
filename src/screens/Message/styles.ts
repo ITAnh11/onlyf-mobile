@@ -41,20 +41,37 @@ const styles = StyleSheet.create({
     borderColor: Colors.border_avt2,
     marginRight: 20,
   },
+  unreadAvatar: {
+    borderColor: Colors.border_avt,
+  },
   name: {
     fontSize: 17,
     color: Colors.primary_text,
     fontWeight: 'bold',
     marginBottom: 5,
   },
+  unreadName: {
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
   timeAgo: {
     fontSize: 12,
     color: Colors.secondary_text,
   },
+  unreadTimeAgo: {
+    fontWeight: 'bold',
+    fontSize: 13,
+    color: Colors.primary_text,
+  },
   lastMessage: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.secondary_text,
   },  
+  unreadMessage: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: Colors.primary_text,
+  },
   loadingText: {
     textAlign: 'center',
     padding: 20,

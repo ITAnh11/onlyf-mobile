@@ -42,7 +42,13 @@ const Message: React.FC<Props> = ({ navigation }) => {
           friends.map(async (friend) => {
             const msg = await fetchLatestMessage(friend.friend.id);
             const messageText =
-              msg?.message.text || (msg?.message.mediaUrl ? 'Ảnh/Video' : 'Chưa có tin nhắn');
+              msg?.message.type === 'text'
+                ? msg?.message.text
+                : msg?.message.type === 'image'
+                ? 'Hình ảnh'
+                : msg?.message.type === 'video'
+                ? 'Video'
+                : 'Chưa có tin nhắn';
 
             return {
               friendId: friend.friend.id,
@@ -50,6 +56,7 @@ const Message: React.FC<Props> = ({ navigation }) => {
               senderId: msg?.senderId || null,
               message: messageText,
               createdAt: msg?.message.createdAt || null,
+              status: msg?.message.status || null,
             };
           })
         );
@@ -76,8 +83,10 @@ const Message: React.FC<Props> = ({ navigation }) => {
       const messageText =
         message.type === 'text'
           ? message.text
-          : message.type === 'image' || message.type === 'video'
-          ? 'Ảnh/Video'
+          : message.type === 'image' 
+          ? 'Hình ảnh'
+          : message.type === 'video'
+          ? 'Video'
           : 'Tin nhắn';
 
       setLatestMessages((prev) => {
@@ -86,6 +95,7 @@ const Message: React.FC<Props> = ({ navigation }) => {
           ...prev[existingIndex],
           message: messageText,
           createdAt: new Date().toISOString(),
+          status: message.status,
         };
 
         let updatedList;
@@ -115,6 +125,8 @@ const Message: React.FC<Props> = ({ navigation }) => {
     friendUsername: string,
     avatar: string
   ) => {
+    socket?.emit('markMessageAsRead', { senderId: friendId });
+
     navigation.navigate('Chat', {
       friendId,
       friendName,
@@ -156,6 +168,8 @@ const Message: React.FC<Props> = ({ navigation }) => {
       }
     }
   
+    const isUnread = item.createdAt && item.senderId !== myId && item.status !== 'read';
+
     return (
       <TouchableOpacity
         onPress={() =>
@@ -174,14 +188,17 @@ const Message: React.FC<Props> = ({ navigation }) => {
               ? { uri: item.friend.profile.urlPublicAvatar }
               : require('../../assets/avatar_placeholder.png')
           }
-          style={styles.avatar}
+          style={[styles.avatar, isUnread && styles.unreadAvatar]}
         />
         <View>
-          <Text style={styles.name}>
+          <Text style={[styles.name, isUnread && styles.unreadName]} numberOfLines={1}>
             {item.friend.profile.name}
-            {timeAgo ? <Text style={styles.timeAgo}>{`  ·  ${timeAgo}`}</Text> : null}
+            {timeAgo ? <Text style={[styles.timeAgo, isUnread && styles.unreadTimeAgo]}>{`  ·  ${timeAgo}`}</Text> : null}
           </Text>
-          <Text style={styles.lastMessage} numberOfLines={1}>
+          <Text style={[
+            styles.lastMessage,
+            isUnread && styles.unreadMessage, 
+          ]} numberOfLines={1}>
             {item.senderId === myId ? 'Bạn: ' : ''}
             {item.message.length > 20
               ? item.message.slice(0, 20) + '...'

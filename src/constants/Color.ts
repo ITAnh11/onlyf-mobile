@@ -5,7 +5,7 @@ const Colors = {
     primary_background: '#111111', // màu nền xám đen
     secondary_background: '#EAA905', // vàng
     black_background: '#000000', // màu nền đen
-    primary_text: '#FEFEFE', // màu chữ trắng
+    primary_text: '#FFFFFF', // màu chữ trắng
     secondary_text: '#C7C4BF', // màu chữ xám nhạt
     tertiary_text: '#0C0C0C', // màu chữ đen
     yellow_button: '#FFB700', // nút vàng
@@ -18,7 +18,7 @@ const Colors = {
     border_avt2: '#4E4E4E', // màu xám
     myMessage: '#FFFFFFCC', // màu xám nhạt
     friendMessage: '#59595866', // màu xám đậm
-    newMessage: '#f6ff7d44', // màu vàng
+    newMessage: '#cfc38f', 
 }
   
   export default Colors;

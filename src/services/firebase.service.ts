@@ -45,5 +45,25 @@ export class FirebaseService {
         }
     }
 
+    //Trả về liên kết ảnh từ đoạn chat
+    static async uploadImage_chat(uri: string): Promise<{ pathImageChat: string; urlPublicImageChat: string } | null> {
+        try {
+            const response = await fetch(uri);
+            const blob = await response.blob();
+
+            const ID = await ProfileService.getId();
+
+            const pathImageChat = `onlyf/user_${ID}/chat/${Date.now()}.jpg`;
+            const imageRef = ref(storage, pathImageChat);
+
+            await uploadBytes(imageRef, blob);
+            const urlPublicImageChat = await getDownloadURL(imageRef);
+
+            return { pathImageChat, urlPublicImageChat };
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            return null;
+        }
+    }
 }
 

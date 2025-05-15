@@ -144,9 +144,29 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   newMessageText: {
-    color: Colors.primary_text,
+    color: Colors.tertiary_text,
     fontWeight: 'bold',
-  },  
+    fontSize: 14,
+    textAlign: 'center',
+  }, 
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  optionBox: {
+    position: 'absolute',
+    bottom: 60,
+    left: 20,
+    backgroundColor: Colors.white_button,
+    borderRadius: 8,
+    padding: 10,
+    zIndex: 999,
+  },
+  option: {
+    paddingVertical: 5,
+    fontSize: 16,
+    color: Colors.tertiary_text,
+  },
 });
 
 export default styles;
