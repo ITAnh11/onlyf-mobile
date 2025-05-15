@@ -16,11 +16,11 @@ type Props = {
 
 const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route }) => {
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [premium, setPremium] = useState(false); // Trạng thái premium
+  const [premium, setPremium] = useState(false); {/*Trạng thái premium*/}
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const profile = await ProfileService.getProfile(); // Lấy thông tin người dùng từ local
+      const profile = await ProfileService.getProfile(); {/*Lấy thông tin người dùng từ local*/}
       setUserProfile(profile);
     };
 
@@ -30,9 +30,9 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
 
   useEffect(() => {
     const checkPremiumStatus = async () => {
-      const isPremium = await SecureStore.getItemAsync('isPremium'); // Lấy trạng thái premium từ local storage
+      const isPremium = await SecureStore.getItemAsync('isPremium'); {/*Lấy trạng thái premium từ local storage*/}
       if(isPremium =='true'){
-      setPremium(isPremium === 'true'); // Cập nhật trạng thái premium
+      setPremium(isPremium === 'true'); {/*Cập nhật trạng thái premium*/}
     };
 
     }
@@ -44,9 +44,9 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     React.useCallback(() => {
       const fetchAndSyncProfile = async () => {
         try {
-          const profile = await ProfileApi.getProfile(); // Lấy thông tin từ server
-          await ProfileService.saveProfile(profile); // Lưu vào local
-          setUserProfile(profile); // Cập nhật state
+          const profile = await ProfileApi.getProfile(); {/*Lấy thông tin từ server*/}
+          await ProfileService.saveProfile(profile); {/*Lưu vào local*/}
+          setUserProfile(profile);
         }
         catch (error) {
           console.error('Error syncing profile:', error);
@@ -57,10 +57,10 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
   }, [])
   );
 
-  // Khởi tạo dispatch từ Redux
+  {/* Khởi tạo dispatch từ Redux*/}
   const dispatch = useDispatch();
 
-  // Hàm xử lý đăng xuất
+  {/* Hàm xử lý đăng xuất*/}
   const handleLogout = async () => {
     const refreshToken = await TokenService.getRefreshToken();
     if (!refreshToken) {
@@ -82,7 +82,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
         console.error("Lỗi khi kiểm tra trạng thái đăng nhập:", error);
       }
     } 
-    // Xóa thông tin người dùng khỏi local storage
+    {/* Xóa thông tin người dùng khỏi local storage*/}
     try {
       await ProfileService.removeProfile();
       console.log("Thông tin người dùng đã được xóa khỏi thiết bị.");
@@ -91,7 +91,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     }
 
     FCM.deleteTokenFromSecureStore();
-    dispatch(clearPosts()); // Xóa tất cả bài viết trong Redux store
+    dispatch(clearPosts()); {/* Xóa tất cả bài viết trong Redux store*/}
     TokenService.removeTokens();
     
     navigation.reset(
@@ -103,7 +103,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     alert("Đăng xuất thành công!");
   }
 
-  // Hàm xóa tài khoản
+  {/* Hàm xóa tài khoản*/}
   const handleDeleteAccount = async () => {
     const accessToken = await TokenService.getAccessToken();
     if (!accessToken) {
@@ -220,7 +220,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                       {/* Ô hiển thị username */}
                       <View style={[styles.box, { flex: 1 }, { marginRight: 10 }]}>
                         <TouchableOpacity
-                          onPress={() => navigation.navigate('EditUserName')} // Điều hướng sang trang EditName
+                          onPress={() => navigation.navigate('EditUserName')} 
                         >
                           {userProfile ? (
                           <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>@{userProfile.username}</Text>
@@ -230,7 +230,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                       {/* Ô sửa tên */}
                       <View style={[styles.box, { flex: 1 }]}>
                         <TouchableOpacity
-                          onPress={() => navigation.navigate('EditName')} // Điều hướng sang trang EditName
+                          onPress={() => navigation.navigate('EditName')} 
                         >
                           <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>Sửa thông tin</Text>
                         </TouchableOpacity>
@@ -242,7 +242,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                   case 'addfriend':
                     return (
                       <TouchableOpacity
-                        onPress={() => navigation.navigate('Share')}> // Điều hướng sang trang Share đường link kết bạn
+                        onPress={() => navigation.navigate('Share')}> 
                       <View
                         style={{
                           flexDirection: 'row',
@@ -291,7 +291,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                               borderRadius: 5,
                               width: '100%',
                             }}
-                            onPress={() => navigation.navigate('Payment')} // Điều hướng sang trang Upgrade
+                            onPress={() => navigation.navigate('Payment')} 
                           >
                             <Text style={{ color: 'white', fontSize: 16 }}>Upgrade Premium</Text>
                           </TouchableOpacity>
@@ -403,7 +403,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                               borderRadius: 5,
                               width: '100%',
                             }}
-                            onPress={() => navigation.navigate('ChangePassword')} // Điều hướng sang trang ChangePassword
+                            onPress={() => navigation.navigate('ChangePassword')} 
                           >
                             <Text style={{ color: 'white', fontSize: 16 }}>Đổi mật khẩu</Text>
                           </TouchableOpacity>
@@ -416,7 +416,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                               borderRadius: 5,
                               width: '100%',
                             }}
-                            onPress={() => navigation.navigate('LoggedDevices')} // Điều hướng sang trang LoggedDevices
+                            onPress={() => navigation.navigate('LoggedDevices')} 
                           >
                             <Text style={{ color: 'white', fontSize: 16 }}>Các thiết bị đăng nhập</Text>
                           </TouchableOpacity>  
@@ -580,7 +580,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                                   },
                                   {
                                     text: 'Có',
-                                    onPress: () => handleDeleteAccount(), // Gọi hàm xóa tài khoản nếu người dùng chọn "Có"
+                                    onPress: () => handleDeleteAccount(), 
                                   },
                                 ],
                                 { cancelable: false }
@@ -610,7 +610,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
           }}
           keyExtractor={(item, idex) => idex.toString()}
           contentContainerStyle={{ paddingTop: 30, paddingHorizontal: 20 }}
-          showsVerticalScrollIndicator={false} // Ẩn thanh cuộn dọc
+          showsVerticalScrollIndicator={false} 
         />
         </SafeAreaView>
   );
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000', // Màu nền cho camera
+    backgroundColor: '#000',
   },
   permissionText: {
     color: 'white',
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
     marginTop: 5,
-    alignSelf: 'center', // căn giữa theo chiều ngang
+    alignSelf: 'center', 
   },
   avatarImage: {
     width: '100%',

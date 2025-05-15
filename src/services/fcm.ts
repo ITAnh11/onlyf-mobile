@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import NotificationApi from "../networking/notification.api";
 import { Alert } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
+import notifee, { AndroidImportance } from "@notifee/react-native";
 
 export class FCM {
 
@@ -11,6 +12,33 @@ export class FCM {
   // Set navigation từ App.js hoặc nơi khởi tạo
   static setNavigation(nav: NavigationProp<any>) {
     this.navigation = nav;
+  }
+
+  static getChannelId(data: any): string {
+    if (data?.messageId && data?.postId) return 'comment';
+    if (data?.reactType && data?.postId) return 'reaction';
+    if (data?.senderId && !data?.postId) return 'friend_request';
+    if (data?.messageText && data?.senderId) return 'chat';
+    return 'default';
+  }
+
+  static async displayLocalNotification(title: string, body: string, data?: any) {
+    await notifee.requestPermission();
+
+    const channelId = this.getChannelId(data || {});
+
+    await notifee.displayNotification({
+      title,
+      body,
+      android: {
+        channelId,
+        smallIcon: 'ic_notification',
+        importance: AndroidImportance.HIGH,
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
   }
 
   static async requestUserPermission(): Promise<boolean> {
@@ -40,17 +68,34 @@ export class FCM {
     }
   }
 
+  static handledKeys = new Set<string>();
+
+  static getUniqueKey(data: any): string | null {
+    if (data?.messageId) return `reply-${data.messageId}`;
+    if (data?.reactType && data?.postId) return `react-${data.reactType}-${data.postId}`;
+    if (data?.senderId && !data?.postId) return `friend-${data.senderId}`;
+    return null;
+  }
+
   static async handleRemoteMessage(remoteMessage: any, isFromTap = false) {
     if (!remoteMessage) return;
     const { data, notification } = remoteMessage;
 
-    console.log("Handling notification:", data, notification);
+    const uniqueKey = this.getUniqueKey(data);
+    if (uniqueKey && this.handledKeys.has(uniqueKey)) {
+      console.log("Already handled:", uniqueKey);
+      return;
+    }
+    if (uniqueKey) {
+      this.handledKeys.add(uniqueKey);
+      setTimeout(() => this.handledKeys.delete(uniqueKey), 30000); // Xoá sau 30s
+    }
 
     if (data?.messageId && data?.postId) {
       // Reply to post
       console.log("Template: Reply to Post");
       const ms = data.messageText || notification?.body || "";
-      Alert.alert(`${data.senderName} replied to your post: ${ms}`);
+      await this.displayLocalNotification("New Reply", `${data.senderName}: ${ms}`,data);
 
       if (isFromTap && this.navigation) {
         this.navigation.navigate("PostDetail", { postId: data.postId });
@@ -59,10 +104,8 @@ export class FCM {
     } else if (data?.reactType && data?.postId) {
       // React to post
       console.log("Template: Reaction to Post");
-      Alert.alert(
-        "Reaction",
-        `${data.senderName} reacted with "${data.reactType}" to your post.`
-      );
+      const ms = data.reactType || notification?.body || "";
+      await this.displayLocalNotification("New Reaction", `${data.senderName} reacted: ${ms} to your post`,data);
 
       if (isFromTap && this.navigation) {
         this.navigation.navigate("PostDetail", { postId: data.postId });
@@ -71,7 +114,7 @@ export class FCM {
     } else if (data?.senderId && !data?.postId) {
       // Friend request
       console.log("Template: Friend Request");
-      Alert.alert("Friend Request", `${data.senderName} sent you a friend request.`);
+      await this.displayLocalNotification("Friend Request", `${data.senderName} sent you a friend request.`,data);
 
       if (isFromTap && this.navigation) {
         this.navigation.navigate("FriendRequests");
@@ -81,8 +124,7 @@ export class FCM {
       // Default: Message or unknown
       console.log("New message");
       const ms = data.messageText || notification?.body || "";
-      Alert.alert("New Message", `${data.senderName}: ${ms}`
-      );
+      await this.displayLocalNotification("New Message", `${data.senderName}: ${ms}`,data);
 
       if (isFromTap && data?.senderId && this.navigation) {
         this.navigation.navigate("Chat", { userId: data.senderId });
@@ -142,6 +184,13 @@ export class FCM {
     } catch (error) {
       console.error("Error getting FCM token:", error);
     }
+
+    // Tạo các notification channels
+    await notifee.createChannel({ id: 'default', name: 'Other Notifications', importance: AndroidImportance.DEFAULT });
+    await notifee.createChannel({ id: 'comment', name: 'Post Replies', importance: AndroidImportance.HIGH });
+    await notifee.createChannel({ id: 'reaction', name: 'Reactions', importance: AndroidImportance.DEFAULT });
+    await notifee.createChannel({ id: 'friend_request', name: 'Friend Requests', importance: AndroidImportance.DEFAULT });
+    await notifee.createChannel({ id: 'chat', name: 'Chat Messages', importance: AndroidImportance.HIGH });
 
     messaging().onNotificationOpenedApp((remoteMessage) => {
       console.log(
