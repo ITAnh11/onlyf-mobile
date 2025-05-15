@@ -56,6 +56,9 @@ const Chat: React.FC<Props> = ({ navigation }) => {
   const previousMessageCount = useRef<number>(0); 
   const [showNewMessageAlert, setShowNewMessageAlert] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState<{ type: 'image' | 'video', url: string } | null>(null);
+
   
   const isCloseToTop = ({ contentOffset }: any) => {
     const paddingToTop = 100;
@@ -307,19 +310,38 @@ const Chat: React.FC<Props> = ({ navigation }) => {
                   </Text>
                 )}
                 {item.message.type === 'image' && item.message.mediaUrl && (
-                  <Image source={{ uri: item.message.mediaUrl }} style={styles.image} resizeMode="contain" />
-                )}
+                  <TouchableOpacity onPress={() => {
+                    setSelectedMedia({ type: 'image', url: item.message.mediaUrl });
+                    setIsModalVisible(true);
+                  }}>
+                    <Image source={{ uri: item.message.mediaUrl }} style={styles.image} resizeMode="contain" />
+                  </TouchableOpacity>                )}
                 {item.message.type === 'video' && item.message.mediaUrl && (
-                  <Video source={{ uri: item.message.mediaUrl }} style={styles.video} controls repeat resizeMode="contain" paused={true} />
+                  <TouchableOpacity onPress={() => {
+                    setSelectedMedia({ type: 'video', url: item.message.mediaUrl });
+                    setIsModalVisible(true);
+                  }}>
+                    <Video source={{ uri: item.message.mediaUrl }} style={styles.video} controls repeat resizeMode="contain" paused={true} />
+                  </TouchableOpacity>
                 )}
 
                 {item.postId && (
                   <TouchableOpacity>
                     {item.post.urlPublicImage && (
-                      <Image source={{ uri: item.post.urlPublicImage }} style={styles.image} resizeMode="contain" />
+                      <TouchableOpacity onPress={() => {
+                        setSelectedMedia({ type: 'image', url: item.post.urlPublicImage });
+                        setIsModalVisible(true);
+                      }}>
+                        <Image source={{ uri: item.post.urlPublicImage }} style={styles.image} resizeMode="contain" />
+                      </TouchableOpacity>
                     )}
                     {item.post.hlsUrlVideo && (
-                      <Video source={{ uri: item.post.hlsUrlVideo }} style={styles.video} controls repeat resizeMode="contain" paused={true} />
+                      <TouchableOpacity onPress={() => {
+                        setSelectedMedia({ type: 'video', url: item.post.hlsUrlVideo });
+                        setIsModalVisible(true);
+                      }}>
+                        <Video source={{ uri: item.post.hlsUrlVideo }} style={styles.video} controls repeat resizeMode="contain" paused={true} />
+                      </TouchableOpacity>
                     )}
                   </TouchableOpacity>
                 )}
@@ -407,6 +429,48 @@ const Chat: React.FC<Props> = ({ navigation }) => {
               <Ionicons name="send" style={styles.iconSend} />
             </TouchableOpacity>
           </View>
+
+          <Modal
+            visible={isModalVisible}
+            transparent={false}  // <-- quan trọng với video
+            animationType="slide"
+            onRequestClose={() => setIsModalVisible(false)}
+          >
+            <View style={{ flex: 1, backgroundColor: 'black' }}>
+              {/* Close Button */}
+              <TouchableOpacity
+                onPress={() => setIsModalVisible(false)}
+                style={{
+                  position: 'absolute',
+                  top: 40,
+                  right: 20,
+                  zIndex: 10,
+                  backgroundColor: 'rgba(0,0,0,0.6)',
+                  padding: 10,
+                  borderRadius: 20,
+                }}
+              >
+                <Text style={{ color: 'white', fontSize: 18 }}>✕</Text>
+              </TouchableOpacity>
+
+              {/* Media Viewer */}
+              {selectedMedia?.type === 'image' ? (
+                <Image
+                  source={{ uri: selectedMedia.url }}
+                  style={{ flex: 1, resizeMode: 'contain' }}
+                />
+              ) : selectedMedia?.type === 'video' ? (
+                <Video
+                  source={{ uri: selectedMedia.url }}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="contain"
+                  controls
+                  paused={false} // <- Cho tự động chạy
+                />
+              ) : null}
+            </View>
+          </Modal>
+
         </View>
       </View>
     </KeyboardAvoidingView>
