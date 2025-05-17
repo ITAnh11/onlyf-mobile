@@ -1,39 +1,59 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import useRequests from '../hooks/useRequest'; 
 import { acceptFriendRequest, rejectFriendRequest } from '../../../networking/friend.api';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '../../../constants/Color';
+import { NavigationProp } from '@react-navigation/native';
 
 type Props = {
+  navigation: NavigationProp<any>;
   refreshCounter: number;
   onRefresh: () => void;
+  onRequestCountChange?: (count: number) => void;
 };
 
-const FriendRequestList: React.FC<Props> = ({ refreshCounter, onRefresh }) => {
+const FriendRequestList: React.FC<Props> = ({ refreshCounter, onRefresh, onRequestCountChange, navigation }) => {
   const { requests, loading, error, fetchFriendRequests } = useRequests();
   const [showAll, setShowAll] = React.useState(false);
   const visibleRequests = showAll ? requests : requests.slice(0, 5);
 
   useEffect(() => {
-    fetchFriendRequests();
-  }, [refreshCounter]);
+    fetchFriendRequests().then(() => {
+      if (onRequestCountChange) {
+        onRequestCountChange(requests.length);
+      }
+    });
+  }, [refreshCounter, requests.length]);
 
   const handleAcceptRequest = async (requestId: number) => {
     try {
       await acceptFriendRequest(requestId);
-      console.log('Friend request accepted!');
+      console.log('Kết bạn thành công!');
       fetchFriendRequests(); 
       onRefresh(); 
-    } catch (err) {
-      console.error('Error accepting friend request:', err);
+    } catch (err: any) {
+      if (err.response && err.response.status === 400) {
+        Alert.alert('Bạn bè đã đầy', 'Vui lòng nâng cấp tài khoản lên Premium để thêm bạn mới không giới hạn.',
+          [
+            { text: 'Hủy', style: 'cancel' },
+            { text: 'Đồng ý', onPress: () => {
+              navigation.navigate('Payment')
+            }}
+          ]
+        );
+      }
+      else {
+        console.error('Error accepting friend request:', err);
+        Alert.alert('Lỗi', 'Đã xảy ra lỗi khi chấp nhận lời mời kết bạn. Vui lòng thử lại sau.');
+      }
     }
   };
 
   const handleRejectRequest = async (requestId: number) => {
     try {
       await rejectFriendRequest(requestId);
-      console.log('Friend request rejected!');
+      console.log('Từ chối lời mời kết bạn thành công!');
       fetchFriendRequests();
       onRefresh();
     } catch (err) {

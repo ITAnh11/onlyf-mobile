@@ -10,6 +10,8 @@ import FCM from '../../services/fcm';
 import { useDispatch } from 'react-redux';
 import { clearPosts } from '../Home/Global/PostSlice';
 import LinkApi from '../../networking/link.api';
+import { Ionicons } from '@expo/vector-icons';
+
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -19,6 +21,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
   const [userProfile, setUserProfile] = useState<any>(null);
   const [premium, setPremium] = useState(false); {/*Trạng thái premium*/}
   const [inviteLink, setInviteLink] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -176,15 +179,11 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                       position: 'absolute',
                       top: 10,
                       right: 10,
-                      width: 40,
-                      height: 40,
-                      backgroundColor: 'transparent',
-                      borderRadius: 20,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <Image source={require("../../assets/home.png")} resizeMode="contain" style={{ width: 45, height: 45 }} />
+                    <Ionicons name="arrow-back" size={24} color="white" />
                   </TouchableOpacity>
                   {/* Avatar lớn ở giữa*/}
                   <TouchableOpacity style={styles.avatarButton}

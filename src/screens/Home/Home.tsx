@@ -39,6 +39,20 @@ const Home: React.FC<Props> = ({ navigation }) => {
           setUserID(id); // Cập nhật state userId với giá trị từ ProfileService
       }
   });
+
+  // State để xem người dùng có muốn nạp không
+  const [isComfirmedPremium, setIsComfirmedPremium] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+  ProfileService.isPremium()
+    .then((isPremium) => {
+      setIsPremium(isPremium);
+  });
+  useEffect(() => {
+    if (isComfirmedPremium) {
+      navigation.navigate("Payment");
+      setIsComfirmedPremium(false);
+    }
+  }, [isComfirmedPremium]);
   
   // State để theo dõi trạng thái quyền
   const [permission, requestPermission] = useCameraPermissions();
@@ -49,6 +63,8 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
   // State để theo dõi trạng thái load các bài post
   const [loading, setLoading] = useState(false);
+
+
 
   // Khởi tạo dispatch từ Redux
   const dispatch = useDispatch(); 
@@ -312,7 +328,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
             {permissionsGranted ? (
               compressedUri ? (
                 <View style={styles.camera_container}>
-                  <Posting compressedUri={compressedUri} setCompressedUri={setCompressedUri} setIsPosted={setIsPosted}/>
+                  <Posting compressedUri={compressedUri} setCompressedUri={setCompressedUri} setIsPosted={setIsPosted} setIsComfirmedPremium={setIsComfirmedPremium}/>
                 </View>
               ) : (
                 <View style={styles.camera_container}>
@@ -351,7 +367,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
       const FIVE_MINUTES = 5 * 60 * 1000;
       const enoughTimePassed = now - lastShownRef.current >= FIVE_MINUTES;
   
-      if (enoughTimePassed && currentIndexRef.current !== 0) {
+      if (enoughTimePassed && currentIndexRef.current !== 0 && isPremium === false) {
         const unsubscribe = interstitial.addAdEventListener(AdEventType.LOADED, () => {
           interstitial.show();
           lastShownRef.current = Date.now();

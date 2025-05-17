@@ -5,11 +5,7 @@ import { head } from "lodash";
 const styles = StyleSheet.create({
   message: {
     flex: 1,
-    backgroundColor: Colors.primary_background,
-  },
-  container: {
-    paddingBottom: 30,
-    backgroundColor: Colors.primary_background,
+    backgroundColor: Colors.black_background,
   },
   header: {
     flexDirection: 'row',
@@ -17,7 +13,7 @@ const styles = StyleSheet.create({
     height: 60,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    backgroundColor: Colors.primary_background,
+    backgroundColor: Colors.black_background,
     marginTop: '10%',
   },
   backButton: {
@@ -57,39 +53,41 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 10,
   },
-  sms : {
-    maxWidth: '75%',
-  },
   messageBubble: {
-    borderRadius: 15,
+    maxWidth: '75%',
+    borderRadius: 20,
     padding: 10,
     marginBottom: 10,
   },
   myMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: Colors.secondary_text,
+    backgroundColor: Colors.myMessage,
+  },
+  myMessageText: {
+    fontSize: 15,
     color: Colors.tertiary_text,
   },
   friendMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.yellow_button,
-    color: Colors.primary_text,
+    backgroundColor: Colors.friendMessage,
   },
-  messageText: {
-    color: Colors.tertiary_text,
+  friendMessageText: {
+    fontSize: 15,
+    color: Colors.primary_text,
   },
   time: {
     fontSize: 10,
-    color: Colors.tertiary_text,
-    textAlign: 'right',
-    marginTop: 4,
+    color: Colors.secondary_text,
+    textAlign: 'center',
+    margin: 5,
+
   },
   inputContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     padding: 20,
-    backgroundColor: Colors.primary_background,
+    backgroundColor: Colors.black_background,
     marginBottom: 5,
   },
   iconsButton: {
@@ -125,10 +123,49 @@ const styles = StyleSheet.create({
     color: Colors.yellow_button,
   },
   image: {
-    width: 200,
-    height: 200,
-    borderRadius: 15,
-    marginBottom: 10,
+    width: '100%',
+    height: undefined,
+    aspectRatio: 1,
+  },
+  video: {
+    width: '100%',
+    height: undefined,
+    aspectRatio: 1,
+    padding: 10,
+  },
+  newMessageAlert: {
+    position: 'absolute',
+    bottom: 80,
+    alignSelf: 'center',
+    backgroundColor: Colors.newMessage,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    zIndex: 1,
+  },
+  newMessageText: {
+    color: Colors.tertiary_text,
+    fontWeight: 'bold',
+    fontSize: 14,
+    textAlign: 'center',
+  }, 
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  optionBox: {
+    position: 'absolute',
+    bottom: 60,
+    left: 20,
+    backgroundColor: Colors.white_button,
+    borderRadius: 8,
+    padding: 10,
+    zIndex: 999,
+  },
+  option: {
+    paddingVertical: 5,
+    fontSize: 16,
+    color: Colors.tertiary_text,
   },
 });
 

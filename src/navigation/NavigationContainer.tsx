@@ -13,6 +13,8 @@ const linking = {
     screens: {
       Splash: '/payment/success',
       Payment: '/payment/cancel',
+      Home: '/share/post',
+      Friend: '/invite',
     },
   },
 };

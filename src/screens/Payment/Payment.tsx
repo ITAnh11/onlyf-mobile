@@ -2,12 +2,19 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Linking from 'expo-linking';
 import PaymentApi from '../../networking/payment.api'; 
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from '@react-navigation/native';
 
 export default function UpgradeScreen() {
+  const navigation = useNavigation();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   return (
     <View style={styles.container}>
+      {/* Nút quay lại */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={24} color="#fff" />
+      </TouchableOpacity>
       <Text style={styles.title}>Upgrade to Premium</Text>
 
       <View style={styles.planCard}>
@@ -80,6 +87,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 32,
     textAlign: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 48,
+    left: 24,
+    zIndex: 10,
   },
   planCard: {
     backgroundColor: '#1C1C1E',

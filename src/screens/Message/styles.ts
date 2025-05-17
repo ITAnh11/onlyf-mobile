@@ -4,11 +4,7 @@ import Colors from "../../constants/Color";
 const styles = StyleSheet.create({
   message: {
     flex: 1,
-    backgroundColor: Colors.primary_background,
-  },
-  container: {
-    paddingBottom: 30,
-    backgroundColor: Colors.primary_background,
+    backgroundColor: Colors.black_background,
   },
   header: {
     flexDirection: 'row',
@@ -16,7 +12,7 @@ const styles = StyleSheet.create({
     height: 60,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    backgroundColor: Colors.primary_background,
+    backgroundColor: Colors.black_background,
     marginTop: '10%',
   },
   backButton: {
@@ -45,16 +41,37 @@ const styles = StyleSheet.create({
     borderColor: Colors.border_avt2,
     marginRight: 20,
   },
+  unreadAvatar: {
+    borderColor: Colors.border_avt,
+  },
   name: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.primary_text,
     fontWeight: 'bold',
     marginBottom: 5,
   },
-  lastMessage: {
+  unreadName: {
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  timeAgo: {
+    fontSize: 12,
+    color: Colors.secondary_text,
+  },
+  unreadTimeAgo: {
+    fontWeight: 'bold',
     fontSize: 13,
-    color: '#888',
+    color: Colors.primary_text,
+  },
+  lastMessage: {
+    fontSize: 15,
+    color: Colors.secondary_text,
   },  
+  unreadMessage: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: Colors.primary_text,
+  },
   loadingText: {
     textAlign: 'center',
     padding: 20,

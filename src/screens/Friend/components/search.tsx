@@ -13,8 +13,10 @@ import { Ionicons } from '@expo/vector-icons';
 import UserItem from './user_search_item';
 import { useSearch, User } from '../hooks/useSearch';
 import Colors from '../../../constants/Color';
+import { NavigationProp } from '@react-navigation/native';
 
 type FriendSearchProps = {
+  navigation: NavigationProp<any>;
   onUserSelect: (user: User) => void;
   onRequestSent?: () => void;
   refreshCounter: number;
@@ -24,6 +26,7 @@ const FriendSearch: React.FC<FriendSearchProps> = ({
   onUserSelect,
   onRequestSent,
   refreshCounter,
+  navigation,
 }) => {
   const { searchText, setSearchText, results, loading } = useSearch();
   const [showAll, setShowAll] = React.useState(false);
@@ -38,6 +41,7 @@ const FriendSearch: React.FC<FriendSearchProps> = ({
           user={item}
           onRequestSent={onRequestSent}
           refreshCounter={refreshCounter}
+          navigation={navigation}
         />
       );
     },

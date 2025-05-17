@@ -4,6 +4,7 @@ import useFriendStatus from '../hooks/useFriendStatus';
 import type { FriendStatus } from '../hooks/useFriendStatus';
 import { sendFriendRequest } from '../../../networking/friend.api';
 import Colors from '../../../constants/Color';
+import { NavigationProp } from '@react-navigation/native';
 
 type User = {
   name: string;
@@ -15,6 +16,7 @@ type User = {
 };
 
 type Props = {
+  navigation: NavigationProp<any>;
   user: User;
   onRequestSent?: () => void;
   refreshCounter?: number;
@@ -36,7 +38,7 @@ const getButtonLabel = (status: FriendStatus) => {
   }
 };
 
-const UserItem: React.FC<Props> = ({ user, refreshCounter, onRequestSent }) => {
+const UserItem: React.FC<Props> = ({ user, refreshCounter, onRequestSent, navigation }) => {
   const { name, username, urlPublicAvatar, user: userInfo } = user;
   const { status, refetchStatus } = useFriendStatus(Number(userInfo?.id));
   const [isSending, setIsSending] = useState(false);
@@ -59,8 +61,20 @@ const UserItem: React.FC<Props> = ({ user, refreshCounter, onRequestSent }) => {
           onRequestSent?.();
         })
         .catch((error: any) => {
-          console.error('Error sending friend request:', error);
-          Alert.alert('Không thể gửi lời mời', 'Bạn đã gửi lời mời hoặc có lỗi xảy ra.');
+          if (error?.response?.status === 400) {
+            Alert.alert('Danh sách bạn bè đã đầy', 'Bạn đã đạt đến giới hạn thêm bạn bè. Vui lòng nâng cấp tài khoản lên Premium để thêm bạn mới không giới hạn.',
+              [
+                { text: 'Hủy', style: 'cancel' },
+                { text: 'Đồng ý', onPress: () => {
+                  navigation.navigate('Payment')
+                }}
+              ]
+            );
+          }
+          else {
+            console.error('Error sending friend request:', error);
+            Alert.alert('Không thể gửi lời mời', 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+          }
         })
         .finally(() => {
           setIsSending(false);

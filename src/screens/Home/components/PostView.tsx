@@ -7,6 +7,7 @@ import TokenService from '../../../services/token.service';
 import Video from 'react-native-video';
 import ProfileService from '../../../services/profile.service';
 
+
 type PostViewProps = {
   post: PostItem;
   setBackToHomePage: (backToHomePage : boolean) => void;
@@ -186,6 +187,11 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
     setShowOptions(false);
   }
 
+  //Hàm tải về
+  const downloadPost = async () => {
+    setShowOptions(false);
+  }
+
   //Hoàm tắt Option
   const cancelOption = () => {
     setShowOptions(false);
@@ -284,7 +290,7 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
         </TouchableOpacity>
       </View>
       {showOptions && (
-        <View style={{ position: 'absolute', height: 180, width: 150, backgroundColor: '#333333', right: 30, bottom: 100, borderRadius: 20 , borderWidth: 1, borderColor: '#EAA905'}}> 
+        <View style={{ position: 'absolute', height: 240, width: 150, backgroundColor: '#333333', right: 30, bottom: 100, borderRadius: 20 , borderWidth: 1, borderColor: '#EAA905'}}> 
           <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', width: 150, height: 60, paddingTop: 7 }} onPress={deletePost}>
             <Image source={require("../../../assets/delete.png")} resizeMode="contain" style={{ width: 19, height: 19, marginLeft: 20 }} />
             <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16, marginLeft: 10 }}>Xóa</Text>
@@ -292,6 +298,10 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
           <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', width: 150, height: 60, paddingBottom: 10 }} onPress={sharePost}>
             <Image source={require("../../../assets/share.png")} resizeMode="contain" style={{ width: 20, height: 20, marginLeft: 20 }} />
             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, marginLeft: 10 }}>Chia sẻ</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', width: 150, height: 60, paddingBottom: 10 }} onPress={downloadPost}>
+            <Image source={require("../../../assets/download.png")} resizeMode="contain" style={{ width: 24, height: 24, marginLeft: 20 }} />
+            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, marginLeft: 10 }}>Tải về</Text>
           </TouchableOpacity>
           <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', width: 150, height: 60, paddingBottom: 10 }} onPress={cancelOption}>
             <Image source={require("../../../assets/cancel.png")} resizeMode="contain" style={{ width: 24, height: 24, marginLeft: 20 }} />

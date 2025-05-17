@@ -8,16 +8,21 @@ import Colors from '../../../constants/Color';
 type Props = {
   refreshCounter: number;
   onRequestSent?: () => void;
+  onSentRequestCountChange?: (count: number) => void;
 };
 
-const SentFriendRequestList: React.FC<Props> = ({ refreshCounter, onRequestSent }) => {
+const SentFriendRequestList: React.FC<Props> = ({ refreshCounter, onRequestSent, onSentRequestCountChange }) => {
   const { sentRequests, loading, error, fetchSentRequests } = useSentRequests();
   const [showAll, setShowAll] = React.useState(false);
   const visibleSendRequests = showAll ? sentRequests : sentRequests.slice(0, 5);
 
   useEffect(() => {
-    fetchSentRequests(); 
-  }, [refreshCounter]); 
+    fetchSentRequests().then(() => {
+      if (onSentRequestCountChange) {
+        onSentRequestCountChange(sentRequests.length);
+      }
+    });
+  }, [refreshCounter, sentRequests.length]);
 
   if (loading) {
     return (
@@ -39,7 +44,7 @@ const SentFriendRequestList: React.FC<Props> = ({ refreshCounter, onRequestSent 
   const handleRevokeRequest = (requestId: number) => {
     revokeFriendRequest(requestId)
       .then(() => {
-        console.log('Friend request revoked!');
+        console.log('Yêu cầu kết bạn đã hủy thành công!');
         fetchSentRequests(); 
         onRequestSent?.();
       })
