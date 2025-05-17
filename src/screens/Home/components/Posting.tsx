@@ -1,25 +1,30 @@
-import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ImageBackground, TextInput, ActivityIndicator } from 'react-native'
+import { View, Text, Image, Button, StyleSheet, TouchableOpacity, ImageBackground, TextInput, ActivityIndicator, Alert } from 'react-native'
 import React, { useState } from 'react';
 import {FirebaseService} from '../../../services/firebase.service';
 import apiClient from '../../../networking/apiclient';
 import TokenService from '../../../services/token.service';
 import { CloudinaryService } from '../../../services/cloudinary.service';
 import { Video } from 'react-native-video';
-
+import ProfileService from '../../../services/profile.service';
+import { useNavigation } from '@react-navigation/native';
 
 interface PostingProps {
     compressedUri: string | null;
     setCompressedUri: (compressedUri: string|null) => void;
     setIsPosted: (isPosted: boolean) => void;
+    setIsComfirmedPremium: (isComfirmedPremium: boolean) => void;
 }
 
-const Posting = ({compressedUri,setCompressedUri,setIsPosted} : PostingProps) => {
+const Posting = ({compressedUri,setCompressedUri,setIsPosted,setIsComfirmedPremium} : PostingProps) => {
   const [caption, setCaption] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  //Hàm trang trí bài post
-  async function style_posting() {
-    
-  }
+
+  //kiểm tra xem người dùng có phải là premium hay không
+  const [isPremium, setIsPremium] = useState(false);
+  ProfileService.isPremium()
+    .then((isPremium) => {
+      setIsPremium(isPremium);
+    });
 
   //Hàm đăng bài
   async function post() {
@@ -27,6 +32,29 @@ const Posting = ({compressedUri,setCompressedUri,setIsPosted} : PostingProps) =>
       try {
         // Upload the video to Firebase and get the URL
         setIsLoading(true); // Bắt đầu loading
+        if (isPremium === false) {
+          Alert.alert(
+            "Cần nạp Premium",
+            "Bạn cần nâng cấp Premium để đăng video. Bạn có muốn nạp ngay không?",
+            [
+              {
+                text: "Hủy",
+                style: "cancel",
+                onPress: () => {
+                  setCompressedUri(null);
+                }
+              },
+              {
+                text: "Nạp ngay",
+                onPress: () => {
+                  setIsComfirmedPremium(true);
+                  setCompressedUri(null);
+                }
+              }
+            ]
+          );
+          return;
+        }
         const URL = await CloudinaryService.uploadVideo_post(compressedUri);
         const accessToken = await TokenService.getAccessToken();
 
@@ -144,7 +172,7 @@ const Posting = ({compressedUri,setCompressedUri,setIsPosted} : PostingProps) =>
                 />
               )}
             </TouchableOpacity>
-            <TouchableOpacity style={styles.edit_button} onPress={() => style_posting()}>
+            <TouchableOpacity style={styles.edit_button}>
                 <Image source={require("../../../assets/Edit.png")} resizeMode="contain" style={{ width:50, height: 50 }}/>
             </TouchableOpacity>
         </View>

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, Dimensions, FlatList, TouchableOpacity, ImageBackground } from 'react-native';
 import { PostItem } from './Type';
+import Video from 'react-native-video';
 
 interface AllImageViewProps {
   setIsAllImageView: (isAllImageView: boolean) => void;
@@ -19,11 +20,23 @@ const AllImageView = ({ setIsAllImageView, danhSach, fetchCards, idItem, setBack
     return (
       <View style={{ flex: 1, margin: 3, aspectRatio: 1 }}>
         <TouchableOpacity onPress={() => {setPostIndexToLink(index), setIsAllImageView(false), setIsLinkToPostView(true)}}>
+        {item.type === 'image' ? (
           <ImageBackground
             source={{ uri: item.urlPublicImage }}
             resizeMode="cover"
             style={{ height: '100%', overflow: 'hidden', aspectRatio: 1, borderRadius: 10 }}
           />
+        ):(
+          <View style={{ height: '100%', overflow: 'hidden', aspectRatio: 1, borderRadius: 10 }}>
+            <Video
+              style={{ height: '100%', overflow: 'hidden', aspectRatio: 1, borderRadius: 10 }}
+              source={{ uri: item.urlPublicVideo }}
+              paused={true} // Tạm dừng video 
+              controls={false} // Ẩn các nút điều khiển
+              resizeMode="cover"
+            />
+          </View>
+        )}          
         </TouchableOpacity>
       </View>
     );
