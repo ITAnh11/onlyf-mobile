@@ -1,5 +1,5 @@
 import { View, Text, Image, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated, TouchableWithoutFeedback } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PostItem } from './Type';
 import apiClient from '../../../networking/apiclient';
@@ -116,6 +116,21 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
     });
   };
 
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (event) => {
+        setKeyboardHeight(event.endCoordinates.height); // Đây là chiều cao bạn cần
+        console.log("Chiều cao bàn phím:", event.endCoordinates.height);
+      }
+    );
+
+    return () => {
+      showSubscription.remove();
+    };
+  }, []);
 
   //Hàm gửi reaction cho bài post
   const handleEmojiPress = async (emoji :string) => {
@@ -237,7 +252,8 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
         backgroundColor: "#333333", 
         height:  50,
         width: '90%', 
-        borderRadius: 30, top: '70%', 
+        borderRadius: 30, 
+        top: Dimensions.get('screen').height - keyboardHeight - 70 - 10,
         paddingLeft: 20,
         flexDirection: 'row',
         justifyContent: 'space-between',
