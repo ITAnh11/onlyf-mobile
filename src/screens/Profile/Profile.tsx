@@ -9,6 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 import FCM from '../../services/fcm';
 import { useDispatch } from 'react-redux';
 import { clearPosts } from '../Home/Global/PostSlice';
+import LinkApi from '../../networking/link.api';
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -17,6 +18,7 @@ type Props = {
 const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route }) => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [premium, setPremium] = useState(false); {/*Trạng thái premium*/}
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -39,6 +41,18 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
     checkPremiumStatus();
   }
   , []);
+
+  useEffect(() => {
+  const fetchInviteLink = async () => {
+    try {
+      const response = await LinkApi.getLink();
+      setInviteLink(response.inviteLink); // response.link là link từ API
+    } catch (error) {
+      console.error("Không thể lấy link mời:", error);
+    }
+  };
+  fetchInviteLink();
+}, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -263,6 +277,11 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                         {/* Lời mời kết bạn bên phải */}
                         <View style={{ flex: 1, marginLeft: 10 }}>
                           <Text style={{ color: 'white', fontSize: 17 }}>Mời bạn bè tham gia OnlyF</Text>
+                              {inviteLink && userProfile && userProfile.username && (
+                                    <Text style={{ color: 'gray', fontSize: 13, marginTop: 5 }}>
+                                      https://onlyf.com/invite/{userProfile.username}
+                                    </Text>
+                                  )}
                         </View>
                       </View>
                        </TouchableOpacity>
