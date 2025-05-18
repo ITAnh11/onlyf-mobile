@@ -4,13 +4,15 @@ import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useMediaLibraryPermissions } from 'expo-image-picker';
-
+import { Ionicons } from '@expo/vector-icons';
+import { NavigationProp } from '@react-navigation/native';
 
 interface CustomCameraProps {
   onPhotoTaken: (compressedUri: string) => void;
+  navigation: NavigationProp<any>;
 }
 
-const ProfileCamera = ({ onPhotoTaken }: CustomCameraProps) => {
+const ProfileCamera = ({ onPhotoTaken, navigation }: CustomCameraProps) => {
     const [photo, setPhoto] = useState<string | null>(null);
     const cameraRef = useRef<CameraView>(null);
     const [facing, setFacing] = useState<CameraType>('back');
@@ -81,6 +83,10 @@ const ProfileCamera = ({ onPhotoTaken }: CustomCameraProps) => {
             // Hiển thị camera nếu chưa chụp ảnh
             <CameraView ref={cameraRef} style={styles.cameraWrapper} facing={facing} />
         )}
+        {/* Nút quay lại */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={24} color="#fff" />
+      </TouchableOpacity>
         {/* <CameraView style={styles.camera} facing={facing} />       */}
         <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.get_Picture_button} onPress={pickImage}>
@@ -149,6 +155,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#333333',
     borderRadius: '50%',
     marginRight: 30,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 48,
+    left: 24,
+    zIndex: 10,
   },
   text: {
     fontSize: 24,
