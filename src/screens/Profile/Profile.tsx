@@ -10,7 +10,7 @@ import FCM from '../../services/fcm';
 import { useDispatch } from 'react-redux';
 import { clearPosts } from '../Home/Global/PostSlice';
 import { Ionicons } from '@expo/vector-icons';
-import LinkApi from '../../networking/link.appi';
+import LinkApi from '../../networking/link.api';
 import * as Linking from 'expo-linking';
 
 type Props = {
