@@ -12,10 +12,14 @@ export type User = {
   status: string;
 };
 
-export const useSearch = () => {
-  const [searchText, setSearchText] = useState('');
-  const [results, setResults] = useState<User[]>([]);
+export const useSearch = (defaultSearch = '') => {
+  const [searchText, setSearchText] = useState(defaultSearch);
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setSearchText(defaultSearch);
+  }, [defaultSearch]);
 
   const doSearch = useCallback(async (text: string) => {
     if (!text.trim()) {

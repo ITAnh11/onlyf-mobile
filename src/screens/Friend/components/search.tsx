@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -20,15 +20,17 @@ type FriendSearchProps = {
   onUserSelect: (user: User) => void;
   onRequestSent?: () => void;
   refreshCounter: number;
+  defaultSearch?: string;
 };
 
 const FriendSearch: React.FC<FriendSearchProps> = ({
-  onUserSelect,
-  onRequestSent,
-  refreshCounter,
-  navigation,
-}) => {
-  const { searchText, setSearchText, results, loading } = useSearch();
+    onUserSelect,
+    onRequestSent,
+    refreshCounter,
+    navigation,
+    defaultSearch,
+  }) => {
+  const { searchText, setSearchText, results, loading } = useSearch(defaultSearch);
   const [showAll, setShowAll] = React.useState(false);
   const visibleResults = showAll ? results : results.slice(0, 5);
 
@@ -45,7 +47,7 @@ const FriendSearch: React.FC<FriendSearchProps> = ({
         />
       );
     },
-    [onUserSelect, onRequestSent, refreshCounter]
+    [onUserSelect, onRequestSent, refreshCounter, navigation]
   );
 
   const keyExtractor = useCallback(
@@ -63,8 +65,12 @@ const FriendSearch: React.FC<FriendSearchProps> = ({
           placeholderTextColor={Colors.secondary_text}
           value={searchText}
           onChangeText={setSearchText}
+          onSubmitEditing={() => Keyboard.dismiss()}
           returnKeyType="search"
         />
+        {searchText.length > 0 && (
+          <Ionicons name="close" size={25} color={Colors.secondary_background} onPress={() => setSearchText('')} />
+        )}
       </View>
 
       {loading ? (

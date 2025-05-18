@@ -13,8 +13,6 @@ type Props = {
 
 const Splash: React.FC<Props> = ({ navigation }) => {
     useEffect(() => {
-        setupRequestInterceptor();
-        setupResponseInterceptor();
         const checkLoginStatus = async () => {
             const refreshToken = await TokenService.getRefreshToken();
             if (!refreshToken) {
