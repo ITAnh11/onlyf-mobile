@@ -37,17 +37,15 @@
               "scheme": "onlyf-mobile"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
     "web": {
       "favicon": "./src/assets/logo_onlyf.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "64766fc2-2739-4601-ab17-db7ac5e93380"
-      }
     },
     "plugins": [
       [
@@ -57,6 +55,12 @@
           "iosAppId": "ca-app-pub-6779097997978939~4774611654"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "67f017a1-2452-484a-bbc6-7bbcac1de1ad"
+      }
+    },
+    "owner": "tuananheas"
   }
 }
