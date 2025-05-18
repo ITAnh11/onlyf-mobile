@@ -129,7 +129,7 @@ Fork repo -> Code -> choose options codespace -> run codespace
 Or run on local
 
 ```
-git clone https://github.com/ITAnh11/onlyf-mobile
+git clone https://github.com/ITAnh11/onlyf-mobile.git
 ```
 
 ### Set up lib
