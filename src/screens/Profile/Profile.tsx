@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, SafeAreaView, Share } from 'react-native';
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import ProfileService from '../../services/profile.service'; // Import ProfileService
