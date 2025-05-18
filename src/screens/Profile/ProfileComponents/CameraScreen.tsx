@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import ProfileCamera from '../../../components/profile_camera';
 import PostAvatar from './PostAvatar';
 import { NavigationProp } from '@react-navigation/native';
-
-
+import { Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -25,7 +25,7 @@ type Props = {
           </View>
         ) : (
           <View>
-            <ProfileCamera onPhotoTaken={setCompressedUri} />
+            <ProfileCamera onPhotoTaken={setCompressedUri} navigation={navigation} />
           </View>
         )}
       </View>

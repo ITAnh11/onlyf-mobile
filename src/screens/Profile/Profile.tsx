@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, SafeAreaView, Share } from 'react-native';
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import ProfileService from '../../services/profile.service'; // Import ProfileService
 import TokenService from '../../services/token.service'; // Import TokenService
@@ -10,6 +10,8 @@ import FCM from '../../services/fcm';
 import { useDispatch } from 'react-redux';
 import { clearPosts } from '../Home/Global/PostSlice';
 import { Ionicons } from '@expo/vector-icons';
+import LinkApi from '../../networking/link.appi';
+import * as Linking from 'expo-linking';
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -18,7 +20,37 @@ type Props = {
 const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route }) => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [premium, setPremium] = useState(false); {/*Trạng thái premium*/}
+  const [inviteLink, setInviteLink] = useState<string | null>(null); {/*Lưu trữ link mời*/}
 
+  {/* Lấy link mời từ server*/}
+  useEffect(() => {
+    const fetchLink = async () => {
+      try {
+        const response = await LinkApi.getLink(); {/*Lấy link mời từ server*/}
+        setInviteLink(response.inviteLink); {/*Lưu vào state*/}
+      } catch (error) {
+        console.error('Error fetching link:', error);
+      }
+    };
+
+    fetchLink();
+  }, []);
+
+  
+  const handleShareInviteLink = async () => {
+  if (!inviteLink) return;
+
+  try {
+    await Share.share({
+      message: `Mời bạn tham gia ứng dụng của mình! Nhấn vào link sau: ${inviteLink}`,
+    });
+  } catch (error) {
+    console.error('Lỗi khi chia sẻ link:', error);
+  }
+};
+
+
+  {/* Lấy thông tin người dùng từ local storage*/}
   useEffect(() => {
     const fetchProfile = async () => {
       const profile = await ProfileService.getProfile(); {/*Lấy thông tin người dùng từ local*/}
@@ -161,8 +193,8 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                     onPress={() => navigation.goBack()}
                     style={{
                       position: 'absolute',
-                      top: 10,
-                      right: 10,
+                      top: 3,
+                      left: 10,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
@@ -220,7 +252,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                           onPress={() => navigation.navigate('EditUserName')} 
                         >
                           {userProfile ? (
-                          <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>@{userProfile.username}</Text>
+                          <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }} numberOfLines={1} >@{userProfile.username}</Text>
                           ) : null}
                         </TouchableOpacity>
                       </View>
@@ -239,7 +271,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                   case 'addfriend':
                     return (
                       <TouchableOpacity
-                        onPress={() => navigation.navigate('Share')}> 
+                        onPress={handleShareInviteLink}> 
                       <View
                         style={{
                           flexDirection: 'row',
@@ -260,6 +292,11 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                         {/* Lời mời kết bạn bên phải */}
                         <View style={{ flex: 1, marginLeft: 10 }}>
                           <Text style={{ color: 'white', fontSize: 17 }}>Mời bạn bè tham gia OnlyF</Text>
+                          {inviteLink && userProfile && userProfile.username && (
+                                    <Text style={{ color: 'gray', fontSize: 13, marginTop: 5 }}>
+                                      https://onlyf.com/invite/{userProfile.username}
+                                    </Text>
+                                  )}
                         </View>
                       </View>
                        </TouchableOpacity>
