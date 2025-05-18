@@ -1,4 +1,4 @@
-import { View, Text, Image, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated, TouchableWithoutFeedback } from 'react-native'
+import { View, Text, Image, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated, TouchableWithoutFeedback, Share } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PostItem } from './Type';
@@ -8,6 +8,8 @@ import Video from 'react-native-video';
 import ProfileService from '../../../services/profile.service';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
+import LinkApi from '../../../networking/link.appi';
+import { set } from 'lodash';
 
 
 type PostViewProps = {
@@ -200,7 +202,16 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
   }
 
   //Hàm chia sẻ
-  const sharePost = () => {
+  const sharePost = async () => {
+    const response = await LinkApi.getLinkSharePost(post.id, post.user.id);
+    console.log("Link chia sẻ: ", response.shareLink);
+    try {
+      await Share.share({
+        message: `Mời bạn tham gia ứng dụng của mình! Nhấn vào link sau: ${response.shareLink}`,
+      });
+    } catch (error) {
+      console.error('Lỗi khi chia sẻ link:', error);
+    }
     setShowOptions(false);
   }
 

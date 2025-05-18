@@ -21,13 +21,14 @@ import PostView from './components/PostView';
 import AllImageView from './components/AllImageView';
 import ProfileService from '../../services/profile.service';
 import 'expo-dev-client';
+import { useSearchParams } from './Hooks/useSearchParams';
 import { BannerAd, BannerAdSize, TestIds, InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
-
-
+import { set } from 'lodash';
 
 type Props = {
   navigation: NavigationProp<any>;
 };
+
 
 const Home: React.FC<Props> = ({ navigation }) => {  
   const [compressedUri, setCompressedUri] = useState<string | null>(null); 
@@ -64,7 +65,24 @@ const Home: React.FC<Props> = ({ navigation }) => {
   // State để theo dõi trạng thái load các bài post
   const [loading, setLoading] = useState(false);
 
-
+    //useEffect lấy danh sách bạn bè
+  const [friendList, setFriendList] = useState<FriendItem[]>([]);
+    useEffect(() => {
+      const fetchAPI = async () => {
+      try{
+        const accessToken = await TokenService.getAccessToken();
+        const response = await apiClient.get(`/friend/get-friends`,{
+          headers: {
+            Authorization: `Bearer ${accessToken}` // Thêm access token vào header
+          }
+        });
+        setFriendList(response.data);
+      }catch (error) {
+        console.error("Lỗi khi gọi API của get Friends:", error); // Xử lý lỗi nếu có
+      }
+    };
+    fetchAPI();
+  },[]);
 
   // Khởi tạo dispatch từ Redux
   const dispatch = useDispatch(); 
@@ -84,7 +102,23 @@ const Home: React.FC<Props> = ({ navigation }) => {
   //Trang thái xem xóa bài hay chưa
   const [isDelete, setIsDelete] = useState(false);
   
-  
+  // Lấy các tham số từ deeplink
+  const { params, clearParams } = useSearchParams();
+  const [postId, setPostId] = useState<string | null>(null);
+  const [ownerId, setOwnerId] = useState<string | null>(null);
+  useEffect(() => {
+    if (params.postId && params.ownerId) {
+      console.log("📌 Nhận từ deeplink:", params);
+      // 👉 Thực hiện hành động như gọi API, chuyển hướng, alert...
+      console.log("ID bài viết:", params.postId);
+      setPostId(params.postId);
+      console.log("ID người dùng:", params.ownerId);
+      setOwnerId(params.ownerId);
+      // 👇 Nếu chỉ muốn xử lý 1 lần, hãy reset lại params
+      clearParams();
+    }
+  }, [params]);
+
   //State để theo dõi vị trí trang hiện tại trong Flatlist
   const [currentIndex, setCurrentIndex] = useState(0);
   const [backToFirstPage, setBacktoFirstPage] = useState(false);
@@ -102,6 +136,37 @@ const Home: React.FC<Props> = ({ navigation }) => {
   // Tạo ref cho FlatList
   const flatListRef = useRef<FlatList>(null); 
   useEffect(() => {
+  if (
+    postId &&
+    postId !== '0' &&
+    friendList.length > 0 &&
+    danhSach.length > 0
+  ) {
+    // 1. Lấy tên người dùng
+    if (ownerId !== null) {
+      setIdItem(ownerId);
+    }
+
+    const name = friendList.find(
+      (item) => String(item.friend.id) === String(ownerId)
+    )?.friend?.profile?.name || '';
+
+    setChoosedItem(name);
+    setChoosing(false);
+
+    // 2. Cuộn đến bài post tương ứng
+    const postIndexToLink = danhSach.findIndex((item) => item.id === postId);
+    console.log("✅ Tìm thấy post tại index:", postIndexToLink);
+
+    if (postIndexToLink !== -1) {
+      flatListRef.current?.scrollToIndex({ index: postIndexToLink + 1, animated: false });
+    }
+
+    // 3. Reset lại postId để không chạy lại
+    setPostId('0');
+  }}, [postId && friendList && danhSach]);
+  
+  useEffect(() => {
     if (backToFirstPage) {
       flatListRef.current?.scrollToIndex({ index: 1, animated: false }); // Cuộn đến trang thứ 2
       setBacktoFirstPage(false); // Đặt lại trạng thái để tránh cuộn lại liên tục
@@ -116,34 +181,13 @@ const Home: React.FC<Props> = ({ navigation }) => {
       flatListRef.current?.scrollToIndex({ index: postIndexToLink + 1, animated: false});// +1 do bên AllPosstImage không có trang home
       setIsLinkToPostView(false);
     }
-  }, [backToFirstPage, backToHomePage, isLinkToPostView]);
+  }, [backToFirstPage, backToHomePage, isLinkToPostView ]);
 
 
   //Theo dõi danh sách các bài post (trạng thái lọc tất cả hoặc của một người bạn cụ thể)
   const [choosedItem, setChoosedItem] = useState("Tất cả bạn bè");
   const [idItem, setIdItem] = useState("Tất cả bạn bè");
   const [choosing, setChoosing] = useState(false);
-
-  //useEffect lấy danh sách bạn bè
-  const [friendList, setFriendList] = useState<FriendItem[]>([]);
-    useEffect(() => {
-      const fetchAPI = async () => {
-      try{
-        const accessToken = await TokenService.getAccessToken();
-        const response = await apiClient.get(`/friend/get-friends`,{
-          headers: {
-            Authorization: `Bearer ${accessToken}` // Thêm access token vào header
-          }
-        });
-        setFriendList(response.data);
-      }catch (error) {
-        console.error("Lỗi khi gọi API của get Friends:", error); // Xử lý lỗi nếu có
-      }
-    };
-    fetchAPI();
-  },[]);
-
-
 
   // Hàm khởi tạo các bài post
   const initAllPost = async () => {
@@ -431,6 +475,9 @@ const Home: React.FC<Props> = ({ navigation }) => {
               contentContainerStyle={{ flexGrow: 1 }} // Đảm bảo FlatList chiếm toàn bộ không gian
               showsVerticalScrollIndicator={false} // Ẩn thanh cuộn dọc
               onEndReached={fetchCards}
+              initialNumToRender={20} // Số lượng bài post đầu tiên được render
+              maxToRenderPerBatch={20} // Số lượng bài post tối đa được render mỗi lần
+              windowSize={10} // Kích thước cửa sổ để render các bài post
               onEndReachedThreshold={0.5}
               pagingEnabled={true} // Bật chế độ cuộn trang
               getItemLayout={(_data, index) => (
