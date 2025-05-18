@@ -50,8 +50,8 @@ const Register: React.FC<Props> = ({ navigation }) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={{ flex: 1 }}>
+        <StatusBar barStyle={'default'} />
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-          <StatusBar barStyle="light-content" />
           <View style={styles.container}>
             <View style={styles.header}>
               <TouchableOpacity onPress={() => navigation.navigate("Welcome")} style={styles.backButton} activeOpacity={0.6}>

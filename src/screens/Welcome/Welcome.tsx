@@ -1,5 +1,5 @@
 import React from "react";
-import {View, TouchableOpacity, Text, Image, Button} from "react-native";
+import {View, TouchableOpacity, Text, Image, Button, StatusBar} from "react-native";
 import {styles} from "./styles";
 import { NavigationProp } from "@react-navigation/native";
 
@@ -10,6 +10,7 @@ type Props = {
 const Welcome: React.FC<Props> = ({ navigation }) => {
     return (
         <View style={styles.container}>
+            <StatusBar barStyle={'default'} />
             <View>
                 <Text style={styles.title}>Chào mừng bạn đến với OnlyF!</Text>
             </View>
