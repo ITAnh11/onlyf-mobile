@@ -202,7 +202,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                     <Ionicons name="arrow-back" size={24} color="white" />
                   </TouchableOpacity>
                   {/* Avatar lớn ở giữa*/}
-                  <TouchableOpacity style={styles.avatarButton}
+                  <TouchableOpacity style={[styles.avatarButton, premium && {borderColor: 'gold', borderWidth: 4,},]}
                     onPress={() => {
                       navigation.navigate('CameraScreen');
                     }}>
@@ -284,9 +284,9 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                       >
                         {/* Avatar nhỏ bên trái */}
                         {userProfile && userProfile.urlPublicAvatar ? (
-                      <Image source={{ uri: userProfile.urlPublicAvatar }} style={[styles.avatarImage, {width: 50, height: 50, borderRadius: 25 }]} />
+                      <Image source={{ uri: userProfile.urlPublicAvatar }} style={[styles.avatarImage, premium && {borderColor: 'gold', borderWidth: 2,}, {width: 50, height: 50, borderRadius: 25 }]} />
                     ) : (
-                      <Image source={require("../../assets/user.png")} style={[styles.avatarButton, {width: 50, height: 50, borderRadius: 25 }]} />
+                      <Image source={require("../../assets/user.png")} style={[styles.avatarButton, premium && {borderColor: 'gold', borderWidth: 2,}, {width: 50, height: 50, borderRadius: 25 }]} />
                     )}
                   
                         {/* Lời mời kết bạn bên phải */}
