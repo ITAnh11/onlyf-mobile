@@ -28,6 +28,7 @@
     "expo-image-manipulator": "~13.0.6",
     "expo-image-picker": "^16.0.6",
     "expo-linking": "~7.0.5",
+    "expo-media-library": "~17.0.6",
     "expo-secure-store": "^14.0.1",
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.9",
@@ -52,8 +53,7 @@
     "react-native-video": "^6.14.0",
     "react-redux": "^9.2.0",
     "socket.io-client": "^4.8.1",
-    "use-debounce": "^10.0.4",
-    "expo-media-library": "~17.0.6"
+    "use-debounce": "^10.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

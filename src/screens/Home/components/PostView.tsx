@@ -6,6 +6,8 @@ import apiClient from '../../../networking/apiclient';
 import TokenService from '../../../services/token.service';
 import Video from 'react-native-video';
 import ProfileService from '../../../services/profile.service';
+import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
 
 
 type PostViewProps = {
@@ -204,6 +206,33 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
 
   //Hàm tải về
   const downloadPost = async () => {
+    let uri = post.type === 'image' ? post.urlPublicImage : post.urlPublicVideo;
+    if (!uri) {
+      alert('Không tìm thấy đường dẫn file để tải về!');
+      setShowOptions(false);
+      return;
+    }
+    try {
+      // Xin quyền truy cập thư viện ảnh
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Bạn cần cấp quyền truy cập thư viện để lưu file!');
+        return;
+      }
+
+      const fileExt = post.type === 'image' ? '.jpg' : '.mp4';
+      const fileName = `media_${post.id}_${Date.now()}${fileExt}`;
+      const fileUri = FileSystem.documentDirectory + fileName;
+      await FileSystem.downloadAsync(uri, fileUri);
+
+      // Lưu vào thư viện ảnh/video
+      await MediaLibrary.saveToLibraryAsync(fileUri);
+
+      alert('Đã tải về thành công!');
+    } catch (error) {
+      alert('Tải về thất bại!');
+      console.error(error);
+    }
     setShowOptions(false);
   }
 
