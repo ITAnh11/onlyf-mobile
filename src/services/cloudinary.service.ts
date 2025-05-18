@@ -2,8 +2,8 @@ import axios from 'axios';
 import ProfileService from './profile.service';
 
 export class CloudinaryService {
-  static CLOUD_NAME = 'dgusdhump';
-  static UPLOAD_PRESET = 'video_upload_preset';
+  static CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+  static UPLOAD_PRESET = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '';
 
   static async uploadVideo_post(uri: string): Promise<{
     urlPublicVideo: string;

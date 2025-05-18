@@ -118,9 +118,19 @@ This project uses the following technologies
 
 ## Project setup on codespace Github
 
+### Requirement
+
+Nodejs version `v22.14.0`
+
 ### Create codespace
 
 Fork repo -> Code -> choose options codespace -> run codespace
+
+Or run on local
+
+```
+git clone https://github.com/ITAnh11/onlyf-mobile
+```
 
 ### Set up lib
 
@@ -130,8 +140,14 @@ $ npm install
 
 ### Create file `.env` like file `.env.example`
 
-Change value by url backend set up on codespace github  
-Follow setup [backend repo](https://github.com/ITAnh11/onlyf-backend)
+1. You need set up backend before frontend  
+   Follow setup [backend repo](https://github.com/ITAnh11/onlyf-backend)  
+   Change value by url of backend
+
+2. Fill value firebase config
+   Create app Web on Firebase and fill value from web
+
+3. Fill value cloudinary config
 
 ### Set up build by eas
 
@@ -212,7 +228,7 @@ Change value `host` in file `app.json` at
    $ npm run start
    ```
 
-2. Public port to develop
+2. Public port to develop if you use codespaces
 
 ## Project setup backend at [repo](https://github.com/ITAnh11/onlyf-backend)
 
