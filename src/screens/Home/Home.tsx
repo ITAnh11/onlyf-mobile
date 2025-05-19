@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StatusBar, Image, Button, FlatList, Platform, ViewToken } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { NavigationProp, useRoute } from '@react-navigation/native';
+import { NavigationProp, useFocusEffect, useRoute } from '@react-navigation/native';
 import { styles } from './styles';
 import TokenService from '../../services/token.service';
 import apiClient from '../../networking/apiclient';
@@ -21,7 +21,7 @@ import PostView from './components/PostView';
 import AllImageView from './components/AllImageView';
 import ProfileService from '../../services/profile.service';
 import 'expo-dev-client';
-import { useSearchParams } from './Hooks/useSearchParams';
+// import { useSearchParams } from './Hooks/useSearchParams';
 import { BannerAd, BannerAdSize, TestIds, InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
 import { set } from 'lodash';
 
@@ -109,21 +109,20 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const [isDelete, setIsDelete] = useState(false);
   
   // Lấy các tham số từ deeplink
-  const { params, clearParams } = useSearchParams();
+  const route = useRoute();
   const [postId, setPostId] = useState<string | null>(null);
   const [ownerId, setOwnerId] = useState<string | null>(null);
-  useEffect(() => {
-    if (params.postId && params.ownerId) {
-      console.log("📌 Nhận từ deeplink:", params);
-      // 👉 Thực hiện hành động như gọi API, chuyển hướng, alert...
-      console.log("ID bài viết:", params.postId);
-      setPostId(params.postId);
-      console.log("ID người dùng:", params.ownerId);
-      setOwnerId(params.ownerId);
-      // 👇 Nếu chỉ muốn xử lý 1 lần, hãy reset lại params
-      clearParams();
-    }
-  }, [params]);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params) {
+        const params = route.params as { postId: string; ownerId: string };
+        setPostId(params.postId);
+        setOwnerId(params.ownerId);
+        console.log('postId:', params.postId);
+        console.log('ownerId:', params.ownerId);
+      }
+    }, [route.params])
+  );
 
 
   //State để theo dõi vị trí trang hiện tại trong Flatlist
@@ -157,7 +156,7 @@ useEffect(() => {
 
     if (name === '') {
       console.log("Không tìm thấy tên người dùng");
-      navigation.navigate("Friend");
+      // navigation.navigate("Friend");
       return; 
     }
     setChoosedItem(name);

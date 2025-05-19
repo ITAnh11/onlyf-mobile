@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert, SafeAreaView, Share } from 'react-native';
-import { NavigationProp, useFocusEffect } from '@react-navigation/native';
+import { NavigationProp, useFocusEffect, useRoute } from '@react-navigation/native';
 import ProfileService from '../../services/profile.service'; // Import ProfileService
 import TokenService from '../../services/token.service'; // Import TokenService
 import apiClient from '../../networking/apiclient'; // Import apiClient
@@ -17,7 +17,7 @@ type Props = {
   navigation: NavigationProp<any>;
 };
 
-const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route }) => {
+const Profile: React.FC<{ navigation: any}> = ({ navigation }) => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [premium, setPremium] = useState(false); {/*Trạng thái premium*/}
   const [inviteLink, setInviteLink] = useState<string | null>(null); {/*Lưu trữ link mời*/}
@@ -49,18 +49,6 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
   }
 };
 
-
-  {/* Lấy thông tin người dùng từ local storage*/}
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const profile = await ProfileService.getProfile(); {/*Lấy thông tin người dùng từ local*/}
-      setUserProfile(profile);
-    };
-
-    fetchProfile();
-  }
-  , []);
-
   useEffect(() => {
     const checkPremiumStatus = async () => {
       const isPremium = await SecureStore.getItemAsync('isPremium'); {/*Lấy trạng thái premium từ local storage*/}
@@ -78,7 +66,6 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
       const fetchAndSyncProfile = async () => {
         try {
           const profile = await ProfileApi.getProfile(); {/*Lấy thông tin từ server*/}
-          await ProfileService.saveProfile(profile); {/*Lưu vào local*/}
           setUserProfile(profile);
         }
         catch (error) {
@@ -190,7 +177,7 @@ const Profile: React.FC<{ navigation: any ; route: any }> = ({ navigation, route
                   <View style={{flex : 1, alignContent: 'center', justifyContent: 'center'}}>
                     {/* Nút ở góc phải trên */}
                   <TouchableOpacity
-                    onPress={() => navigation.goBack()}
+                    onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Home' }] })}
                     style={{
                       position: 'absolute',
                       top: 3,
