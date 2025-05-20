@@ -6,6 +6,7 @@ import { navigationRef } from "./NavigationService";
 import * as Linking from 'expo-linking';
 import { AppState, AppStateStatus } from "react-native";
 import TokenService from "../services/token.service";
+import { times } from "lodash";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -34,7 +35,7 @@ const handleUrl = async (url: string | null) => {
 
   switch (hostname) {
     case "share-post":
-      navigationRef.navigate("Home", {...queryParams });
+      navigationRef.navigate("Home", {...queryParams , _ts: Date.now()});
       break;
     case "payment/success":
       navigationRef.resetRoot({
