@@ -117,10 +117,10 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const lastHandledTs = useRef<number | null>(null);
   useFocusEffect(
     React.useCallback(() => {
-    const params = route.params as { postId?: string; ownerId?: string ; _ts?: Date} | undefined;
+    const params = route.params as { postId?: string; ownerId?: string ; _ts?: number} | undefined;
 
     // Kiểm tra nếu params tồn tại và khác với state hiện tại
-    const paramsTs = params?._ts ? new Date(params._ts).getTime() : null;
+    const paramsTs = params && typeof params._ts !== 'undefined' ? Number(params._ts) : null;
     if (params?.postId && params.postId !== postId && paramsTs !== lastHandledTs.current) {
       lastHandledTs.current = paramsTs; // Cập nhật timestamp đã xử lý
       setPostId(params.postId);
@@ -171,7 +171,7 @@ useEffect(() => {
     setIdItem(ownerId);
     setWaitingForDeeplinkScroll(true);
   }
-}, [postId]);
+}, [postId,danhSach]);
 
 // Khi danhSach hoặc idItem thay đổi, mới tìm index và cuộn
 useEffect(() => {
@@ -221,7 +221,7 @@ useEffect(() => {
     try {
       const response = await apiClient.get(`/post/get-posts/`, {
         params: {
-          limit: 50, // Số lượng bài post muốn lấy
+          limit: 30, // Số lượng bài post muốn lấy
         },
         headers: {
           Authorization: `Bearer ${accessToken}` // Thêm access token vào header
@@ -262,7 +262,7 @@ useEffect(() => {
       const accessToken = await TokenService.getAccessToken();
       try {
         const params: any = {
-          limit: 50, // Số lượng bài post muốn lấy
+          limit: 30, // Số lượng bài post muốn lấy
         };
         
         let response: any;
@@ -320,7 +320,7 @@ useEffect(() => {
           const accessToken = await TokenService.getAccessToken();
           try {
             const params: any = {
-              limit: 50, // Số lượng bài post muốn lấy
+              limit: 30, // Số lượng bài post muốn lấy
               cursor: nextCursor // Tham số con trỏ để phân trang
             };
             let response: any;
@@ -507,9 +507,9 @@ useEffect(() => {
               contentContainerStyle={{ flexGrow: 1 }} // Đảm bảo FlatList chiếm toàn bộ không gian
               showsVerticalScrollIndicator={false} // Ẩn thanh cuộn dọc
               onEndReached={fetchCards}
-              initialNumToRender={20} // Số lượng bài post đầu tiên được render
-              maxToRenderPerBatch={20} // Số lượng bài post tối đa được render mỗi lần
-              windowSize={10} // Kích thước cửa sổ để render các bài post
+              initialNumToRender={10} // Số lượng bài post đầu tiên được render
+              maxToRenderPerBatch={10} // Số lượng bài post tối đa được render mỗi lần
+              windowSize={5} // Kích thước cửa sổ để render các bài post
               onEndReachedThreshold={0.5}
               pagingEnabled={true} // Bật chế độ cuộn trang
               getItemLayout={(_data, index) => (
