@@ -184,7 +184,7 @@ const Chat: React.FC<Props> = ({ navigation }) => {
       } else if (type.startsWith('video')) {
         const videoUrl = await CloudinaryService.uploadVideo_chat(uri);
         if (videoUrl) {
-          sendMessage('video', videoUrl.urlPublicVideo); 
+          sendMessage('video', videoUrl.hlsUrlVideo); 
         }
       } else {
         console.warn('Không hỗ trợ định dạng media:', type);
@@ -300,31 +300,6 @@ const Chat: React.FC<Props> = ({ navigation }) => {
                   styles.messageBubble, 
                   item.senderId === myId ? styles.myMessage : styles.friendMessage 
                 ]}>
-                {item.message.type === 'text' && (
-                  <Text
-                    style={[ 
-                      item.senderId === myId ? styles.myMessageText : styles.friendMessageText 
-                    ]}
-                  >
-                    {item.message.text}
-                  </Text>
-                )}
-                {item.message.type === 'image' && item.message.mediaUrl && (
-                  <TouchableOpacity onPress={() => {
-                    setSelectedMedia({ type: 'image', url: item.message.mediaUrl });
-                    setIsModalVisible(true);
-                  }}>
-                    <Image source={{ uri: item.message.mediaUrl }} style={styles.image} resizeMode="contain" />
-                  </TouchableOpacity>                )}
-                {item.message.type === 'video' && item.message.mediaUrl && (
-                  <TouchableOpacity onPress={() => {
-                    setSelectedMedia({ type: 'video', url: item.message.mediaUrl });
-                    setIsModalVisible(true);
-                  }}>
-                    <Video source={{ uri: item.message.mediaUrl }} style={styles.video} controls repeat resizeMode="contain" paused={true} />
-                  </TouchableOpacity>
-                )}
-
                 {item.postId && (
                   <TouchableOpacity>
                     {item.post.urlPublicImage && (
@@ -340,9 +315,63 @@ const Chat: React.FC<Props> = ({ navigation }) => {
                         setSelectedMedia({ type: 'video', url: item.post.hlsUrlVideo });
                         setIsModalVisible(true);
                       }}>
-                        <Video source={{ uri: item.post.hlsUrlVideo }} style={styles.video} controls repeat resizeMode="contain" paused={true} />
+                        <View style={styles.videoContainer}>
+                          <Video
+                            source={{ uri: item.post.hlsUrlVideo }}
+                            style={styles.video}
+                            controls={false}
+                            repeat={false}
+                            resizeMode="cover"
+                            paused={true}
+                          />
+                          <View style={styles.playIconOverlay}>
+                            <Ionicons name="play-circle-outline" size={48} color="white" />
+                          </View>
+                        </View>
                       </TouchableOpacity>
                     )}
+                  </TouchableOpacity>
+                )}
+
+                {item.message.type === 'text' && (
+                  <Text
+                    style={[ 
+                      item.senderId === myId ? styles.myMessageText : styles.friendMessageText 
+                    ]}
+                  >
+                    {item.message.text}
+                  </Text>
+                )}
+                
+                {item.message.type === 'image' && item.message.mediaUrl && (
+                  <TouchableOpacity onPress={() => {
+                    setSelectedMedia({ type: 'image', url: item.message.mediaUrl });
+                    setIsModalVisible(true);
+                  }}>
+                    <Image source={{ uri: item.message.mediaUrl }} style={styles.image} resizeMode="contain" />
+                  </TouchableOpacity>                
+                )}
+
+                {item.message.type === 'video' && item.message.mediaUrl && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedMedia({ type: 'video', url: item.message.mediaUrl });
+                      setIsModalVisible(true);
+                    }}
+                  >
+                    <View style={styles.videoContainer}>
+                      <Video
+                        source={{ uri: item.message.mediaUrl }}
+                        style={styles.video}
+                        controls={false}
+                        repeat={false}
+                        resizeMode="cover"
+                        paused={true}
+                      />
+                      <View style={styles.playIconOverlay}>
+                        <Ionicons name="play-circle-outline" size={48} color="white" />
+                      </View>
+                    </View>
                   </TouchableOpacity>
                 )}
               </View>
@@ -432,7 +461,7 @@ const Chat: React.FC<Props> = ({ navigation }) => {
 
           <Modal
             visible={isModalVisible}
-            transparent={false}  // <-- quan trọng với video
+            transparent={false}  
             animationType="slide"
             onRequestClose={() => setIsModalVisible(false)}
           >
@@ -440,17 +469,9 @@ const Chat: React.FC<Props> = ({ navigation }) => {
               {/* Close Button */}
               <TouchableOpacity
                 onPress={() => setIsModalVisible(false)}
-                style={{
-                  position: 'absolute',
-                  top: 40,
-                  right: 20,
-                  zIndex: 10,
-                  backgroundColor: 'rgba(0,0,0,0.6)',
-                  padding: 10,
-                  borderRadius: 20,
-                }}
+                style={styles.closeButton}
               >
-                <Text style={{ color: 'white', fontSize: 18 }}>✕</Text>
+                <Ionicons name="close" style={styles.close} />
               </TouchableOpacity>
 
               {/* Media Viewer */}
@@ -465,7 +486,7 @@ const Chat: React.FC<Props> = ({ navigation }) => {
                   style={{ width: '100%', height: '100%' }}
                   resizeMode="contain"
                   controls
-                  paused={false} // <- Cho tự động chạy
+                  paused={false} 
                 />
               ) : null}
             </View>
