@@ -1,4 +1,4 @@
-import { View, Text, Image, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated, TouchableWithoutFeedback } from 'react-native'
+import { View, Text, Image, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated, TouchableWithoutFeedback, Share } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PostItem } from './Type';
@@ -8,6 +8,7 @@ import Video from 'react-native-video';
 import ProfileService from '../../../services/profile.service';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
+import sharePostLink from '../../../networking/sharePostLink';
 
 
 type PostViewProps = {
@@ -125,7 +126,6 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
       (event) => {
         setKeyboardHeight(event.endCoordinates.height); // Đây là chiều cao bạn cần
-        console.log("Chiều cao bàn phím:", event.endCoordinates.height);
       }
     );
 
@@ -200,7 +200,15 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
   }
 
   //Hàm chia sẻ
-  const sharePost = () => {
+  const sharePost = async () => {
+     const response = await sharePostLink.getPostLink(post.id, post.user.id);
+       try {
+      await Share.share({
+        message: `Mời bạn tham gia ứng dụng của mình! Nhấn vào link sau: ${response.shareLink}`,
+      });
+      } catch (error) {
+        console.error('Lỗi khi chia sẻ link:', error);
+      }
     setShowOptions(false);
   }
 
@@ -308,7 +316,7 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
           </TouchableOpacity>
       </View>
       )}
-
+      { post.user.id !== userId ? (
       <View style={styles.Message_container}>
         <TouchableOpacity onPress={handleShowInput}>
           <Text style = {styles.Message}>Gửi tin nhắn...</Text>
@@ -321,6 +329,22 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
           ))}
         </View>
       </View>
+      ) : (
+        post.reacts.length > 0 ? (
+        <View style={styles.Message_container_of_owner}>
+          <Text style = {{fontSize: 20, color:'#EAA905', fontWeight: 'bold', fontStyle: 'italic'}}>{post.reacts.reduce((sum, react) => sum + react.count, 0)}</Text>
+          {post.reacts.map((ReactItem, index) => (
+            <Text key={index} style={[styles.Emoji, { marginLeft: index === 0 ? 0 : -13, zIndex: index }]}>{ReactItem.type}</Text>
+          ))}
+        </View>
+        ):(
+          <View style={styles.Message_container_of_owner}>
+            <ImageBackground source={require("../../../assets/Edit.png")} resizeMode="contain" style={{ width: 15, height: 15 }} />
+            <Text style = {{fontSize: 15, color: '#bfbebd', fontWeight: 'bold', fontStyle: 'italic'}}> Chưa có hoạt động nào!</Text>
+          </View>
+        )
+      )
+      }
       <View style={styles.Button_container}>
         <TouchableOpacity onPress={() => setIsAllImageView(true)} >
           <ImageBackground source={require("../../../assets/All_post_icon.png")} resizeMode="contain" style={{ width: 30, height: 30 }} />
@@ -441,6 +465,17 @@ const styles = StyleSheet.create({
     marginLeft: "5%",
     marginTop: "20%",
     borderRadius: 30,
+  },
+  Message_container_of_owner:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: "#333333",
+    height: 50,
+    marginTop: "20%",
+    borderRadius: 30,
+    alignSelf: 'center',
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   Message: {
     fontSize: 18,

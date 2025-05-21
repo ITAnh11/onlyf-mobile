@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     title: {
@@ -45,4 +45,16 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+      overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: Dimensions.get('window').height,
+    width: Dimensions.get('window').width,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Nền mờ
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999, // Đảm bảo nổi trên các thành phần khác
+  },
+
 });
