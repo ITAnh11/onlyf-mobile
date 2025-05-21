@@ -35,7 +35,7 @@ const handleUrl = async (url: string | null) => {
 
   switch (hostname) {
     case "share-post":
-      navigationRef.navigate("Home", {...queryParams , _ts: Date.now()});
+      navigationRef.navigate("Home", {...queryParams , _ts: Date.now(), type: "share-post" });
       break;
     case "payment/success":
       navigationRef.resetRoot({
