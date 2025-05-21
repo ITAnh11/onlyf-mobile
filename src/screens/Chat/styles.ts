@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
   myMessageText: {
     fontSize: 15,
     color: Colors.tertiary_text,
+    alignSelf: 'flex-end',
   },
   friendMessage: {
     alignSelf: 'flex-start',
@@ -80,7 +81,6 @@ const styles = StyleSheet.create({
     color: Colors.secondary_text,
     textAlign: 'center',
     margin: 5,
-
   },
   inputContainer: {
     alignItems: 'center',
@@ -127,11 +127,27 @@ const styles = StyleSheet.create({
     height: undefined,
     aspectRatio: 1,
   },
+  videoContainer: {
+    position: 'relative',
+    width: '100%',
+    height: undefined,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  playIconOverlay: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -24 }, { translateY: -24 }],
+    justifyContent: 'center',
+    alignItems: 'center',
+    opacity: 0.7,
+  },
   video: {
     width: '100%',
     height: undefined,
     aspectRatio: 1,
-    padding: 10,
   },
   newMessageAlert: {
     position: 'absolute',
@@ -166,6 +182,19 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     fontSize: 16,
     color: Colors.tertiary_text,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    padding: 5,
+    zIndex: 999,
+    borderRadius: 50,
+    backgroundColor: Colors.primary_background,
+  },
+  close: {
+    fontSize: 20,
+    color: Colors.primary_text,
   },
 });
 

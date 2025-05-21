@@ -71,12 +71,15 @@ const FriendList: React.FC<Props> = ({ refreshCounter, onRefresh, onFriendCountC
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.friendContainer}>
-              <Image
-                source={item.friend.profile.urlPublicAvatar
-                  ? { uri: item.friend.profile.urlPublicAvatar }
-                  : require('../../../assets/avatar_placeholder.png')}
-                style={styles.avatar}
-              />
+              <View style={styles.avatarWrapper}>
+                <Image
+                  source={item.friend.profile.urlPublicAvatar
+                    ? { uri: item.friend.profile.urlPublicAvatar }
+                    : require('../../../assets/avatar_placeholder.png')}
+                  style={styles.avatar}
+                />
+              </View>
+
               <View style={styles.infoContainer}>
                 <Text style={styles.name}>{item.friend.profile.name}</Text>
                 <Text style={styles.username}>@{item.friend.profile.username}</Text>
@@ -124,13 +127,20 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
-  avatar: {
-    width: 60,
+  avatarWrapper: {
+    width: 60, 
     height: 60,
-    borderRadius: 30,
-    borderWidth: 2,
+    borderRadius: 33,
+    borderWidth: 3,
     borderColor: Colors.border_avt,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 20,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 30,
   },
   infoContainer: {
     flex: 1,
