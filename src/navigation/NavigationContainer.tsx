@@ -25,6 +25,10 @@ const AppNavigator = () => {
 
     const { hostname, queryParams } = Linking.parse(url);
 
+    console.log("Parsed URL:", { hostname, queryParams });
+    console.log("AppState:", appState.current);
+    console.log("Handled Initial URL:", handledInitialUrl);
+
     switch (hostname) {
       case "share-post":
         navigationRef.navigate("Home", { ...queryParams, _ts: Date.now() });

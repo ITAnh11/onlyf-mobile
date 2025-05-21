@@ -11,7 +11,16 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://super-space-computing-machine-5gqp9gq7wrv3qv-3000.app.github.dev"
+        "EXPO_PUBLIC_API_URL": "https://super-space-computing-machine-5gqp9gq7wrv3qv-3000.app.github.dev",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyCDw-I_nQtagrreqBlmrhJa3DDIhSsFuhY",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "onlyf-4aa06.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "onlyf-4aa06",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "onlyf-4aa06.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "688538499350",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:688538499350:web:a56e6178fb93d336c93837",
+        "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-NFM4YV1140",
+        "EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME": "dgusdhump",
+        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "video_upload_preset"
       }
     },
     "production": {

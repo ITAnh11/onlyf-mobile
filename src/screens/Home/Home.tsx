@@ -117,11 +117,13 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const lastHandledTs = useRef<number | null>(null);
   useFocusEffect(
     React.useCallback(() => {
+
+      console.log('route.params:', route.params);
     const params = route.params as { postId?: string; ownerId?: string ; _ts?: number; type?:string} | undefined;
 
     // Kiểm tra nếu params tồn tại và khác với state hiện tại
     const paramsTs = params && typeof params._ts !== 'undefined' ? Number(params._ts) : null;
-    if (params?.postId && params.postId !== postId && paramsTs !== lastHandledTs.current && params.type === 'share-post') {
+    if (params?.postId && params.postId !== postId && paramsTs !== lastHandledTs.current) {
       lastHandledTs.current = paramsTs; // Cập nhật timestamp đã xử lý
       setPostId(params.postId);
       setOwnerId(params.ownerId || null);
