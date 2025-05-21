@@ -1,75 +1,99 @@
-// navigation/NavigationContainer.tsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import Route from "./Route";
 import { navigationRef } from "./NavigationService";
 import * as Linking from 'expo-linking';
-import { AppState, AppStateStatus } from "react-native";
+import { AppState, AppStateStatus, View, ActivityIndicator } from "react-native";
 import TokenService from "../services/token.service";
-import { times } from "lodash";
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
-const handleUrl = async (url: string | null) => {
-  if (!url) return;
-
-  const refreshToken = await TokenService.getRefreshToken();
-  console.log("Refresh token:", refreshToken);
-
-  if (!refreshToken) {
-    console.log("No refresh token found. Cannot handle deep link.");
-    navigationRef.resetRoot({
-      index: 0,
-      routes: [{ name: "Splash" }],
-    });
-    return;
-  }
-
-  const { hostname, path, queryParams } = Linking.parse(url);
-
-  // Nếu cần, bật log để debug
-  console.log("Handling deep link URL:", url);
-  console.log("Parsed path:", path);
-  console.log("Parsed query params:", queryParams);
-  console.log("Parsed hostname:", hostname);
-
-  switch (hostname) {
-    case "share-post":
-      navigationRef.navigate("Home", {...queryParams , _ts: Date.now()});
-      break;
-    case "payment/success":
-      navigationRef.resetRoot({
-        index: 0,
-        routes: [{ name: "Splash", params: { ...queryParams } }],
-      });
-      break;
-    case "invite":
-      navigationRef.navigate("Friend", {...queryParams });
-      break;
-    default:
-      console.log("Unknown hostname:", hostname);
-  }
-}
 
 const AppNavigator = () => {
+  const [initialNavState, setInitialNavState] = useState<any>(undefined);
+  const [isReady, setIsReady] = useState(false); // Đánh dấu đã load xong initial state
   const appState = useRef<AppStateStatus>(AppState.currentState);
 
   useEffect(() => {
-    const checkInitialUrl = async () => {
-      const initialUrl = await Linking.getInitialURL();
-      handleUrl(initialUrl);
+    const getInitialStateFromUrl = async () => {
+      const url = await Linking.getInitialURL();
+
+      const refreshToken = await TokenService.getRefreshToken();
+
+      if (!refreshToken) {
+        setInitialNavState({
+          index: 0,
+          routes: [{ name: "Splash" }],
+        });
+        setIsReady(true);
+        return;
+      }
+
+      if (!url) {
+        // Nếu ko có URL thì đi màn mặc định, ví dụ Home
+        setInitialNavState({
+          index: 0,
+          routes: [{ name: "Home" }],
+        });
+        setIsReady(true);
+        return;
+      }
+
+      const { hostname, queryParams } = Linking.parse(url);
+
+      switch (hostname) {
+        case "share-post":
+          setInitialNavState({
+            index: 0,
+            routes: [{ name: "Home", params: { ...queryParams, _ts: Date.now() } }],
+          });
+          break;
+        case "payment/success":
+          setInitialNavState({
+            index: 0,
+            routes: [{ name: "Splash", params: { ...queryParams } }],
+          });
+          break;
+        case "invite":
+          setInitialNavState({
+            index: 0,
+            routes: [{ name: "Friend", params: { ...queryParams } }],
+          });
+          break;
+        default:
+          setInitialNavState({
+            index: 0,
+            routes: [{ name: "Home" }],
+          });
+          break;
+      }
+
+      setIsReady(true); // Đánh dấu đã load xong
     };
 
-    checkInitialUrl();
+    getInitialStateFromUrl();
 
     const linkingSubscription = Linking.addEventListener("url", (event) => {
-      handleUrl(event.url);
+      if (navigationRef.isReady()) {
+        const { hostname, queryParams } = Linking.parse(event.url);
+        switch (hostname) {
+          case "share-post":
+            navigationRef.navigate("Home", { ...queryParams, _ts: Date.now() });
+            break;
+          case "payment/success":
+            navigationRef.resetRoot({
+              index: 0,
+              routes: [{ name: "Splash", params: { ...queryParams } }],
+            });
+            break;
+          case "invite":
+            navigationRef.resetRoot({
+              index: 0,
+              routes: [{ name: "Friend", params: { ...queryParams } }],
+            });
+            break;
+        }
+      }
     });
 
-    const appStateSubscription = AppState.addEventListener("change", (nextAppState: AppStateStatus) => {
-      if (appState.current.match(/inactive|background/) && nextAppState === "active") {
-        Linking.getInitialURL().then(handleUrl);
-      }
+    const appStateSubscription = AppState.addEventListener("change", (nextAppState) => {
       appState.current = nextAppState;
     });
 
@@ -79,14 +103,25 @@ const AppNavigator = () => {
     };
   }, []);
 
+  if (!isReady) {
+    // Hiển thị loading hoặc null trong khi chờ initialNavState
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
-    <NavigationContainer 
-    ref={navigationRef} 
-    // linking={linking}
+    <NavigationContainer
+      ref={navigationRef}
+      initialState={initialNavState}
+      onReady={() => {
+        // Khi navigation sẵn sàng, bạn có thể set thêm logic nếu muốn
+      }}
     >
       <Route />
     </NavigationContainer>
-    
   );
 };
 
