@@ -28,7 +28,7 @@
   };
 
   export type ReactItem = {
-    userId: string;        
+    count: number;        
     type: string;          
   };
 
