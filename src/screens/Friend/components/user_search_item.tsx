@@ -84,15 +84,16 @@ const UserItem: React.FC<Props> = ({ user, refreshCounter, onRequestSent, naviga
 
   return (
     <View style={styles.container}>
-      <Image
-        source={
-          urlPublicAvatar
-            ? { uri: urlPublicAvatar }
-            : require('../../../assets/avatar_placeholder.png')
-        }
-        style={styles.avatar}
-      />
-
+      <View style={styles.avatarWrapper}>
+        <Image
+          source={
+            urlPublicAvatar
+              ? { uri: urlPublicAvatar }
+              : require('../../../assets/avatar_placeholder.png')
+          }
+          style={styles.avatar}
+        />
+      </View>
       <View style={styles.info}>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.username}>@{username}</Text>
@@ -146,13 +147,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  avatar: {
-    width: 60,
+  avatarWrapper: {
+    width: 60, 
     height: 60,
-    borderRadius: 30,
-    borderWidth: 2,
+    borderRadius: 33,
+    borderWidth: 3,
     borderColor: Colors.border_avt,
-    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 20,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 30,
   },
   info: {
     flex: 1,
