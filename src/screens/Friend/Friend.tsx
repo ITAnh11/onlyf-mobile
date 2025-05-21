@@ -38,7 +38,7 @@ const Friend: React.FC<Props> = ({ navigation }) => {
     <View style={{ flex: 1, backgroundColor: Colors.primary_background }}>
       <StatusBar style="light" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backButton}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" style={styles.backButton} />
         </TouchableOpacity>
         <Text style={styles.title}>Bạn bè</Text>
