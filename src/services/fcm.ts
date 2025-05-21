@@ -1,42 +1,57 @@
 import messaging from "@react-native-firebase/messaging";
 import * as SecureStore from "expo-secure-store";
 import NotificationApi from "../networking/notification.api";
-import { Alert } from "react-native";
-import { NavigationProp } from "@react-navigation/native";
-import notifee, { AndroidImportance } from "@notifee/react-native";
+import { AppState } from "react-native";
+import { NavigationContainerRef, ParamListBase } from "@react-navigation/native";
+import notifee, { AndroidImportance, AndroidStyle } from "@notifee/react-native";
+import { navigationRef } from "../navigation/NavigationService";
 
 export class FCM {
 
-  static navigation: NavigationProp<any>;
+  static navigation: NavigationContainerRef<ParamListBase>;
+  static pendingNotification: any = null;
 
   // Set navigation từ App.js hoặc nơi khởi tạo
-  static setNavigation(nav: NavigationProp<any>) {
-    this.navigation = nav;
+  static setNavigation(nav: NavigationContainerRef<ParamListBase>) {
+  this.navigation = nav;
+  // Nếu có pending thì xử lý
+  if (this.pendingNotification) {
+    this.handleRemoteMessage(this.pendingNotification, true);
+    this.pendingNotification = null;
   }
+}
+  static handlePendingNotificationIfAny() {
+  if (this.pendingNotification && this.navigation?.isReady?.()) {
+    this.handleRemoteMessage(this.pendingNotification, true);
+    this.pendingNotification = null;
+  }
+}
 
   static getChannelId(data: any): string {
     if (data?.messageId && data?.postId) return 'comment';
     if (data?.reactType && data?.postId) return 'reaction';
-    if (data?.senderId && !data?.postId) return 'friend_request';
-    if (data?.messageText && data?.senderId) return 'chat';
+    if (data?.messageText && data?.messageType) return 'chat';
+    if (data?.senderId && !data?.postId && !data?.messageText) return 'friend_request';
     return 'default';
   }
 
-  static async displayLocalNotification(title: string, body: string, data?: any) {
+  static async displayLocalNotification(title: string, body: string, data?: any, androidStyle?: any) {
     await notifee.requestPermission();
 
     const channelId = this.getChannelId(data || {});
-
+    console.log("Channel ID:", channelId);
     await notifee.displayNotification({
       title,
       body,
       android: {
         channelId,
-        smallIcon: 'ic_notification',
+        //smallIcon: 'ic_notification',
         importance: AndroidImportance.HIGH,
+        sound: 'default',
         pressAction: {
           id: 'default',
         },
+      style: androidStyle,
       },
     });
   }
@@ -71,9 +86,10 @@ export class FCM {
   static handledKeys = new Set<string>();
 
   static getUniqueKey(data: any): string | null {
-    if (data?.messageId) return `reply-${data.messageId}`;
+    if (data?.messageId && data?.postId) return `reply-${data.messageId}`;
     if (data?.reactType && data?.postId) return `react-${data.reactType}-${data.postId}`;
-    if (data?.senderId && !data?.postId) return `friend-${data.senderId}`;
+    if (data?.messageText && data?.messageType) return `chat-${data.senderId}-${data.messageText}-${data.messageType}`;
+    if (data?.senderId && !data?.postId && !data?.messageText) return `friend-${data.senderId}`;
     return null;
   }
 
@@ -88,49 +104,92 @@ export class FCM {
     }
     if (uniqueKey) {
       this.handledKeys.add(uniqueKey);
-      setTimeout(() => this.handledKeys.delete(uniqueKey), 30000); // Xoá sau 30s
+      setTimeout(() => this.handledKeys.delete(uniqueKey), 30000); // Xoá sau 10s
     }
 
     if (data?.messageId && data?.postId) {
       // Reply to post
       console.log("Template: Reply to Post");
-      const ms = data.messageText || notification?.body || "";
-      await this.displayLocalNotification("New Reply", `${data.senderName}: ${ms}`,data);
-
-      if (isFromTap && this.navigation) {
-        this.navigation.navigate("PostDetail", { postId: data.postId });
+      const ms = data.messageText || notification?.body || "";     
+      // Chỉ hiển thị notification khi app foreground
+  if (AppState.currentState === "active" && uniqueKey) {
+    await this.displayLocalNotification(
+      "New Reply",
+      `${data.senderName}: ${ms}`,
+      data
+    );
+  }
+      console.log("isFromTap", isFromTap);
+      if (isFromTap===true && this.navigation) {
+        this.navigation.navigate("Chat", { 
+          friendId: Number(data.senderId),
+          friendName: data.senderName,
+          friendUsername: data.senderUsername,
+          avatar: data.senderAvatar,
+         });
       }
 
     } else if (data?.reactType && data?.postId) {
       // React to post
       console.log("Template: Reaction to Post");
       const ms = data.reactType || notification?.body || "";
-      await this.displayLocalNotification("New Reaction", `${data.senderName} reacted: ${ms} to your post`,data);
-
-      if (isFromTap && this.navigation) {
-        this.navigation.navigate("PostDetail", { postId: data.postId });
+      if (AppState.currentState === "active" && uniqueKey) {
+        await this.displayLocalNotification(
+          "New Reaction",
+          `${data.senderName} reacted: ${ms} to your post`,
+          data
+        );
       }
 
-    } else if (data?.senderId && !data?.postId) {
-      // Friend request
-      console.log("Template: Friend Request");
-      await this.displayLocalNotification("Friend Request", `${data.senderName} sent you a friend request.`,data);
-
-      if (isFromTap && this.navigation) {
-        this.navigation.navigate("FriendRequests");
+      if (isFromTap===true && this.navigation) {
+        this.navigation.navigate("Chat", { 
+          friendId: Number(data.senderId),
+          friendName: data.senderName,
+          friendUsername: data.senderUsername,
+          avatar: data.senderAvatar,
+         });
       }
 
-    } else {
+    } else if(data?.messageText && data?.messageType) {
       // Default: Message or unknown
       console.log("New message");
       const ms = data.messageText || notification?.body || "";
-      await this.displayLocalNotification("New Message", `${data.senderName}: ${ms}`,data);
-
-      if (isFromTap && data?.senderId && this.navigation) {
-        this.navigation.navigate("Chat", { userId: data.senderId });
+      if (AppState.currentState === "active" && uniqueKey) {
+        let androidStyle = undefined;
+        if (data.messageType === "image" && data.mediaUrl) {
+          androidStyle = {
+            type: AndroidStyle.BIGPICTURE,
+            picture: data.mediaUrl, // Đường dẫn ảnh
+          };
+        } else if (data.messageType === "video" && data.thumbnailUrl) {
+          androidStyle = {
+            type: AndroidStyle.BIGPICTURE,
+            picture: data.thumbnailUrl, // Đường dẫn thumbnail video
+          };
+        }
+        await this.displayLocalNotification("New Message", `${data.senderName}: ${ms}`,data, androidStyle);
       }
-    }
+
+      if (isFromTap===true && this.navigation) {
+        this.navigation.navigate("Chat", { 
+          friendId: Number(data.senderId),
+          friendName: data.senderName,
+          friendUsername: data.senderUsername,
+          avatar: data.senderAvatar,
+         });
+      }
+    } else {
+      // Friend request
+      console.log("Template: Friend Request");
+      if (AppState.currentState === "active" && uniqueKey) {
+        await this.displayLocalNotification("Friend Request", `${data.senderName} sent you a friend request.`,data);
+      }
+      if (isFromTap===true && this.navigation) {
+        console.log("Navigating to Friend");
+        this.navigation.navigate("Friend");
+      }
   }
+}
 
 
   static async getToken() {
@@ -186,27 +245,40 @@ export class FCM {
     }
 
     // Tạo các notification channels
-    await notifee.createChannel({ id: 'default', name: 'Other Notifications', importance: AndroidImportance.DEFAULT });
-    await notifee.createChannel({ id: 'comment', name: 'Post Replies', importance: AndroidImportance.HIGH });
-    await notifee.createChannel({ id: 'reaction', name: 'Reactions', importance: AndroidImportance.DEFAULT });
-    await notifee.createChannel({ id: 'friend_request', name: 'Friend Requests', importance: AndroidImportance.DEFAULT });
-    await notifee.createChannel({ id: 'chat', name: 'Chat Messages', importance: AndroidImportance.HIGH });
+    await notifee.createChannel({ id: 'default', name: 'Other Notifications', importance: AndroidImportance.DEFAULT, sound: 'default' });
+    await notifee.createChannel({ id: 'comment', name: 'Post Replies', importance: AndroidImportance.HIGH, sound: 'default' });
+    await notifee.createChannel({ id: 'reaction', name: 'Reactions', importance: AndroidImportance.HIGH , sound: 'default' });
+    await notifee.createChannel({ id: 'friend_request', name: 'Friend Requests', importance: AndroidImportance.HIGH, sound: 'default' });
+    await notifee.createChannel({ id: 'chat', name: 'Chat Messages', importance: AndroidImportance.HIGH , sound: 'default' });
 
     messaging().onNotificationOpenedApp((remoteMessage) => {
       console.log(
-        "Notification caused app to open from background state:",
-        remoteMessage.notification
-      );
-      this.handleRemoteMessage(remoteMessage, true);
+        "Notification caused app to open from background state:", remoteMessage);
+      if (!this.navigation) {
+          this.pendingNotification = remoteMessage;
+        } else {
+          this.handleRemoteMessage(remoteMessage, true);
+        }
     });
 
     messaging().setBackgroundMessageHandler(async (remoteMessage) => {
       console.log("Message handled in the background!", remoteMessage);
-      this.handleRemoteMessage(remoteMessage);
+      if (!this.navigation) {
+          this.pendingNotification = remoteMessage;
+        } else {
+          this.handleRemoteMessage(remoteMessage, true);
+        }
     });
 
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      this.handleRemoteMessage(remoteMessage);
+      console.log("A new FCM message arrived!", remoteMessage);
+      const kt = await this.requestUserPermission();
+      console.log("Permission status:", kt);
+      if (!this.navigation) {
+          this.pendingNotification = remoteMessage;
+        } else {
+          this.handleRemoteMessage(remoteMessage, false);
+        }
     });
 
     return unsubscribe; // Hủy đăng ký khi component bị unmount
