@@ -177,16 +177,18 @@ const Profile: React.FC<{ navigation: any}> = ({ navigation }) => {
                   <View style={{flex : 1, alignContent: 'center', justifyContent: 'center'}}>
                     {/* Nút ở góc phải trên */}
                   <TouchableOpacity
-                    onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Home' }] })}
+                    onPress={() => 
+                      navigation.goBack()
+                    }
                     style={{
                       position: 'absolute',
-                      top: 3,
+                      top: 10,
                       left: 10,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <Ionicons name="arrow-back" size={24} color="white" />
+                    <Ionicons name="arrow-back" size={30} color="white" />
                   </TouchableOpacity>
                   {/* Avatar lớn ở giữa*/}
                   <TouchableOpacity style={[styles.avatarButton, premium && {borderColor: 'gold', borderWidth: 4,},]}
