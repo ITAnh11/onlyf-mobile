@@ -33,26 +33,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
   },
-  avatar: {
-    width: 60,
+  avatarWrapper: {
+    width: 60, 
     height: 60,
-    borderRadius: 30,
+    borderRadius: 33,
     borderWidth: 3,
     borderColor: Colors.border_avt2,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 20,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 30,
   },
   unreadAvatar: {
     borderColor: Colors.border_avt,
   },
   name: {
     fontSize: 17,
-    color: Colors.primary_text,
+    color: Colors.secondary_text,
     fontWeight: 'bold',
     marginBottom: 5,
   },
   unreadName: {
-    fontWeight: 'bold',
-    fontSize: 18,
+    color: Colors.primary_text,
   },
   timeAgo: {
     fontSize: 12,
@@ -60,7 +66,6 @@ const styles = StyleSheet.create({
   },
   unreadTimeAgo: {
     fontWeight: 'bold',
-    fontSize: 13,
     color: Colors.primary_text,
   },
   lastMessage: {
@@ -68,8 +73,6 @@ const styles = StyleSheet.create({
     color: Colors.secondary_text,
   },  
   unreadMessage: {
-    fontWeight: 'bold',
-    fontSize: 16,
     color: Colors.primary_text,
   },
   loadingText: {
@@ -80,7 +83,12 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     padding: 20,
-  },  
+  },
+  ellipse: {
+    fontSize: 15,
+    color: Colors.border_avt,
+    marginLeft: 'auto',
+  },
 });
 
 export default styles;

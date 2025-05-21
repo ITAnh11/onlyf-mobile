@@ -4,10 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { NavigationProp, useFocusEffect } from '@react-navigation/native';
 import styles from './styles';
 import useFriends from '../Friend/hooks/useFriend';
-import { fetchLatestMessage } from './hooks/useMessage';
+import { fetchLatestMessages } from './hooks/useMessage';
 import { getSocket } from '../../utils/socket';
 import ProfileService from '../../services/profile.service';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -24,42 +24,40 @@ const Message: React.FC<Props> = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    ProfileService.getId().then((id) => {
-      if (id) {
-        setMyId(id);
-      } else {
-        console.log("Không thể lấy myId");
-      }
-    }).catch((error) => {
-      console.log("Lỗi khi lấy myId: ", error);
-    });
-  }, []);  
-  
+    ProfileService.getId()
+      .then((id) => {
+        if (id) setMyId(id);
+        else console.log("Không thể lấy myId");
+      })
+      .catch((error) => console.log("Lỗi khi lấy myId: ", error));
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       const fetchMessages = async () => {
-        const messages = await Promise.all(
-          friends.map(async (friend) => {
-            const msg = await fetchLatestMessage(friend.friend.id);
+        const allMessages = await fetchLatestMessages();
+
+        const messages = allMessages
+          .map((msg) => {
             const messageText =
-              msg?.message.type === 'text'
-                ? msg?.message.text
-                : msg?.message.type === 'image'
+              msg.message.type === 'text'
+                ? msg.message.text
+                : msg.message.type === 'image'
                 ? 'Hình ảnh'
-                : msg?.message.type === 'video'
+                : msg.message.type === 'video'
                 ? 'Video'
-                : 'Chưa có tin nhắn';
+                : '';
 
             return {
-              friendId: friend.friend.id,
-              friend: friend.friend,
-              senderId: msg?.senderId || null,
+              friendId: msg.friendId,
+              friend: friends.find(f => f.friend.id === msg.friendId)?.friend,
+              senderId: msg.senderId,
               message: messageText,
-              createdAt: msg?.message.createdAt || null,
-              status: msg?.message.status || null,
+              createdAt: msg.message.createdAt,
+              status: msg.message.status,
             };
           })
-        );
+          .filter((msg) => msg.friend);
 
         const sortedMessages = messages.sort((a, b) => {
           if (!a.createdAt) return 1;
@@ -67,12 +65,22 @@ const Message: React.FC<Props> = ({ navigation }) => {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         });
 
-        setLatestMessages(sortedMessages);
+        const allFriendIdsWithMessages = sortedMessages.map(msg => msg.friendId);
+        const friendsWithoutMessages = friends
+          .filter(f => !allFriendIdsWithMessages.includes(f.friend.id))
+          .map(f => ({
+            friendId: f.friend.id,
+            friend: f.friend,
+            message: '',
+            createdAt: '',
+            senderId: null,
+            status: null,
+          }));
+
+        setLatestMessages([...sortedMessages, ...friendsWithoutMessages]);
       };
 
-      if (friends.length > 0) {
-        fetchMessages();
-      }
+      if (friends.length > 0) fetchMessages();
     }, [friends])
   );
 
@@ -83,7 +91,7 @@ const Message: React.FC<Props> = ({ navigation }) => {
       const messageText =
         message.type === 'text'
           ? message.text
-          : message.type === 'image' 
+          : message.type === 'image'
           ? 'Hình ảnh'
           : message.type === 'video'
           ? 'Video'
@@ -105,7 +113,14 @@ const Message: React.FC<Props> = ({ navigation }) => {
         } else {
           const friend = friends.find((f) => f.friend.id === senderId)?.friend;
           if (!friend) return prev;
-          updatedList = [...prev, { friendId: senderId, friend, message: messageText, createdAt: new Date().toISOString() }];
+          updatedList = [...prev, {
+            friendId: senderId,
+            friend,
+            message: messageText,
+            createdAt: new Date().toISOString(),
+            senderId,
+            status: message.status
+          }];
         }
 
         return updatedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -113,7 +128,6 @@ const Message: React.FC<Props> = ({ navigation }) => {
     };
 
     socket?.on('receiveMessage', handleReceiveMessage);
-
     return () => {
       socket?.off('receiveMessage', handleReceiveMessage);
     };
@@ -138,36 +152,25 @@ const Message: React.FC<Props> = ({ navigation }) => {
   const renderChatItem = ({ item }: { item: any }) => {
     const messageTime = item.createdAt ? new Date(item.createdAt) : null;
     let timeAgo = '';
-  
+
     if (messageTime) {
       const now = new Date();
-      const diffInMilliseconds = now.getTime() - messageTime.getTime();
-      const diffInSeconds = diffInMilliseconds / 1000;
-      const diffInMinutes = diffInSeconds / 60;
-      const diffInHours = diffInMinutes / 60;
-      const diffInDays = diffInHours / 24;
-      const diffInWeeks = diffInDays / 7;
-      const diffInYears = diffInDays / 365;
-  
-      if (diffInMinutes < 1) {
-        timeAgo = 'Vừa xong';
-      } else if (diffInMinutes < 60) {
-        timeAgo = `${Math.floor(diffInMinutes)} phút trước`;
-      } else if (diffInHours < 24) {
-        timeAgo = `${Math.floor(diffInHours)} giờ trước`;
-      } else if (diffInDays < 2) {
-        timeAgo = 'Hôm qua';
-      } else if (diffInDays < 7) {
-        timeAgo = `${Math.floor(diffInDays)} ngày trước`;
-      } else if (diffInWeeks < 5) {
-        timeAgo = `${Math.floor(diffInWeeks)} tuần trước`;
-      } else {
-        timeAgo = diffInYears < 1
-          ? format(messageTime, 'dd/MM')
-          : format(messageTime, 'dd/MM/yyyy');
-      }
+      const diffMs = now.getTime() - messageTime.getTime();
+      const diffMin = diffMs / 60000;
+      const diffHours = diffMin / 60;
+      const diffDays = diffHours / 24;
+      const diffWeeks = diffDays / 7;
+      const diffYears = diffDays / 365;
+
+      if (diffMin < 1) timeAgo = 'Vừa xong';
+      else if (diffMin < 60) timeAgo = `${Math.floor(diffMin)} phút trước`;
+      else if (diffHours < 24) timeAgo = `${Math.floor(diffHours)} giờ trước`;
+      else if (diffDays < 2) timeAgo = 'Hôm qua';
+      else if (diffDays < 7) timeAgo = `${Math.floor(diffDays)} ngày trước`;
+      else if (diffWeeks < 5) timeAgo = `${Math.floor(diffWeeks)} tuần trước`;
+      else timeAgo = diffYears < 1 ? format(messageTime, 'dd/MM') : format(messageTime, 'dd/MM/yyyy');
     }
-  
+
     const isUnread = item.createdAt && item.senderId !== myId && item.status !== 'read';
 
     return (
@@ -182,32 +185,34 @@ const Message: React.FC<Props> = ({ navigation }) => {
         }
         style={styles.chatItem}
       >
-        <Image
-          source={
-            item.friend.profile.urlPublicAvatar
-              ? { uri: item.friend.profile.urlPublicAvatar }
-              : require('../../assets/avatar_placeholder.png')
-          }
-          style={[styles.avatar, isUnread && styles.unreadAvatar]}
-        />
+        <View style={[styles.avatarWrapper, isUnread && styles.unreadAvatar]}>
+          <Image
+            source={
+              item.friend.profile.urlPublicAvatar
+                ? { uri: item.friend.profile.urlPublicAvatar }
+                : require('../../assets/avatar_placeholder.png')
+            }
+            style={styles.avatar}
+          />
+        </View>
+
         <View>
           <Text style={[styles.name, isUnread && styles.unreadName]} numberOfLines={1}>
             {item.friend.profile.name}
             {timeAgo ? <Text style={[styles.timeAgo, isUnread && styles.unreadTimeAgo]}>{`  ·  ${timeAgo}`}</Text> : null}
           </Text>
-          <Text style={[
-            styles.lastMessage,
-            isUnread && styles.unreadMessage, 
-          ]} numberOfLines={1}>
-            {item.senderId === myId ? 'Bạn: ' : ''}
-            {item.message.length > 20
-              ? item.message.slice(0, 20) + '...'
-              : item.message}
+          <Text style={[styles.lastMessage, isUnread && styles.unreadMessage]} numberOfLines={1}>
+            {item.message
+              ? `${item.senderId === myId ? 'Bạn: ' : ''}${item.message.length > 20 ? item.message.slice(0, 20) + '...' : item.message}`
+              : 'Bắt đầu trò chuyện'}
           </Text>
         </View>
+        {isUnread && (
+          <Ionicons name="ellipse" style={styles.ellipse}/>
+        )}
       </TouchableOpacity>
     );
-  };  
+  };
 
   return (
     <View style={styles.message}>

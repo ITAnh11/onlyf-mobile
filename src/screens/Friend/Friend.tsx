@@ -2,43 +2,28 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, SectionList, Text, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { NavigationProp, useFocusEffect } from '@react-navigation/native';
+import { NavigationProp, useFocusEffect, useRoute } from '@react-navigation/native';
 import FriendList from './components/friend_list';
 import FriendRequestList from './components/friend_requests';
 import FriendSearch from './components/search';
 import SentFriendRequestList from './components/friend_sent_request';
 import styles from './styles';
 import Colors from '../../constants/Color';
-import { useSearchParams } from './hooks/useSearchParams';
 
 type Props = {
   navigation: NavigationProp<any>;
 };
 
 const Friend: React.FC<Props> = ({ navigation }) => {
+  const route = useRoute();
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [friendCount, setFriendCount] = useState(0);
   const [requestCount, setRequestCount] = useState(0);
   const [sentRequestCount, setSentRequestCount] = useState(0);
-  const { params, clearParams } = useSearchParams();
-  console.log('params:', params);
-  const [searchText, setSearchText] = useState(params?.username ?? '');
 
-  useEffect(() => {
-    if (params?.username) {
-      setSearchText(params.username);
-      clearParams();
-    }
-  }, [params]);
+  const username = (route.params as { username?: string })?.username || '';
+  const [searchText, setSearchText] = useState(username);
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        clearParams();
-      };
-    }, [])
-  );
-  
   const triggerRefresh = () => {
     setRefreshCounter(prev => prev + 1);
   };
@@ -50,22 +35,23 @@ const Friend: React.FC<Props> = ({ navigation }) => {
   ];
 
   return (
-    <View style={{ flex: 1 , backgroundColor: Colors.primary_background }}>
-      <StatusBar style='light' />
+    <View style={{ flex: 1, backgroundColor: Colors.primary_background }}>
+      <StatusBar style="light" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backButton}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" style={styles.backButton} />
         </TouchableOpacity>
         <Text style={styles.title}>Bạn bè</Text>
       </View>
 
       <View style={styles.searchContainer}>
-        <FriendSearch 
-          onUserSelect={(user) => console.log(user)} 
+        <FriendSearch
+          key={searchText}
+          onUserSelect={(user) => console.log(user)}
           onRequestSent={triggerRefresh}
           refreshCounter={refreshCounter}
           navigation={navigation}
-          defaultSearch={searchText}
+          defaultSearch={username}
         />
       </View>
 
