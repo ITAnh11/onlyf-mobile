@@ -43,11 +43,14 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
   // State để xem người dùng có muốn nạp không
   const [isComfirmedPremium, setIsComfirmedPremium] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
-  ProfileService.isPremium()
-    .then((isPremium) => {
-      setIsPremium(isPremium);
-  });
+  const [isPremium, setIsPremium] = useState<boolean>(false);
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      const premiumStatus = await ProfileService.isPremium();
+      setIsPremium(premiumStatus);
+    };
+    checkPremiumStatus();
+  }, []);
   useEffect(() => {
     if (isComfirmedPremium) {
       navigation.navigate("Payment");
@@ -117,13 +120,11 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const lastHandledTs = useRef<number | null>(null);
   useFocusEffect(
     React.useCallback(() => {
-
-      console.log('route.params:', route.params);
     const params = route.params as { postId?: string; ownerId?: string ; _ts?: number; type?:string} | undefined;
 
     // Kiểm tra nếu params tồn tại và khác với state hiện tại
     const paramsTs = params && typeof params._ts !== 'undefined' ? Number(params._ts) : null;
-    if (params?.postId && params.postId !== postId && paramsTs !== lastHandledTs.current) {
+    if (params?.postId && params.postId !== postId && paramsTs !== lastHandledTs.current && params.type === 'share-post') {
       lastHandledTs.current = paramsTs; // Cập nhật timestamp đã xử lý
       setPostId(params.postId);
       setOwnerId(params.ownerId || null);
@@ -434,11 +435,11 @@ useEffect(() => {
     //mở quảng cáo khi nó được tải
     const lastShownRef = useRef(0);
     const showInterstitialAdIfNeeded = () => {
+      if (isPremium === true) return;
       const now = Date.now();
-      const FIVE_MINUTES = 5 * 60 * 1000;
+      const FIVE_MINUTES = process.env.EXPO_PUBLIC_AD_TIME_LIMIT;
       const enoughTimePassed = now - lastShownRef.current >= FIVE_MINUTES;
-  
-      if (enoughTimePassed && currentIndexRef.current !== 0 && isPremium === false) {
+      if (enoughTimePassed && currentIndexRef.current !== 0) {
         const unsubscribe = interstitial.addAdEventListener(AdEventType.LOADED, () => {
           interstitial.show();
           lastShownRef.current = Date.now();
@@ -448,6 +449,7 @@ useEffect(() => {
         interstitial.load();
       } else {
         console.log('Chưa đủ 5 phút, chưa hiển thị quảng cáo', currentIndexRef.current);
+        console.log('isPremium:', isPremium);
       }
     };
 
@@ -458,7 +460,7 @@ useEffect(() => {
   
       const interval = setInterval(() => {
         showInterstitialAdIfNeeded();
-      }, 5 * 60 * 1000); // 5 phút
+      }, process.env.EXPO_PUBLIC_AD_TIME_LIMIT); // 5 phút
   
       return () => clearInterval(interval);
     }, []);
@@ -529,5 +531,3 @@ useEffect(() => {
 };
 
 export default Home;
-
-
