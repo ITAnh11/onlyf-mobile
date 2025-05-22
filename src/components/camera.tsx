@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     borderRadius: 60,
   },
   buttonContainer: {
-    marginTop: 30,
+    marginTop: 80,
     marginBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-around',
