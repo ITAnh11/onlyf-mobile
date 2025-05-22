@@ -46,6 +46,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: Colors.secondary_text,
   },
+  text1: {
+    fontSize: 12,
+    marginBottom: 10,
+    color: Colors.secondary_text,
+  },
   input: {
     width: 45,
     height: 55,

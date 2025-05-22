@@ -1,11 +1,11 @@
 import React, { useRef, useState } from "react";
-import { Keyboard, ScrollView, StatusBar, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Text } from "react-native";
+import { Keyboard, ScrollView, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
-import { set } from "lodash";
 import { useRoute } from "@react-navigation/native";
 import apiClient from "../../networking/apiclient";
 import Colors from "../../constants/Color";
+import { StatusBar } from "expo-status-bar";
 
 type Props = {
     navigation: any;
@@ -69,7 +69,7 @@ const Activate: React.FC<Props> = ({navigation}) => {
                 contentContainerStyle={{ flexGrow: 1 }}
                 >
                 <View style={styles.container}>
-                    <StatusBar barStyle="default" />
+                    <StatusBar style="light" />
                     <View style={styles.header}>
                         <TouchableOpacity
                             onPress={() => navigation.goBack()}

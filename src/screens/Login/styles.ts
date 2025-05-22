@@ -76,7 +76,7 @@ export const styles = StyleSheet.create({
     color: Colors.error_text,
     fontSize: 12,
     alignSelf: "flex-start",
-    marginTop: -3,
+    marginLeft: '8%',
     marginBottom: 5,
   },
 });

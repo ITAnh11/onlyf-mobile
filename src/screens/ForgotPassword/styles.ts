@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
   inputEmail: {
     width: "80%",
-    height: "8%",
+    height: 48,
     fontSize: 16,
     alignSelf: "center",
     alignContent: "center",
