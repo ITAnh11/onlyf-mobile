@@ -51,12 +51,15 @@ const Profile: React.FC<{ navigation: any}> = ({ navigation }) => {
 
   useEffect(() => {
     const checkPremiumStatus = async () => {
-      const isPremium = await SecureStore.getItemAsync('isPremium'); {/*Lấy trạng thái premium từ local storage*/}
-      if(isPremium =='true'){
-      setPremium(isPremium === 'true'); {/*Cập nhật trạng thái premium*/}
+      try {
+      const isPremium = await ProfileService.isPremium(); // Gọi hàm kiểm tra premium
+      setPremium(!!isPremium); // Đảm bảo giá trị boolean
+    } catch (error) {
+      setPremium(false);
+      console.error('Lỗi khi kiểm tra trạng thái premium:', error);
+    }
     };
 
-    }
     checkPremiumStatus();
   }
   , []);
@@ -120,7 +123,7 @@ const Profile: React.FC<{ navigation: any}> = ({ navigation }) => {
         routes: [{ name: 'Welcome' }],
       }
     );
-    alert("Đăng xuất thành công!");
+    //alert("Đăng xuất thành công!");
   }
 
   {/* Hàm xóa tài khoản*/}
@@ -178,7 +181,17 @@ const Profile: React.FC<{ navigation: any}> = ({ navigation }) => {
                     {/* Nút ở góc phải trên */}
                   <TouchableOpacity
                     onPress={() => 
-                      navigation.goBack()
+                      {
+                        try {
+                          if (navigation.canGoBack && navigation.canGoBack()) {
+                            navigation.goBack();
+                          } else {
+                            navigation.navigate('Home'); // hoặc tên màn hình mặc định của bạn
+                          }
+                        } catch (e) {
+                          navigation.navigate('Home');
+                        }
+                      }
                     }
                     style={{
                       position: 'absolute',
