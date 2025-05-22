@@ -43,14 +43,6 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
   // State để xem người dùng có muốn nạp không
   const [isComfirmedPremium, setIsComfirmedPremium] = useState(false);
-  const [isPremium, setIsPremium] = useState<boolean>(false);
-  useEffect(() => {
-    const checkPremiumStatus = async () => {
-      const premiumStatus = await ProfileService.isPremium();
-      setIsPremium(premiumStatus);
-    };
-    checkPremiumStatus();
-  }, []);
   useEffect(() => {
     if (isComfirmedPremium) {
       navigation.navigate("Payment");
@@ -434,8 +426,8 @@ useEffect(() => {
 
     //mở quảng cáo khi nó được tải
     const lastShownRef = useRef(0);
-    const showInterstitialAdIfNeeded = () => {
-      if (isPremium === true) return;
+    const showInterstitialAdIfNeeded = async () => {
+      if (await ProfileService.isPremium() === true) return;
       const now = Date.now();
       const FIVE_MINUTES = process.env.EXPO_PUBLIC_AD_TIME_LIMIT;
       const enoughTimePassed = now - lastShownRef.current >= FIVE_MINUTES;
@@ -449,7 +441,6 @@ useEffect(() => {
         interstitial.load();
       } else {
         console.log('Chưa đủ 5 phút, chưa hiển thị quảng cáo', currentIndexRef.current);
-        console.log('isPremium:', isPremium);
       }
     };
 
