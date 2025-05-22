@@ -34,7 +34,8 @@ const AppNavigator = () => {
       case "share-post":
         navigationRef.navigate("Home", { ...queryParams, _ts: Date.now() });
         break;
-      case "payment/success":
+      case "payment-success":
+        console.log('Navigation to PaymentSuccess');
         navigationRef.resetRoot({
           index: 0,
           routes: [{ name: "Splash", params: { ...queryParams } }],
@@ -79,9 +80,18 @@ const AppNavigator = () => {
         setIsNavReady(true);
         if (navigationRef.current) {
           FCM.setNavigation(navigationRef.current);
-          FCM.handlePendingNotificationIfAny(); 
+          FCM.handlePendingNotificationIfAny();
         }
+
+        Linking.getInitialURL().then((url) => {
+          if (url) {
+            console.log("Initial URL on ready:", url);
+            handleUrl(url, true);
+          }
+        });
       }}
+
+      
     >
       <Route />
     </NavigationContainer>
