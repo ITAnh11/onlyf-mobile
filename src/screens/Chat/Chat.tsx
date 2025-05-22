@@ -249,23 +249,47 @@ const Chat: React.FC<Props> = ({ navigation }) => {
 
   // Format thời gian tin nhắn
   const formatMessengerTime = (isoString: string) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const date = new Date(isoString);
     const now = new Date();
-  
-    const isToday = date.toDateString() === now.toDateString();
-  
-    if (isToday) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+    const dateStr = date.toLocaleDateString('vi-VN', { timeZone: userTimeZone });
+    const nowStr = now.toLocaleDateString('vi-VN', { timeZone: userTimeZone });
+
+    const timeStr = date.toLocaleTimeString('vi-VN', {
+      timeZone: userTimeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    if (dateStr === nowStr) {
+      return timeStr;
     }
-  
-    const isSameYear = date.getFullYear() === now.getFullYear();
-  
-    if (isSameYear) {
-      return `${date.getDate()} thg ${date.getMonth() + 1}, ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+    const sameYear =
+      new Date(date.toLocaleString('en-US', { timeZone: userTimeZone })).getFullYear() ===
+      new Date(now.toLocaleString('en-US', { timeZone: userTimeZone })).getFullYear();
+
+    const day = date.toLocaleDateString('vi-VN', {
+      timeZone: userTimeZone,
+      day: 'numeric',
+      month: 'numeric',
+    });
+
+    if (sameYear) {
+      return `${day}, ${timeStr}`;
     }
-  
-    return `${date.getDate()} thg ${date.getMonth() + 1}, ${date.getFullYear()}, ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-  };  
+
+    const fullDate = date.toLocaleDateString('vi-VN', {
+      timeZone: userTimeZone,
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+    });
+
+    return `${fullDate}, ${timeStr}`;
+  };
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
@@ -301,20 +325,27 @@ const Chat: React.FC<Props> = ({ navigation }) => {
                   item.senderId === myId ? styles.myMessage : styles.friendMessage 
                 ]}>
                 {item.postId && (
-                  <TouchableOpacity>
-                    {item.post.urlPublicImage && (
-                      <TouchableOpacity onPress={() => {
-                        setSelectedMedia({ type: 'image', url: item.post.urlPublicImage });
-                        setIsModalVisible(true);
-                      }}>
-                        <Image source={{ uri: item.post.urlPublicImage }} style={styles.image} resizeMode="contain" />
+                  <>
+                    {item.post.urlPublicImage ? (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedMedia({ type: 'image', url: item.post.urlPublicImage });
+                          setIsModalVisible(true);
+                        }}
+                      >
+                        <Image
+                          source={{ uri: item.post.urlPublicImage }}
+                          style={styles.image}
+                          resizeMode="contain"
+                        />
                       </TouchableOpacity>
-                    )}
-                    {item.post.hlsUrlVideo && (
-                      <TouchableOpacity onPress={() => {
-                        setSelectedMedia({ type: 'video', url: item.post.hlsUrlVideo });
-                        setIsModalVisible(true);
-                      }}>
+                    ) : item.post.hlsUrlVideo ? (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedMedia({ type: 'video', url: item.post.hlsUrlVideo });
+                          setIsModalVisible(true);
+                        }}
+                      >
                         <View style={styles.videoContainer}>
                           <Video
                             source={{ uri: item.post.hlsUrlVideo }}
@@ -329,8 +360,8 @@ const Chat: React.FC<Props> = ({ navigation }) => {
                           </View>
                         </View>
                       </TouchableOpacity>
-                    )}
-                  </TouchableOpacity>
+                    ) : null}
+                  </>
                 )}
 
                 {item.message.type === 'text' && (

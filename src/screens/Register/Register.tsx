@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard, ScrollView, StatusBar } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { NavigationProp } from "@react-navigation/native";
@@ -8,6 +8,7 @@ import { API_URL } from "../../constants/config.constants";
 import apiClient from "../../networking/apiclient";
 import { navigate } from "../../navigation/NavigationService";
 import Colors from "../../constants/Color";
+import { StatusBar } from "expo-status-bar";
 
 type Props = {
   navigation: NavigationProp<any>;
@@ -51,7 +52,7 @@ const Register: React.FC<Props> = ({ navigation }) => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-          <StatusBar barStyle="light-content" />
+          <StatusBar style="light" />
           <View style={styles.container}>
             <View style={styles.header}>
               <TouchableOpacity onPress={() => navigation.navigate("Welcome")} style={styles.backButton} activeOpacity={0.6}>

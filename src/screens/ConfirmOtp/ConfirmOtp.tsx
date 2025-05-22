@@ -1,11 +1,11 @@
 import React, { useRef, useState } from "react";
-import { Keyboard, ScrollView, StatusBar, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Text } from "react-native";
+import { Keyboard, ScrollView,TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
-import { set } from "lodash";
 import { useRoute } from "@react-navigation/native";
 import apiClient from "../../networking/apiclient";
 import Colors from "../../constants/Color";
+import { StatusBar } from "expo-status-bar";
 
 type Props = {
     navigation: any;
@@ -76,7 +76,7 @@ const ConfirmOtp: React.FC<Props> = ({navigation}) => {
                 contentContainerStyle={{ flexGrow: 1 }}
                 >
                 <View style={styles.container}>
-                    <StatusBar barStyle="default" />
+                    <StatusBar style="light" />
                     <View style={styles.header}>
                         <TouchableOpacity
                             onPress={() => navigation.goBack()}
@@ -92,7 +92,8 @@ const ConfirmOtp: React.FC<Props> = ({navigation}) => {
                         <View style={styles.content}>
                             <Text style={styles.text}>Nhập mã OTP được gửi tới email của bạn</Text>
                             <Text style={[styles.text, {fontStyle: "italic"}]}>{email}</Text>
-                            <Text style={styles.text}>Mã xác thực có giá trị trong 5 phút</Text>
+                            <Text style={styles.text}>Mã xác thực có giá trị trong 5 phút.</Text>
+                            <Text style={styles.text1}>(Nếu không thấy email hãy kiểm tra trong mục thư rác)</Text>
                         
                             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 10 }}>
                                 {[...Array(6)].map((_, index) => (

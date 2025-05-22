@@ -1,6 +1,15 @@
-import React, { useContext, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, ScrollView } from "react-native";
-import { CommonActions, NavigationProp } from "@react-navigation/native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+} from "react-native";
+import { NavigationProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import * as Device from "expo-device";
@@ -18,9 +27,12 @@ const Login: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  useEffect(() => {
+    console.log("Current errors:", errors);
+  }, [errors]);
+
   const handleLogin = async () => {
-    console.log("Login button pressed");
-    setErrors({});
+    setErrors({}); // clear errors
     try {
       const deviceInfo = {
         brand: Device.brand,
@@ -28,40 +40,45 @@ const Login: React.FC<Props> = ({ navigation }) => {
         os: Device.osName,
         osVersion: Device.osVersion,
       };
-  
+
       const response = await apiClient.post("/auth/login", {
         email,
         password,
         deviceInfo,
       });
-  
+
       const data = response.data;
       console.log("Login response:", data);
       TokenService.saveTokens(data.accessToken, data.refreshToken);
-  
-      alert("Đăng nhập thành công!");
-      
+
       navigation.reset({
         index: 0,
         routes: [{ name: "Loading" }],
       });
-  
     } catch (error: any) {
+      console.log("Login error:", error?.response?.data || error.message);
+
       if (error.response) {
-        if (error.response.data.message === "Unauthorized") {
-          setErrors({ email: " ", password: "Tài khoản hoặc mật khẩu không đúng." });
+        const errorMessage = error.response.data.message;
+
+        if (errorMessage === "Unauthorized" || errorMessage === "Invalid credentials") {
+          setErrors({
+            password: "Tài khoản hoặc mật khẩu không đúng.",
+          });
+        } else if (errorMessage === "User is not activated") {
+          const otp = await apiClient.get("/auth/get-otp-mail-for-register", {
+            params: { email },
+          });
+          if (otp.status === 200) {
+            alert("Mã OTP đã được gửi đến email của bạn!");
+          }
+          navigation.navigate("Activate", { email });
         } else if (error.response.data.errors) {
           const apiErrors: { [key: string]: string } = {};
           for (const key in error.response.data.errors) {
             apiErrors[key] = error.response.data.errors[key][0];
           }
           setErrors(apiErrors);
-        } else if (error.response.data.message === "User is not activated") {
-          const otp = await apiClient.get("/auth/get-otp-mail-for-register", { params: { email } });
-          if (otp.status === 200) {
-            alert("Mã OTP đã được gửi đến email của bạn!");
-          }
-          navigation.navigate("Activate", { email });
         }
       } else if (error.request) {
         alert("Không kết nối được đến server, vui lòng kiểm tra mạng!");
@@ -70,7 +87,6 @@ const Login: React.FC<Props> = ({ navigation }) => {
       }
     }
   };
-  
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -81,7 +97,6 @@ const Login: React.FC<Props> = ({ navigation }) => {
           contentContainerStyle={{ flexGrow: 1 }}
         >
           <View style={styles.container}>
-            <StatusBar style="light" />
             <View style={styles.header}>
               <TouchableOpacity
                 onPress={() => navigation.navigate("Welcome")}
@@ -117,9 +132,13 @@ const Login: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.errorText}>{errors.password}</Text>
               )}
 
-              <TouchableOpacity style={styles.link} onPress={() => navigation.navigate("ForgotPassword")}>
+              <TouchableOpacity
+                style={styles.link}
+                onPress={() => navigation.navigate("ForgotPassword")}
+              >
                 <Text style={styles.link}>Quên mật khẩu?</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.button} onPress={handleLogin}>
                 <Text style={styles.buttonText}>Đăng nhập</Text>
               </TouchableOpacity>
