@@ -20,7 +20,8 @@
         "EXPO_PUBLIC_FIREBASE_APP_ID": "1:688538499350:web:a56e6178fb93d336c93837",
         "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-NFM4YV1140",
         "EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME": "dgusdhump",
-        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "video_upload_preset"
+        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "video_upload_preset",
+        "EXPO_PUBLIC_AD_TIME_LIMIT": "300000"
       }
     },
     "production": {
