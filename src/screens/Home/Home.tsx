@@ -33,11 +33,18 @@ type Props = {
 const Home: React.FC<Props> = ({ navigation }) => {  
   const [compressedUri, setCompressedUri] = useState<string | null>(null); 
 
-  const [userId, setUserID] = useState<string | number>(); // State để lưu tên người dùng
+  const [userId, setUserID] = useState<string | number>(); // State để lưu id người dùng
+  const [userAvatar, setUserAvatar] = useState<string | null>(null); // State để lưu avatar người dùng
   // lấy thông tin người dùng từ ProfileService
   ProfileService.getId().then((id) => {
       if (id !== null) {
           setUserID(id); // Cập nhật state userId với giá trị từ ProfileService
+      }
+  });
+
+  ProfileService.geturlPublicAvatar().then((avatar) => {
+      if (avatar !== null) {
+          setUserAvatar(avatar); // Cập nhật state userAvatar với giá trị từ ProfileService
       }
   });
 
@@ -466,7 +473,12 @@ useEffect(() => {
       <View style={{backgroundColor: '#111111',height: height,justifyContent:'center'}}>
         <View style={styles.list_button}>
             <TouchableOpacity style={[styles.button, { marginLeft: 20 }]} onPress={() => {navigation.navigate("Profile");}}>
-              <Image source={require("../../assets/user.png")} resizeMode="contain" style={{ width: 33, height: 33 }} />
+              { userAvatar ? (
+                  <Image source={{ uri: userAvatar }} resizeMode="cover" style={{ width: '90%', height: '90%', borderRadius: 50 }} />
+                ) : (
+                  <Image source={require("../../assets/user.png")} resizeMode="cover" style={{ width: 33, height: 33 }}/>
+                )
+              }
             </TouchableOpacity>
             {(currentIndex === 0 && isAllImageView === false) ? (
               <TouchableOpacity style={styles.button_friend} onPress={() => navigation.navigate("Friend")}>
