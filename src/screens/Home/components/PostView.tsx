@@ -249,6 +249,27 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
     setShowOptions(false);
   }
 
+  //Hàm tính thời gian đã đăng
+  const getTimeAgoShort = (createdAt: string): string => {
+  const createdDate = new Date(createdAt);
+  const now = new Date();
+  const diffMs = now.getTime() - createdDate.getTime();
+
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays >= 1) {
+    return `${diffDays}d`;        // 1d, 2d, 3d...
+  } else if (diffHours >= 1) {
+    return `${diffHours}h`;       // 1h, 5h, 23h...
+  } else if (diffMinutes >= 1) {
+    return `${diffMinutes}m`;     // 1m, 10m...
+  } else {
+    return 'vừa xong';            // dưới 1 phút
+  }
+};
+
   return (
     <SafeAreaView style={{ flexDirection: "column", height: Dimensions.get('screen').height, flex: 1 }}>
       <View style={styles.Post_container}>
@@ -279,6 +300,7 @@ const PostView = ({ post, setBackToHomePage, setIsAllImageView, currentPostId, s
             )
           }
         <Text style={styles.User_name}>{post.user.profile.name}</Text>
+        <Text style={styles.Time}>{getTimeAgoShort(post.createdAt)}</Text>
       </View>
 
       {showInput && (
@@ -445,6 +467,12 @@ const styles = StyleSheet.create({
   User_name: {
     fontSize: 18,
     color: '#e0e0e0',
+    marginLeft: 10,
+    fontWeight: 'bold',
+  },
+  Time: {
+    fontSize: 18,
+    color: '#b0abab',
     marginLeft: 10,
     fontWeight: 'bold',
   },
