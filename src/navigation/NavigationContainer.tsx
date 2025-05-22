@@ -5,6 +5,7 @@ import { navigationRef } from "./NavigationService";
 import * as Linking from 'expo-linking';
 import { AppState, AppStateStatus } from "react-native";
 import TokenService from "../services/token.service";
+import { FCM } from "../services/fcm";
 
 const AppNavigator = () => {
   const [isNavReady, setIsNavReady] = useState(false);
@@ -76,6 +77,10 @@ const AppNavigator = () => {
       ref={navigationRef}
       onReady={() => {
         setIsNavReady(true);
+        if (navigationRef.current) {
+          FCM.setNavigation(navigationRef.current);
+          FCM.handlePendingNotificationIfAny(); 
+        }
       }}
     >
       <Route />
