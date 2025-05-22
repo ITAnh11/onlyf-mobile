@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StatusBar, Image, Button, FlatList, Platform, ViewToken, ActivityIndicator } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationProp, useFocusEffect, useRoute } from '@react-navigation/native';
@@ -70,22 +70,26 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
     //useEffect lấy danh sách bạn bè
   const [friendList, setFriendList] = useState<FriendItem[]>([]);
-    useEffect(() => {
-      const fetchAPI = async () => {
-      try{
-        const accessToken = await TokenService.getAccessToken();
-        const response = await apiClient.get(`/friend/get-friends`,{
-          headers: {
-            Authorization: `Bearer ${accessToken}` // Thêm access token vào header
-          }
-        });
-        setFriendList(response.data);
-      }catch (error) {
-        console.error("Lỗi khi gọi API của get Friends:", error); // Xử lý lỗi nếu có
-      }
-    };
-    fetchAPI();
-  },[]);
+  const fetchAPI = async () => {
+    try {
+      const accessToken = await TokenService.getAccessToken();
+      const response = await apiClient.get(`/friend/get-friends`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setFriendList(response.data);
+    } catch (error) {
+      console.error("Lỗi khi gọi API của get Friends:", error);
+    }
+  };
+
+  // Gọi lại mỗi khi màn hình được focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchAPI();
+    }, [])
+  );
 
   // Khởi tạo dispatch từ Redux
   const dispatch = useDispatch(); 
@@ -116,7 +120,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
     // Kiểm tra nếu params tồn tại và khác với state hiện tại
     const paramsTs = params && typeof params._ts !== 'undefined' ? Number(params._ts) : null;
-    if (params?.postId && params.postId !== postId && paramsTs !== lastHandledTs.current && params.type === 'share-post') {
+    if (params?.postId && params.postId !== postId && paramsTs !== lastHandledTs.current) {
       lastHandledTs.current = paramsTs; // Cập nhật timestamp đã xử lý
       setPostId(params.postId);
       setOwnerId(params.ownerId || null);
@@ -494,25 +498,31 @@ useEffect(() => {
         }
 
         { (isAllImageView === false) ? (
-            <FlatList
-              ref={flatListRef}
-              data={danhSach}
-              renderItem={({ item }) => renderItem({ item })}
-              keyExtractor={(item, index) => item.id === 'home' ? `home-${index}` : item.id.toString()}
-              contentContainerStyle={{ flexGrow: 1 }} // Đảm bảo FlatList chiếm toàn bộ không gian
-              showsVerticalScrollIndicator={false} // Ẩn thanh cuộn dọc
-              onEndReached={fetchCards}
-              initialNumToRender={10} // Số lượng bài post đầu tiên được render
-              maxToRenderPerBatch={10} // Số lượng bài post tối đa được render mỗi lần
-              windowSize={5} // Kích thước cửa sổ để render các bài post
-              onEndReachedThreshold={0.5}
-              pagingEnabled={true} // Bật chế độ cuộn trang
-              getItemLayout={(_data, index) => (
-                { length: height, offset: height * index, index } // Cung cấp chiều cao của mỗi mục
-              )}
-              onViewableItemsChanged={onViewRef.current}
-              viewabilityConfig={viewConfigRef.current}
-            />
+            (danhSach.length > 1 || currentIndex === 0) ? (
+              <FlatList
+                ref={flatListRef}
+                data={danhSach}
+                renderItem={({ item }) => renderItem({ item })}
+                keyExtractor={(item, index) => item.id === 'home' ? `home-${index}` : item.id.toString()}
+                contentContainerStyle={{ flexGrow: 1 }} // Đảm bảo FlatList chiếm toàn bộ không gian
+                showsVerticalScrollIndicator={false} // Ẩn thanh cuộn dọc
+                onEndReached={fetchCards}
+                initialNumToRender={10} // Số lượng bài post đầu tiên được render
+                maxToRenderPerBatch={10} // Số lượng bài post tối đa được render mỗi lần
+                windowSize={5} // Kích thước cửa sổ để render các bài post
+                onEndReachedThreshold={0.5}
+                pagingEnabled={true} // Bật chế độ cuộn trang
+                getItemLayout={(_data, index) => (
+                  { length: height, offset: height * index, index } // Cung cấp chiều cao của mỗi mục
+                )}
+                onViewableItemsChanged={onViewRef.current}
+                viewabilityConfig={viewConfigRef.current}
+              />
+            ) : (
+              <View style={styles.safeArea_style}>
+                <Text style={{ color: 'white', fontSize: 20, alignSelf: 'center', fontStyle: 'italic', fontWeight:'bold' }}>Không có bài post nào!</Text>
+              </View>
+            )
           ) : (
             <AllImageView setIsAllImageView={setIsAllImageView} danhSach={danhSach} fetchCards={fetchCards} idItem={idItem} setBackToHomePage={setBackToHomePage} setIsLinkToPostView={setIsLinkToPostView} setPostIndexToLink={setPostIndexToLink}/>
           )}
