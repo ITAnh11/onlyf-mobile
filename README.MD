@@ -31,7 +31,7 @@
 
 ## Table of Contents
 
-- [Description](#introduction)
+- [Description](#desciption)
 - [All related repos](#all-related-repos)
 - [Demo](#demo)
 - [Technologies Used](#technologies-used)
@@ -66,7 +66,8 @@ The app is inspired by [Locket](https://www.locket.vn/).
 - [Generate data](https://github.com/ITAnh11/generate_data_onlyf)
 - [Firebase hosting](https://github.com/ITAnh11/onlyf-mobile-hosting-firebase)
 
-## Demo
+## Demo  
+[Video demo](https://youtu.be/781RO8JKoLo?si=_dxxot7U0Kzvo61w)
 
 ## Technologies Used
 
